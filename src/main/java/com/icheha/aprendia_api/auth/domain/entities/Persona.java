@@ -2,6 +2,8 @@ package com.icheha.aprendia_api.auth.domain.entities;
 
 import com.icheha.aprendia_api.auth.domain.entities.pivot.PersonaRol;
 import com.icheha.aprendia_api.auth.domain.enums.GenderEnum;
+import com.icheha.aprendia_api.auth.domain.interfaces.PersonaI;
+import com.icheha.aprendia_api.auth.domain.interfaces.PersonaRolI;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +17,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Persona {
+public class Persona implements PersonaI {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -76,4 +78,16 @@ public class Persona {
 
     @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PersonaRol> personaRoles;
+
+    // Implementación de la interfaz PersonaI
+    @Override
+    public List<? extends PersonaRolI> getPersonaRoles() {
+        return personaRoles;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void setPersonaRoles(List<? extends PersonaRolI> personaRoles) {
+        this.personaRoles = (List<PersonaRol>) personaRoles;
+    }
 }

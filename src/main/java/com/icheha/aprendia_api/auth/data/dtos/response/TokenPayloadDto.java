@@ -1,5 +1,6 @@
 package com.icheha.aprendia_api.auth.data.dtos.response;
 
+import com.icheha.aprendia_api.auth.domain.interfaces.TokenPayloadI;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TokenPayloadDto {
+public class TokenPayloadDto implements TokenPayloadI {
     private Long idPersona;
     private String nombre;
     private String roleName;
