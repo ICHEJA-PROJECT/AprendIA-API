@@ -9,6 +9,7 @@ import com.icheha.aprendia_api.auth.domain.entities.Persona;
 import com.icheha.aprendia_api.auth.domain.entities.pivot.PersonaRol;
 import com.icheha.aprendia_api.auth.domain.repositories.PersonaRepository;
 import com.icheha.aprendia_api.auth.domain.repositories.RolRepository;
+import com.icheha.aprendia_api.auth.domain.services.IAuthService;
 import com.icheha.aprendia_api.auth.utils.EncryptionUtil;
 import com.icheha.aprendia_api.auth.utils.JwtUtil;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class AuthServiceImpl {
+public class AuthServiceImpl implements IAuthService {
     
     private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
     
