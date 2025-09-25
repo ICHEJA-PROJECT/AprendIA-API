@@ -6,7 +6,10 @@ import com.icheha.aprendia_api.auth.data.dtos.request.LoginQrDto;
 import com.icheha.aprendia_api.auth.data.dtos.request.ValidateTokenDto;
 import com.icheha.aprendia_api.auth.data.dtos.response.LoginResponseDto;
 import com.icheha.aprendia_api.auth.data.dtos.response.ValidateTokenResponseDto;
-import com.icheha.aprendia_api.auth.domain.services.impl.AuthServiceImpl;
+import com.icheha.aprendia_api.auth.domain.exceptions.InvalidCredentialsException;
+import com.icheha.aprendia_api.auth.domain.exceptions.InvalidTokenException;
+import com.icheha.aprendia_api.auth.domain.exceptions.UserNotFoundException;
+import com.icheha.aprendia_api.auth.services.IAuthService;
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,7 +30,7 @@ public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     
     @Autowired
-    private AuthServiceImpl authServiceImpl;
+    private IAuthService authService;
     
     @PostMapping("/login/credentials")
     @Operation(
@@ -41,7 +44,7 @@ public class AuthController {
         try {
             logger.debug("Received login request for CURP: {}", loginDto.getCurp());
             
-            LoginResponseDto response = authServiceImpl.loginWithCredentials(loginDto);
+            LoginResponseDto response = authService.loginWithCredentials(loginDto);
             
             BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<>(
                 true,
@@ -51,14 +54,25 @@ public class AuthController {
             );
             
             return baseResponse.buildResponseEntity();
-        } catch (RuntimeException e) {
-            logger.error("Login failed for CURP: {}", loginDto.getCurp(), e);
+        } catch (InvalidCredentialsException | UserNotFoundException e) {
+            logger.warn("Login failed for CURP: {} - {}", loginDto.getCurp(), e.getMessage());
             
             BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<>(
                 false,
                 null,
                 e.getMessage(),
                 HttpStatus.UNAUTHORIZED
+            );
+            
+            return baseResponse.buildResponseEntity();
+        } catch (Exception e) {
+            logger.error("Unexpected error during login for CURP: {}", loginDto.getCurp(), e);
+            
+            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<>(
+                false,
+                null,
+                "Error interno del servidor",
+                HttpStatus.INTERNAL_SERVER_ERROR
             );
             
             return baseResponse.buildResponseEntity();
@@ -76,7 +90,7 @@ public class AuthController {
         try {
             logger.debug("Received QR login request");
             
-            LoginResponseDto response = authServiceImpl.loginWithQR(loginDto);
+            LoginResponseDto response = authService.loginWithQR(loginDto);
             
             BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<>(
                 true,
@@ -86,14 +100,25 @@ public class AuthController {
             );
             
             return baseResponse.buildResponseEntity();
-        } catch (RuntimeException e) {
-            logger.error("QR login failed", e);
+        } catch (InvalidTokenException | UserNotFoundException e) {
+            logger.warn("QR login failed - {}", e.getMessage());
             
             BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<>(
                 false,
                 null,
                 e.getMessage(),
                 HttpStatus.UNAUTHORIZED
+            );
+            
+            return baseResponse.buildResponseEntity();
+        } catch (Exception e) {
+            logger.error("Unexpected error during QR login", e);
+            
+            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<>(
+                false,
+                null,
+                "Error interno del servidor",
+                HttpStatus.INTERNAL_SERVER_ERROR
             );
             
             return baseResponse.buildResponseEntity();
@@ -110,7 +135,7 @@ public class AuthController {
         try {
             logger.debug("Received token validation request");
             
-            ValidateTokenResponseDto response = authServiceImpl.validateToken(validateDto.getToken());
+            ValidateTokenResponseDto response = authService.validateToken(validateDto.getToken());
             
             BaseResponse<ValidateTokenResponseDto> baseResponse = new BaseResponse<>(
                 true,

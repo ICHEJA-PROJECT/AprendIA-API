@@ -1,7 +1,5 @@
 package com.icheha.aprendia_api.auth.data.entities;
 
-import com.icheha.aprendia_api.auth.domain.interfaces.PersonaI;
-import com.icheha.aprendia_api.auth.domain.interfaces.PersonaRolI;
 import com.icheha.aprendia_api.auth.domain.enums.GenderEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,15 +10,15 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Entidad TypeORM para Persona
- * Implementa PersonaI y mapea a la tabla 'persona'
+ * Entidad JPA para Persona
+ * Mapea a la tabla 'persona'
  */
 @Entity
 @Table(name = "persona")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PersonaEntity implements PersonaI {
+public class PersonaEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -81,16 +79,4 @@ public class PersonaEntity implements PersonaI {
 
     @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PersonaRolEntity> personaRoles;
-
-    // Implementación de la interfaz PersonaI
-    @Override
-    public List<? extends PersonaRolI> getPersonaRoles() {
-        return personaRoles;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void setPersonaRoles(List<? extends PersonaRolI> personaRoles) {
-        this.personaRoles = (List<PersonaRolEntity>) personaRoles;
-    }
 }

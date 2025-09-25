@@ -1,93 +1,271 @@
 package com.icheha.aprendia_api.auth.domain.entities;
 
-import com.icheha.aprendia_api.auth.domain.entities.pivot.PersonaRol;
 import com.icheha.aprendia_api.auth.domain.enums.GenderEnum;
-import com.icheha.aprendia_api.auth.domain.interfaces.PersonaI;
-import com.icheha.aprendia_api.auth.domain.interfaces.PersonaRolI;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.icheha.aprendia_api.auth.domain.valueobjects.Curp;
+import com.icheha.aprendia_api.auth.domain.valueobjects.Password;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
-@Entity
-@Table(name = "persona")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class Persona implements PersonaI {
+/**
+ * Entidad de dominio Persona
+ * Representa la información personal de un usuario del sistema
+ * Contiene la lógica de negocio relacionada con una persona
+ */
+public class Persona {
     
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_persona")
-    private Long idPersona;
-
-    @Column(name = "primer_nombre", length = 32, nullable = false)
-    private String primerNombre;
-
-    @Column(name = "segundo_nombre", length = 32)
-    private String segundoNombre;
-
-    @Column(name = "apellido_paterno", length = 32, nullable = false)
-    private String apellidoPaterno;
-
-    @Column(name = "apellido_materno", length = 32, nullable = false)
-    private String apellidoMaterno;
-
-    @Column(name = "curp", length = 18, nullable = false, unique = true)
-    private String curp;
-
-    @Column(name = "numero_ine", length = 13, nullable = false)
-    private String numeroIne;
-
-    @Column(name = "fecha_nacimiento", nullable = false)
-    private LocalDate fechaNacimiento;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "genero", nullable = false)
-    private GenderEnum genero;
-
-    @Column(name = "codigo_postal", length = 5, nullable = false)
-    private String codigoPostal;
-
-    @Column(name = "estado", length = 100, nullable = false)
-    private String estado;
-
-    @Column(name = "municipio", length = 100, nullable = false)
-    private String municipio;
-
-    @Column(name = "localidad", length = 100, nullable = false)
-    private String localidad;
-
-    @Column(name = "vialidad_nombre", length = 100, nullable = false)
-    private String vialidadNombre;
-
-    @Column(name = "id_vialidad_tipo", nullable = false)
-    private Integer idVialidadTipo;
-
-    @Column(name = "asentamiento", length = 100, nullable = false)
-    private String asentamiento;
-
-    @Column(name = "id_asentamiento_tipo", nullable = false)
-    private Integer idAsentamientoTipo;
-
-    @Column(name = "password", length = 254, nullable = false)
-    private String password;
-
-    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<PersonaRol> personaRoles;
-
-    // Implementación de la interfaz PersonaI
-    @Override
-    public List<? extends PersonaRolI> getPersonaRoles() {
-        return personaRoles;
+    private final Long idPersona;
+    private final String primerNombre;
+    private final String segundoNombre;
+    private final String apellidoPaterno;
+    private final String apellidoMaterno;
+    private final Curp curp;
+    private final String numeroIne;
+    private final LocalDate fechaNacimiento;
+    private final GenderEnum genero;
+    private final String codigoPostal;
+    private final String estado;
+    private final String municipio;
+    private final String localidad;
+    private final String vialidadNombre;
+    private final Integer idVialidadTipo;
+    private final String asentamiento;
+    private final Integer idAsentamientoTipo;
+    private final Password password;
+    private final List<PersonaRol> personaRoles;
+    
+    // Constructor privado para usar Builder
+    private Persona(Builder builder) {
+        this.idPersona = builder.idPersona;
+        this.primerNombre = builder.primerNombre;
+        this.segundoNombre = builder.segundoNombre;
+        this.apellidoPaterno = builder.apellidoPaterno;
+        this.apellidoMaterno = builder.apellidoMaterno;
+        this.curp = builder.curp;
+        this.numeroIne = builder.numeroIne;
+        this.fechaNacimiento = builder.fechaNacimiento;
+        this.genero = builder.genero;
+        this.codigoPostal = builder.codigoPostal;
+        this.estado = builder.estado;
+        this.municipio = builder.municipio;
+        this.localidad = builder.localidad;
+        this.vialidadNombre = builder.vialidadNombre;
+        this.idVialidadTipo = builder.idVialidadTipo;
+        this.asentamiento = builder.asentamiento;
+        this.idAsentamientoTipo = builder.idAsentamientoTipo;
+        this.password = builder.password;
+        this.personaRoles = builder.personaRoles;
     }
-
+    
+    // Getters
+    public Long getIdPersona() { return idPersona; }
+    public String getPrimerNombre() { return primerNombre; }
+    public String getSegundoNombre() { return segundoNombre; }
+    public String getApellidoPaterno() { return apellidoPaterno; }
+    public String getApellidoMaterno() { return apellidoMaterno; }
+    public Curp getCurp() { return curp; }
+    public String getNumeroIne() { return numeroIne; }
+    public LocalDate getFechaNacimiento() { return fechaNacimiento; }
+    public GenderEnum getGenero() { return genero; }
+    public String getCodigoPostal() { return codigoPostal; }
+    public String getEstado() { return estado; }
+    public String getMunicipio() { return municipio; }
+    public String getLocalidad() { return localidad; }
+    public String getVialidadNombre() { return vialidadNombre; }
+    public Integer getIdVialidadTipo() { return idVialidadTipo; }
+    public String getAsentamiento() { return asentamiento; }
+    public Integer getIdAsentamientoTipo() { return idAsentamientoTipo; }
+    public Password getPassword() { return password; }
+    public List<PersonaRol> getPersonaRoles() { return personaRoles; }
+    
+    /**
+     * Obtiene el nombre completo formateado
+     */
+    public String getNombreCompleto() {
+        StringBuilder nombre = new StringBuilder(primerNombre);
+        if (segundoNombre != null && !segundoNombre.trim().isEmpty()) {
+            nombre.append(" ").append(segundoNombre);
+        }
+        return nombre.toString();
+    }
+    
+    /**
+     * Obtiene el nombre completo con apellidos
+     */
+    public String getNombreCompletoConApellidos() {
+        return getNombreCompleto() + " " + apellidoPaterno + " " + apellidoMaterno;
+    }
+    
+    /**
+     * Verifica si la persona tiene un rol específico
+     */
+    public boolean tieneRol(String nombreRol) {
+        return personaRoles != null && 
+               personaRoles.stream()
+                   .anyMatch(pr -> pr.getRol().getNombre().equals(nombreRol));
+    }
+    
+    /**
+     * Obtiene el primer rol de la persona
+     */
+    public Rol getPrimerRol() {
+        if (personaRoles == null || personaRoles.isEmpty()) {
+            return null;
+        }
+        return personaRoles.get(0).getRol();
+    }
+    
+    /**
+     * Verifica si la contraseña proporcionada coincide
+     */
+    public boolean verificarPassword(String passwordPlana) {
+        return password != null && password.verificar(passwordPlana);
+    }
+    
     @Override
-    @SuppressWarnings("unchecked")
-    public void setPersonaRoles(List<? extends PersonaRolI> personaRoles) {
-        this.personaRoles = (List<PersonaRol>) personaRoles;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Persona persona = (Persona) o;
+        return Objects.equals(idPersona, persona.idPersona) &&
+               Objects.equals(curp, persona.curp);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(idPersona, curp);
+    }
+    
+    @Override
+    public String toString() {
+        return "Persona{" +
+                "idPersona=" + idPersona +
+                ", curp=" + curp +
+                ", nombreCompleto='" + getNombreCompletoConApellidos() + '\'' +
+                '}';
+    }
+    
+    // Builder pattern
+    public static class Builder {
+        private Long idPersona;
+        private String primerNombre;
+        private String segundoNombre;
+        private String apellidoPaterno;
+        private String apellidoMaterno;
+        private Curp curp;
+        private String numeroIne;
+        private LocalDate fechaNacimiento;
+        private GenderEnum genero;
+        private String codigoPostal;
+        private String estado;
+        private String municipio;
+        private String localidad;
+        private String vialidadNombre;
+        private Integer idVialidadTipo;
+        private String asentamiento;
+        private Integer idAsentamientoTipo;
+        private Password password;
+        private List<PersonaRol> personaRoles;
+        
+        public Builder idPersona(Long idPersona) {
+            this.idPersona = idPersona;
+            return this;
+        }
+        
+        public Builder primerNombre(String primerNombre) {
+            this.primerNombre = primerNombre;
+            return this;
+        }
+        
+        public Builder segundoNombre(String segundoNombre) {
+            this.segundoNombre = segundoNombre;
+            return this;
+        }
+        
+        public Builder apellidoPaterno(String apellidoPaterno) {
+            this.apellidoPaterno = apellidoPaterno;
+            return this;
+        }
+        
+        public Builder apellidoMaterno(String apellidoMaterno) {
+            this.apellidoMaterno = apellidoMaterno;
+            return this;
+        }
+        
+        public Builder curp(Curp curp) {
+            this.curp = curp;
+            return this;
+        }
+        
+        public Builder numeroIne(String numeroIne) {
+            this.numeroIne = numeroIne;
+            return this;
+        }
+        
+        public Builder fechaNacimiento(LocalDate fechaNacimiento) {
+            this.fechaNacimiento = fechaNacimiento;
+            return this;
+        }
+        
+        public Builder genero(GenderEnum genero) {
+            this.genero = genero;
+            return this;
+        }
+        
+        public Builder codigoPostal(String codigoPostal) {
+            this.codigoPostal = codigoPostal;
+            return this;
+        }
+        
+        public Builder estado(String estado) {
+            this.estado = estado;
+            return this;
+        }
+        
+        public Builder municipio(String municipio) {
+            this.municipio = municipio;
+            return this;
+        }
+        
+        public Builder localidad(String localidad) {
+            this.localidad = localidad;
+            return this;
+        }
+        
+        public Builder vialidadNombre(String vialidadNombre) {
+            this.vialidadNombre = vialidadNombre;
+            return this;
+        }
+        
+        public Builder idVialidadTipo(Integer idVialidadTipo) {
+            this.idVialidadTipo = idVialidadTipo;
+            return this;
+        }
+        
+        public Builder asentamiento(String asentamiento) {
+            this.asentamiento = asentamiento;
+            return this;
+        }
+        
+        public Builder idAsentamientoTipo(Integer idAsentamientoTipo) {
+            this.idAsentamientoTipo = idAsentamientoTipo;
+            return this;
+        }
+        
+        public Builder password(Password password) {
+            this.password = password;
+            return this;
+        }
+        
+        public Builder personaRoles(List<PersonaRol> personaRoles) {
+            this.personaRoles = personaRoles;
+            return this;
+        }
+        
+        public Persona build() {
+            return new Persona(this);
+        }
     }
 }
+

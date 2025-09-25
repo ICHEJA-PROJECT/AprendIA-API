@@ -2,6 +2,7 @@ package com.icheha.aprendia_api.exercises.templates.domain.entities;
 
 import com.icheha.aprendia_api.exercises.templates.domain.entities.pivots.TemplateInstructionMediaEntity;
 import com.icheha.aprendia_api.exercises.templates.domain.entities.pivots.TemplateSkillEntity;
+import com.icheha.aprendia_api.exercises.topics.data.entities.TopicEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,7 +41,7 @@ public class TemplateEntity {
     // Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tema", insertable = false, updatable = false)
-    private com.icheha.aprendia_api.exercises.topics.domain.entities.TopicEntity tema;
+    private TopicEntity tema;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_layout", insertable = false, updatable = false)

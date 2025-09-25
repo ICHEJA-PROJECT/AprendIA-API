@@ -6,6 +6,8 @@ server:
 spring:
   application:
     name: aprendia-api
+  main:
+    allow-circular-references: true
   
   datasource:
     url: jdbc:postgresql://localhost:5432/authdb

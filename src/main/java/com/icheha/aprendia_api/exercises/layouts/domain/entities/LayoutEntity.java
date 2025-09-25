@@ -1,5 +1,6 @@
 package com.icheha.aprendia_api.exercises.layouts.domain.entities;
 
+import com.icheha.aprendia_api.exercises.topics.data.entities.ResourceEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,7 +38,7 @@ public class LayoutEntity {
     private TypeLayoutEntity tipoLayout;
 
     @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<com.icheha.aprendia_api.exercises.topics.domain.entities.ResourceEntity> recursos;
+    private List<ResourceEntity> recursos;
 
     @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<com.icheha.aprendia_api.exercises.templates.domain.entities.TemplateEntity> templates;

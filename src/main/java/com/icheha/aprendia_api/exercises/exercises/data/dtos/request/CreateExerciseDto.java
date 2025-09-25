@@ -1,4 +1,4 @@
-package com.icheha.aprendia_api.exercises.exercises.domain.dtos;
+package com.icheha.aprendia_api.exercises.exercises.data.dtos.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
