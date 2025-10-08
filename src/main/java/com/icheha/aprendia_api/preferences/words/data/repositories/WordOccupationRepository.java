@@ -51,3 +51,4 @@ public interface WordOccupationRepository extends JpaRepository<WordOccupationEn
     @Query("SELECT COUNT(wo) FROM WordOccupationEntity wo WHERE wo.wordId = :wordId")
     Long countByWordId(@Param("wordId") Long wordId);
 }
+

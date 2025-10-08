@@ -9,72 +9,67 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Entidad JPA para Persona
- * Mapea a la tabla 'persona'
- */
 @Entity
 @Table(name = "persona")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PersonaEntity {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_persona")
     private Long idPersona;
 
-    @Column(name = "primer_nombre", length = 32, nullable = false)
+    @Column(name = "primer_nombre")
     private String primerNombre;
 
-    @Column(name = "segundo_nombre", length = 32)
+    @Column(name = "segundo_nombre")
     private String segundoNombre;
 
-    @Column(name = "apellido_paterno", length = 32, nullable = false)
+    @Column(name = "apellido_paterno")
     private String apellidoPaterno;
 
-    @Column(name = "apellido_materno", length = 32, nullable = false)
+    @Column(name = "apellido_materno")
     private String apellidoMaterno;
 
-    @Column(name = "curp", length = 18, nullable = false, unique = true)
+    @Column(name = "curp", unique = true)
     private String curp;
 
-    @Column(name = "numero_ine", length = 13, nullable = false)
+    @Column(name = "numero_ine")
     private String numeroIne;
 
-    @Column(name = "fecha_nacimiento", nullable = false)
+    @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "genero", nullable = false)
+    @Column(name = "genero")
     private GenderEnum genero;
 
-    @Column(name = "codigo_postal", length = 5, nullable = false)
+    @Column(name = "codigo_postal")
     private String codigoPostal;
 
-    @Column(name = "estado", length = 100, nullable = false)
+    @Column(name = "estado")
     private String estado;
 
-    @Column(name = "municipio", length = 100, nullable = false)
+    @Column(name = "municipio")
     private String municipio;
 
-    @Column(name = "localidad", length = 100, nullable = false)
+    @Column(name = "localidad")
     private String localidad;
 
-    @Column(name = "vialidad_nombre", length = 100, nullable = false)
+    @Column(name = "vialidad_nombre")
     private String vialidadNombre;
 
-    @Column(name = "id_vialidad_tipo", nullable = false)
+    @Column(name = "id_vialidad_tipo")
     private Integer idVialidadTipo;
 
-    @Column(name = "asentamiento", length = 100, nullable = false)
+    @Column(name = "asentamiento")
     private String asentamiento;
 
-    @Column(name = "id_asentamiento_tipo", nullable = false)
+    @Column(name = "id_asentamiento_tipo")
     private Integer idAsentamientoTipo;
 
-    @Column(name = "password", length = 254, nullable = false)
+    @Column(name = "password")
     private String password;
 
     @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

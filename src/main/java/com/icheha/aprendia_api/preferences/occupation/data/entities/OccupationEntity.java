@@ -28,8 +28,4 @@ public class OccupationEntity {
     
     @OneToMany(mappedBy = "occupation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<StudentOccupationEntity> students;
-    
-    
-    @OneToMany(mappedBy = "occupation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ExerciseOccupationEntity> exercises;
 }

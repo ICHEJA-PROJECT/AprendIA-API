@@ -1,5 +1,6 @@
 package com.icheha.aprendia_api.exercises.topics.data.entities;
 
+import com.icheha.aprendia_api.exercises.layouts.data.entities.LayoutEntity;
 import com.icheha.aprendia_api.exercises.topics.data.entities.pivots.TopicResourceEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -35,7 +36,7 @@ public class ResourceEntity {
     // Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_layout", insertable = false, updatable = false)
-    private com.icheha.aprendia_api.exercises.layouts.domain.entities.LayoutEntity layout;
+    private LayoutEntity layout;
 
     @OneToMany(mappedBy = "recurso", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TopicResourceEntity> topicResources;

@@ -17,7 +17,7 @@ import com.icheha.aprendia_api.auth.domain.services.IAuthDomainService;
 import com.icheha.aprendia_api.auth.domain.valueobjects.Curp;
 import com.icheha.aprendia_api.auth.services.IAuthService;
 import com.icheha.aprendia_api.auth.services.utils.EncryptionUtil;
-import com.icheha.aprendia_api.auth.services.utils.JwtUtil;
+import com.icheha.aprendia_api.core.utils.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +106,7 @@ public class AuthServiceImpl implements IAuthService {
             }
             
             if (jwtUtil.isTokenExpired(token)) {
-                TokenPayloadDto expiredPayload = jwtUtil.extractTokenPayload(token);
+                TokenPayloadDto expiredPayload = jwtUtil.extractPayload(token);
                 return new ValidateTokenResponseDto(
                     false,
                     true,
@@ -115,8 +115,8 @@ public class AuthServiceImpl implements IAuthService {
                 );
             }
             
-            TokenPayloadDto payload = jwtUtil.extractTokenPayload(token);
-            logger.info("Token validated successfully for user {}", payload.getNombre());
+            TokenPayloadDto payload = jwtUtil.extractPayload(token);
+            logger.info("Token validated successfully for user {}", payload.getUsername());
             
             return new ValidateTokenResponseDto(
                 true,
@@ -143,7 +143,7 @@ public class AuthServiceImpl implements IAuthService {
             throw InvalidTokenException.qrToken();
         }
         
-        TokenPayloadDto payload = jwtUtil.extractTokenPayload(decryptedToken);
+        TokenPayloadDto payload = jwtUtil.extractPayload(decryptedToken);
         logger.debug("QR token decoded successfully");
         
         return authDomainService.findUserById(payload.getIdPersona());
@@ -153,7 +153,12 @@ public class AuthServiceImpl implements IAuthService {
     private LoginResponseDto generateLoginResponse(Persona persona) {
         PersonaRol personaRol = getUserRole(persona.getIdPersona());
         
-        TokenPayloadDto payload = tokenPayloadMapper.toDto(persona, personaRol);
+        TokenPayloadDto payload = tokenPayloadMapper.toDto(persona, 
+                personaRol.getRol().getNombre(), 
+                null, // disabilityName
+                null, // disabilityId
+                null  // learningPathId
+        );
         String token = jwtUtil.generateToken(payload);
         
         return new LoginResponseDto(token, payload);

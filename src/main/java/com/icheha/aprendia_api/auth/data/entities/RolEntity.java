@@ -7,26 +7,21 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * Entidad JPA para Rol
- * Mapea a la tabla 'rol'
- */
 @Entity
 @Table(name = "rol")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class RolEntity {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_rol")
     private Long idRol;
 
-    @Column(name = "nombre", length = 50, nullable = false, unique = true)
+    @Column(name = "nombre")
     private String nombre;
 
-    @Column(name = "descripcion", length = 255)
+    @Column(name = "descripcion")
     private String descripcion;
 
     @OneToMany(mappedBy = "rol", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

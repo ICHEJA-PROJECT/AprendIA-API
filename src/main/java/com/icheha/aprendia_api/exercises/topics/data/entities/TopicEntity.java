@@ -1,5 +1,6 @@
 package com.icheha.aprendia_api.exercises.topics.data.entities;
 
+import com.icheha.aprendia_api.exercises.templates.data.entities.TemplateEntity;
 import com.icheha.aprendia_api.exercises.topics.data.entities.pivots.TopicResourceEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,9 +24,16 @@ public class TopicEntity {
     @Column(name = "nombre", length = 64, nullable = false)
     private String nombre;
 
+    @Column(name = "id_unidad", nullable = true)
+    private Long idUnidad;
+
     // Relaciones
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_unidad", insertable = false, updatable = false)
+    private UnitEntity unidad;
+
     @OneToMany(mappedBy = "tema", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<com.icheha.aprendia_api.exercises.templates.domain.entities.TemplateEntity> templates;
+    private List<TemplateEntity> templates;
 
     @OneToMany(mappedBy = "tema", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TopicSequenceEntity> secuenciasComoOrigen;

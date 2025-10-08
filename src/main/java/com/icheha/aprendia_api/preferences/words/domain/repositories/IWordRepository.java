@@ -79,3 +79,4 @@ public interface IWordRepository {
      */
     List<Word> findByRegionId(Long regionId);
 }
+

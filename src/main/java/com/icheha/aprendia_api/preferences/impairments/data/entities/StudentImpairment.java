@@ -7,25 +7,34 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "estudiante_discapacidad")
+@Table(name = "educando_discapacidades")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@IdClass(StudentImpairment.StudentImpairmentId.class)
 public class StudentImpairment {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_estudiante_discapacidad")
-    private Long id;
+    @Column(name = "id_educando", nullable = false)
+    private Long studentId;
+    
+    @Id
+    @Column(name = "id_discapacidad", nullable = false)
+    private Long impairmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_estudiante", nullable = false)
+    @JoinColumn(name = "id_educando", insertable = false, updatable = false)
     private PersonaEntity student;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_discapacidad", nullable = false)
+    @JoinColumn(name = "id_discapacidad", insertable = false, updatable = false)
     private Impairment impairment;
 
-    @Column(name = "descripcion", length = 500)
-    private String descripcion;
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class StudentImpairmentId implements java.io.Serializable {
+        private Long studentId;
+        private Long impairmentId;
+    }
 }

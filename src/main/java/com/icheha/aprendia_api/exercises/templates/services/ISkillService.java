@@ -1,7 +1,16 @@
 package com.icheha.aprendia_api.exercises.templates.services;
 
-import org.springframework.stereotype.Service;
+import com.icheha.aprendia_api.exercises.templates.data.dtos.request.CreateSkillDto;
+import com.icheha.aprendia_api.exercises.templates.data.dtos.request.GetSkillsByTemplatesDto;
+import com.icheha.aprendia_api.exercises.templates.data.dtos.response.SkillResponseDto;
 
-@Service
+import java.util.List;
+
 public interface ISkillService {
+    
+    SkillResponseDto createSkill(CreateSkillDto createSkillDto);
+    
+    List<SkillResponseDto> getAllSkills();
+    
+    List<SkillResponseDto> getSkillsByTemplates(GetSkillsByTemplatesDto getSkillsByTemplatesDto);
 }

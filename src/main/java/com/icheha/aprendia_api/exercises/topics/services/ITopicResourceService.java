@@ -1,8 +1,13 @@
 package com.icheha.aprendia_api.exercises.topics.services;
 
+import com.icheha.aprendia_api.exercises.topics.data.dtos.request.CreateTopicResourceDto;
+import com.icheha.aprendia_api.exercises.topics.data.dtos.response.TopicResourceResponseDto;
 
-import org.springframework.stereotype.Service;
+import java.util.List;
 
-@Service
 public interface ITopicResourceService {
+    
+    TopicResourceResponseDto createTopicResource(CreateTopicResourceDto createTopicResourceDto);
+    
+    List<TopicResourceResponseDto> getAllTopicResources();
 }

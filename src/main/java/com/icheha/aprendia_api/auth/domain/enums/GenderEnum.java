@@ -2,25 +2,26 @@ package com.icheha.aprendia_api.auth.domain.enums;
 
 /**
  * Enum para definir los valores de género
- * Valores: MASCULINE = 'M', FEMININE = 'F'
+ * Valores: MASCULINO, FEMENINO, OTRO
  */
 public enum GenderEnum {
-    MASCULINE('M'),
-    FEMININE('F');
+    MASCULINO("MASCULINO"),
+    FEMENINO("FEMENINO"),
+    OTRO("OTRO");
     
-    private final char value;
+    private final String value;
     
-    GenderEnum(char value) {
+    GenderEnum(String value) {
         this.value = value;
     }
     
-    public char getValue() {
+    public String getValue() {
         return value;
     }
     
-    public static GenderEnum fromValue(char value) {
+    public static GenderEnum fromValue(String value) {
         for (GenderEnum gender : values()) {
-            if (gender.value == value) {
+            if (gender.value.equals(value)) {
                 return gender;
             }
         }

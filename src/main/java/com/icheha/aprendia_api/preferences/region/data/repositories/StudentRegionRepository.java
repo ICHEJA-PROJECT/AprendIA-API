@@ -1,7 +1,7 @@
 package com.icheha.aprendia_api.preferences.region.data.repositories;
 
 import com.icheha.aprendia_api.preferences.region.data.entities.StudentRegionEntity;
-import com.icheha.aprendia_api.preferences.region.data.entities.StudentRegionId;
+import com.icheha.aprendia_api.preferences.region.domain.StudentRegionId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -51,3 +51,4 @@ public interface StudentRegionRepository extends JpaRepository<StudentRegionEnti
     @Query("SELECT COUNT(sr) FROM StudentRegionEntity sr WHERE sr.studentId = :studentId")
     Long countByStudentId(@Param("studentId") Long studentId);
 }
+

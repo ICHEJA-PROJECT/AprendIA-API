@@ -23,3 +23,4 @@ public class StudentOccupationResponseDto {
     @Schema(description = "Nombre de la ocupación", example = "Ingeniero de Software")
     private String occupationName;
 }
+

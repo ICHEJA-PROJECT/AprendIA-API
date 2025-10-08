@@ -58,3 +58,4 @@ public interface IStudentOccupationRepository {
      */
     void deleteByOccupationId(Long occupationId);
 }
+

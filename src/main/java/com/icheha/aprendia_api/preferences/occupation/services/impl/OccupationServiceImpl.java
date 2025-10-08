@@ -2,134 +2,109 @@ package com.icheha.aprendia_api.preferences.occupation.services.impl;
 
 import com.icheha.aprendia_api.preferences.occupation.data.dtos.request.CreateOccupationDto;
 import com.icheha.aprendia_api.preferences.occupation.data.dtos.response.OccupationResponseDto;
-import com.icheha.aprendia_api.preferences.occupation.domain.entities.Occupation;
-import com.icheha.aprendia_api.preferences.occupation.domain.repositories.IOccupationRepository;
+import com.icheha.aprendia_api.preferences.occupation.data.entities.OccupationEntity;
+import com.icheha.aprendia_api.preferences.occupation.data.repositories.OccupationRepository;
 import com.icheha.aprendia_api.preferences.occupation.services.IOccupationService;
-import com.icheha.aprendia_api.preferences.occupation.services.mappers.OccupationMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-/**
- * Implementación del servicio de Occupation
- */
 @Service
-@Transactional
 public class OccupationServiceImpl implements IOccupationService {
     
-    private static final Logger logger = LoggerFactory.getLogger(OccupationServiceImpl.class);
-    
     @Autowired
-    private IOccupationRepository occupationRepository;
-    
-    @Autowired
-    private OccupationMapper occupationMapper;
+    private OccupationRepository occupationRepository;
     
     @Override
-    public OccupationResponseDto create(CreateOccupationDto createOccupationDto) {
-        logger.debug("Creating occupation with name: {}", createOccupationDto.getName());
-        
+    public List<Object> getAllOccupations() {
+        // Este método parece ser para compatibilidad, retornamos la lista de DTOs
+        return findAll().stream()
+                .map(occupation -> (Object) occupation)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public OccupationResponseDto create(CreateOccupationDto dto) {
         // Verificar si ya existe una ocupación con ese nombre
-        if (occupationRepository.existsByName(createOccupationDto.getName())) {
-            throw new IllegalArgumentException("Ya existe una ocupación con el nombre: " + createOccupationDto.getName());
+        if (occupationRepository.existsByName(dto.getName())) {
+            throw new RuntimeException("Ya existe una ocupación con el nombre: " + dto.getName());
         }
         
-        // Convertir DTO a entidad de dominio
-        Occupation occupation = occupationMapper.toDomain(createOccupationDto);
+        // Crear nueva entidad
+        OccupationEntity entity = new OccupationEntity();
+        entity.setName(dto.getName());
         
-        // Guardar en el repositorio
-        Occupation savedOccupation = occupationRepository.save(occupation);
+        // Guardar en la base de datos
+        OccupationEntity savedEntity = occupationRepository.save(entity);
         
-        logger.info("Occupation created successfully with ID: {}", savedOccupation.getId());
-        
-        return occupationMapper.toResponseDto(savedOccupation);
+        // Convertir a DTO de respuesta
+        return toResponseDto(savedEntity);
     }
     
     @Override
-    @Transactional(readOnly = true)
     public List<OccupationResponseDto> findAll() {
-        logger.debug("Finding all occupations");
-        
-        List<Occupation> occupations = occupationRepository.findAll();
-        
-        logger.info("Found {} occupations", occupations.size());
-        
-        return occupationMapper.toResponseDtoList(occupations);
+        List<OccupationEntity> entities = occupationRepository.findAll();
+        return entities.stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
     }
     
     @Override
-    @Transactional(readOnly = true)
     public OccupationResponseDto findById(Long id) {
-        logger.debug("Finding occupation by ID: {}", id);
-        
-        Optional<Occupation> occupationOpt = occupationRepository.findById(id);
-        
-        if (occupationOpt.isEmpty()) {
-            throw new IllegalArgumentException("No se encontró una ocupación con ID: " + id);
+        Optional<OccupationEntity> entityOpt = occupationRepository.findById(id);
+        if (entityOpt.isEmpty()) {
+            throw new RuntimeException("Ocupación no encontrada con ID: " + id);
         }
-        
-        Occupation occupation = occupationOpt.get();
-        logger.info("Occupation found: {}", occupation.getName());
-        
-        return occupationMapper.toResponseDto(occupation);
+        return toResponseDto(entityOpt.get());
     }
     
     @Override
-    @Transactional(readOnly = true)
-    public OccupationResponseDto findByName(String name) {
-        logger.debug("Finding occupation by name: {}", name);
-        
-        Optional<Occupation> occupationOpt = occupationRepository.findByName(name);
-        
-        if (occupationOpt.isEmpty()) {
-            throw new IllegalArgumentException("No se encontró una ocupación con nombre: " + name);
-        }
-        
-        Occupation occupation = occupationOpt.get();
-        logger.info("Occupation found: {}", occupation.getName());
-        
-        return occupationMapper.toResponseDto(occupation);
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
     public List<OccupationResponseDto> findByNameContaining(String name) {
-        logger.debug("Finding occupations containing name: {}", name);
-        
-        List<Occupation> occupations = occupationRepository.findByNameContaining(name);
-        
-        logger.info("Found {} occupations containing '{}'", occupations.size(), name);
-        
-        return occupationMapper.toResponseDtoList(occupations);
+        List<OccupationEntity> entities = occupationRepository.findByNameContaining(name);
+        return entities.stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
     }
     
     @Override
     public void deleteById(Long id) {
-        logger.debug("Deleting occupation with ID: {}", id);
-        
         if (!occupationRepository.existsById(id)) {
-            throw new IllegalArgumentException("No se encontró una ocupación con ID: " + id);
+            throw new RuntimeException("Ocupación no encontrada con ID: " + id);
         }
-        
         occupationRepository.deleteById(id);
-        
-        logger.info("Occupation deleted successfully with ID: {}", id);
     }
     
     @Override
-    @Transactional(readOnly = true)
     public boolean existsByName(String name) {
-        logger.debug("Checking if occupation exists with name: {}", name);
+        return occupationRepository.existsByName(name);
+    }
+    
+    // Método helper para convertir entidad a DTO
+    private OccupationResponseDto toResponseDto(OccupationEntity entity) {
+        OccupationResponseDto dto = new OccupationResponseDto();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
         
-        boolean exists = occupationRepository.existsByName(name);
+        // Contar estudiantes asociados
+        dto.setStudentCount(entity.getStudents() != null ? entity.getStudents().size() : 0);
+        dto.setExerciseCount(0); // No hay relación con ejercicios definida
         
-        logger.debug("Occupation exists with name '{}': {}", name, exists);
+        // Extraer IDs de estudiantes
+        if (entity.getStudents() != null) {
+            dto.setStudentIds(entity.getStudents().stream()
+                    .map(student -> student.getStudentId())
+                    .collect(Collectors.toList()));
+        } else {
+            dto.setStudentIds(Collections.emptyList());
+        }
         
-        return exists;
+        // No hay ejercicios asociados ya que la relación no está definida
+        dto.setExerciseIds(Collections.emptyList());
+        
+        return dto;
     }
 }

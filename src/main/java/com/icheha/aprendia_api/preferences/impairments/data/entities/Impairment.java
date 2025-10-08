@@ -20,7 +20,7 @@ public class Impairment {
     private Long id;
 
     @Column(name = "nombre", length = 32, nullable = false)
-    private String nombre;
+    private String name;
 
     @OneToMany(mappedBy = "impairment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<StudentImpairment> students;

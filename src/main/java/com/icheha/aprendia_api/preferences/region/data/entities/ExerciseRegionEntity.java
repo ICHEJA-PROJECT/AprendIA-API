@@ -1,5 +1,6 @@
 package com.icheha.aprendia_api.preferences.region.data.entities;
 
+import com.icheha.aprendia_api.preferences.region.domain.ExerciseRegionId;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,3 +30,4 @@ public class ExerciseRegionEntity {
     @JoinColumn(name = "id_region", insertable = false, updatable = false)
     private RegionEntity region;
 }
+

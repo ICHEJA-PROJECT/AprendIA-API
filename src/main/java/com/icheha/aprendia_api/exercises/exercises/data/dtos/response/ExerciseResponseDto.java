@@ -14,6 +14,8 @@ public class ExerciseResponseDto {
     private Long id;
     private Map<String, Object> context;
     private Long templateId;
+    private String name;
+    private String description;
     private String templateNombre;
     private String templateDescripcion;
     private String templateInstrucciones;

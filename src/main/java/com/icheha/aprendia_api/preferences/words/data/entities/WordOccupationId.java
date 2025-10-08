@@ -32,3 +32,4 @@ public class WordOccupationId implements Serializable {
         return Objects.hash(wordId, occupationId);
     }
 }
+

@@ -58,3 +58,4 @@ public interface RegionRepository extends JpaRepository<RegionEntity, Long> {
     @Query("SELECT DISTINCT r FROM RegionEntity r JOIN r.exercises er WHERE er.exerciseId = :exerciseId")
     List<RegionEntity> findByExerciseId(@Param("exerciseId") Long exerciseId);
 }
+

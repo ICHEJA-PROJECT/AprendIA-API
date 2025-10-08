@@ -29,3 +29,4 @@ public class WordOccupationEntity {
     @JoinColumn(name = "id_palabra", insertable = false, updatable = false)
     private WordEntity word;
 }
+

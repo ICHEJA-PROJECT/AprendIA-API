@@ -7,22 +7,34 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "recurso_discapacidad")
+@Table(name = "recurso_discapacidades")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@IdClass(ResourceImpairment.ResourceImpairmentId.class)
 public class ResourceImpairment {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_recurso_discapacidad")
-    private Long id;
+    @Column(name = "id_recurso", nullable = false)
+    private Long resourceId;
+    
+    @Id
+    @Column(name = "id_discapacidad", nullable = false)
+    private Long impairmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_recurso", nullable = false)
+    @JoinColumn(name = "id_recurso", insertable = false, updatable = false)
     private ResourceEntity resource;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_discapacidad", nullable = false)
+    @JoinColumn(name = "id_discapacidad", insertable = false, updatable = false)
     private Impairment impairment;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ResourceImpairmentId implements java.io.Serializable {
+        private Long resourceId;
+        private Long impairmentId;
+    }
 }

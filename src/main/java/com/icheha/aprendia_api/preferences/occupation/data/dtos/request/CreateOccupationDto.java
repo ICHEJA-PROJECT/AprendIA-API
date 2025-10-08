@@ -21,3 +21,4 @@ public class CreateOccupationDto {
     @Schema(description = "Nombre de la ocupación", example = "Ingeniero de Software", maxLength = 32)
     private String name;
 }
+

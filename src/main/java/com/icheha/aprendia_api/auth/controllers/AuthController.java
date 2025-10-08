@@ -46,7 +46,7 @@ public class AuthController {
             
             LoginResponseDto response = authService.loginWithCredentials(loginDto);
             
-            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<>(
+            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<LoginResponseDto>(
                 true,
                 response,
                 "Login exitoso",
@@ -57,7 +57,7 @@ public class AuthController {
         } catch (InvalidCredentialsException | UserNotFoundException e) {
             logger.warn("Login failed for CURP: {} - {}", loginDto.getCurp(), e.getMessage());
             
-            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<>(
+            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<LoginResponseDto>(
                 false,
                 null,
                 e.getMessage(),
@@ -68,7 +68,7 @@ public class AuthController {
         } catch (Exception e) {
             logger.error("Unexpected error during login for CURP: {}", loginDto.getCurp(), e);
             
-            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<>(
+            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<LoginResponseDto>(
                 false,
                 null,
                 "Error interno del servidor",
@@ -92,7 +92,7 @@ public class AuthController {
             
             LoginResponseDto response = authService.loginWithQR(loginDto);
             
-            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<>(
+            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<LoginResponseDto>(
                 true,
                 response,
                 "Login con QR exitoso",
@@ -103,7 +103,7 @@ public class AuthController {
         } catch (InvalidTokenException | UserNotFoundException e) {
             logger.warn("QR login failed - {}", e.getMessage());
             
-            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<>(
+            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<LoginResponseDto>(
                 false,
                 null,
                 e.getMessage(),
@@ -114,7 +114,7 @@ public class AuthController {
         } catch (Exception e) {
             logger.error("Unexpected error during QR login", e);
             
-            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<>(
+            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<LoginResponseDto>(
                 false,
                 null,
                 "Error interno del servidor",
@@ -137,7 +137,7 @@ public class AuthController {
             
             ValidateTokenResponseDto response = authService.validateToken(validateDto.getToken());
             
-            BaseResponse<ValidateTokenResponseDto> baseResponse = new BaseResponse<>(
+            BaseResponse<ValidateTokenResponseDto> baseResponse = new BaseResponse<ValidateTokenResponseDto>(
                 true,
                 response,
                 "Validación de token completada",

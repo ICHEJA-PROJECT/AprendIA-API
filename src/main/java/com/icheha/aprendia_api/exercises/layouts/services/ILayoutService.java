@@ -1,8 +1,13 @@
 package com.icheha.aprendia_api.exercises.layouts.services;
 
+import com.icheha.aprendia_api.exercises.layouts.data.dtos.request.CreateLayoutDto;
+import com.icheha.aprendia_api.exercises.layouts.data.dtos.response.LayoutResponseDto;
 
-import org.springframework.stereotype.Service;
+import java.util.List;
 
-@Service
 public interface ILayoutService {
+    
+    LayoutResponseDto createLayout(CreateLayoutDto createLayoutDto);
+    
+    List<LayoutResponseDto> getAllLayouts();
 }

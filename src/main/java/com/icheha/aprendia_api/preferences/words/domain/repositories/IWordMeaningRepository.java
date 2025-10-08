@@ -65,3 +65,4 @@ public interface IWordMeaningRepository {
      */
     boolean existsById(Long id);
 }
+

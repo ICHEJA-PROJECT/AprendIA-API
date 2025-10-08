@@ -72,3 +72,4 @@ public interface IWordOccupationRepository {
      */
     Long countByWordId(Long wordId);
 }
+

@@ -1,8 +1,13 @@
 package com.icheha.aprendia_api.exercises.topics.services;
 
+import com.icheha.aprendia_api.exercises.topics.data.dtos.request.CreateTopicSequenceDto;
+import com.icheha.aprendia_api.exercises.topics.data.dtos.response.TopicSequenceResponseDto;
 
-import org.springframework.stereotype.Service;
+import java.util.List;
 
-@Service
 public interface ITopicSequenceService {
+    
+    TopicSequenceResponseDto createTopicSequence(CreateTopicSequenceDto createTopicSequenceDto);
+    
+    List<TopicSequenceResponseDto> getAllTopicSequences();
 }

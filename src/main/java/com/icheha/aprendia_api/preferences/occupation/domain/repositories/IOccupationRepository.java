@@ -65,3 +65,4 @@ public interface IOccupationRepository {
      */
     boolean existsById(Long id);
 }
+

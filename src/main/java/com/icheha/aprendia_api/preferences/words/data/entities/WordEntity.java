@@ -24,7 +24,7 @@ public class WordEntity {
     @Column(name = "id_palabra")
     private Long id;
     
-    @Column(name = "nombre", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "palabra", columnDefinition = "TEXT", nullable = false)
     private String word;
     
     @OneToMany(mappedBy = "word", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -37,3 +37,4 @@ public class WordEntity {
     @JoinColumn(name = "id_palabra")
     private List<WordRegionEntity> regions;
 }
+

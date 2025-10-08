@@ -1,7 +1,7 @@
 package com.icheha.aprendia_api.preferences.occupation.data.repositories;
 
 import com.icheha.aprendia_api.preferences.occupation.data.entities.ExerciseOccupationEntity;
-import com.icheha.aprendia_api.preferences.occupation.data.entities.ExerciseOccupationId;
+import com.icheha.aprendia_api.preferences.occupation.domain.entities.ExerciseOccupationId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,3 +39,4 @@ public interface ExerciseOccupationRepository extends JpaRepository<ExerciseOccu
      */
     void deleteByOccupationId(Long occupationId);
 }
+

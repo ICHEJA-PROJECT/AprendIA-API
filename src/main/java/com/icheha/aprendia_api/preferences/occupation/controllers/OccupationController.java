@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/preferences/occupations")
+@RequestMapping("/occupations")
 @Tag(name = "Occupation Management", description = "Endpoints para gestión de ocupaciones")
 public class OccupationController {
     
@@ -272,3 +272,4 @@ public class OccupationController {
         }
     }
 }
+

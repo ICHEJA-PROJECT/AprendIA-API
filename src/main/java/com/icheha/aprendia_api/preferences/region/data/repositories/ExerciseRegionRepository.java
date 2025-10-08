@@ -1,7 +1,7 @@
 package com.icheha.aprendia_api.preferences.region.data.repositories;
 
 import com.icheha.aprendia_api.preferences.region.data.entities.ExerciseRegionEntity;
-import com.icheha.aprendia_api.preferences.region.data.entities.ExerciseRegionId;
+import com.icheha.aprendia_api.preferences.region.domain.ExerciseRegionId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -51,3 +51,4 @@ public interface ExerciseRegionRepository extends JpaRepository<ExerciseRegionEn
     @Query("SELECT COUNT(er) FROM ExerciseRegionEntity er WHERE er.exerciseId = :exerciseId")
     Long countByExerciseId(@Param("exerciseId") Long exerciseId);
 }
+

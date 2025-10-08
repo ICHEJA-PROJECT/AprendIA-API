@@ -58,3 +58,4 @@ public interface IExerciseOccupationRepository {
      */
     void deleteByOccupationId(Long occupationId);
 }
+

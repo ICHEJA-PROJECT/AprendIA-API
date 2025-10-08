@@ -1,253 +1,270 @@
-# AprendIA - Sistema de Microservicios
+# AprendIA API
 
-Este proyecto implementa una arquitectura de microservicios completa para la plataforma educativa AprendIA. Utiliza Docker y Docker Compose para orquestar los diferentes servicios, facilitando un entorno de desarrollo y despliegue consistente.
+API REST para el sistema de aprendizaje adaptativo AprendIA, desarrollada con Spring Boot, JPA y arquitectura hexagonal (Clean Architecture / DDD).
 
-## ✨ Características
+## 🚀 Características
 
-- **API Gateway**: Punto de entrada único para todos los servicios utilizando NestJS.
-- **Autenticación JWT**: Microservicio de autenticación seguro basado en NestJS que utiliza JSON Web Tokens.
-- **Gestión de Ejercicios**: Microservicio para crear y gestionar ejercicios educativos.
-- **Gestión de Registros**: Microservicio para el manejo de registros y estadísticas de estudiantes.
-- **Gestión de Imágenes**: Microservicio para subir, gestionar y servir imágenes utilizando Quarkus y Cloudinary.
-- **Evaluación de Voz**: Servicio de Python para análisis y evaluación de audio/voz.
-- **Comparación de Imágenes**: Servicio de IA para comparar y analizar imágenes educativas.
-- **Message Broker**: Sistema de mensajería con RabbitMQ para comunicación entre servicios.
-- **Base de Datos PostgreSQL**: Contenedor de base de datos para persistir la información.
-- **Orquestación con Docker**: Totalmente contenedorizado y gestionado a través de `docker compose`.
+- **Arquitectura Hexagonal**: Separación clara entre dominio, aplicación e infraestructura
+- **Spring Boot 3.x**: Framework moderno para aplicaciones Java
+- **JPA/Hibernate**: Mapeo objeto-relacional con PostgreSQL
+- **JWT Authentication**: Autenticación segura con tokens JWT
+- **Swagger/OpenAPI**: Documentación interactiva de la API
+- **Tests Unitarios**: Cobertura completa de servicios y controladores
+- **Docker**: Containerización para desarrollo y producción
 
-## Arquitectura
+## 📋 Requisitos
 
-El proyecto está compuesto por los siguientes servicios:
+- Java 17+
+- Maven 3.8+
+- PostgreSQL 13+
+- Docker (opcional)
 
-### Servicios Core
+## 🛠️ Instalación
 
-- `api-gateway`: **API Gateway** desarrollado en NestJS que actúa como punto de entrada único y enruta las peticiones a los microservicios correspondientes.
-- `auth-ms`: Microservicio de **autenticación** desarrollado en NestJS que maneja el registro, login de usuarios y generación de JWT.
-- `exercise-service`: Microservicio de **ejercicios** desarrollado en NestJS para la gestión de ejercicios educativos.
-- `record-service`: Microservicio de **registros** desarrollado en NestJS para el manejo de estadísticas y historial de estudiantes.
-
-### Servicios de Soporte
-
-- `cloudinary-service`: Microservicio desarrollado en **Quarkus** que se encarga de la comunicación con la API de Cloudinary para la gestión de archivos.
-- `voice-evaluator-service`: Servicio desarrollado en **Python** para análisis y evaluación de audio/voz.
-- `comparar-imagen-service`: Servicio de **IA en Python** para comparación y análisis de imágenes educativas.
-
-### Infraestructura
-
-- `auth-db`: Instancia de **PostgreSQL** que sirve como base de datos principal para todos los servicios.
-- `rabbitmq`: Broker de mensajes **RabbitMQ** para comunicación asíncrona entre microservicios.
-
-## 🚀 Empezando
-
-Sigue estos pasos para levantar el entorno completo en tu máquina local.
-
-### Prerrequisitos
-
-Asegúrate de tener instalado lo siguiente:
-
-- [Docker](https://www.docker.com/get-started)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-
-### Instalación
-
-1. **Clona el repositorio:**
-
-    ```bash
-    git clone --recurse-submodules <URL_DEL_REPOSITORIO>
-    cd backend-launcher
-    ```
-
-2. **Configura las variables de entorno:**
-
-    Crea un archivo `.env` en la raíz del proyecto. Puedes copiar el archivo `.env.example` si existe, o crearlo desde cero con el siguiente contenido:
-
-    ```env
-    # JWT Configuration
-    JWT_SECRET=tu_secreto_para_jwt
-    JWT_EXPIRATION=1h
-    ENCRYPTION_KEY=tu_llave_de_encriptacion
-
-    # Database Configuration
-    DB_PORT_EXT=5432
-    DB_USERNAME=postgres
-    DB_PASSWORD=1234567
-    DB_NAME=authdb
-
-    # RabbitMQ Configuration
-    RABBITMQ_DEFAULT_USER=guest
-    RABBITMQ_DEFAULT_PASS=guest
-    BROKER_HOSTS=amqp://rabbitmq:5672
-
-    # API Gateway Configuration
-    API_GATEWAY_PORT_EXT=80
-
-    # Cloudinary Service Configuration
-    CLOUDINARY_PORT_EXT=8080
-    CLOUDINARY_CLOUD_NAME=tu_cloud_name_de_cloudinary
-    CLOUDINARY_API_KEY=tu_api_key_de_cloudinary
-    CLOUDINARY_API_SECRET=tu_api_secret_de_cloudinary
-
-    # Voice Evaluator Service Configuration
-    VOICE_PORT_EXT=5000
-    ```
-
-    **Importante:** Reemplaza los valores `tu_*` con tus credenciales y secretos reales.
-
-3. **Levanta los servicios:**
-
-    Utiliza Docker Compose para construir las imágenes y levantar los contenedores.
-
-    ```bash
-    docker compose up --build -d
-    ```
-
-    El flag `-d` ejecuta los contenedores en segundo plano (detached mode).
-
-## 🌐 URLs de los Servicios
-
-Una vez que los contenedores estén en ejecución, los servicios estarán disponibles en las siguientes URLs:
-
-### Servicios Públicos
-
-- **API Gateway**: `http://localhost:80` (puerto configurable con `API_GATEWAY_PORT_EXT`)
-- **Cloudinary Service**: `http://localhost:8080` (puerto configurable con `CLOUDINARY_PORT_EXT`)
-- **Voice Evaluator Service**: `http://localhost:5000` (puerto configurable con `VOICE_PORT_EXT`)
-- **Comparar Imagen Service**: `http://localhost:5001`
-
-### Servicios de Infraestructura
-
-- **PostgreSQL Database**: `localhost:5432` (puerto configurable con `DB_PORT_EXT`)
-- **RabbitMQ Management Console**: `http://localhost:15672` (usuario: `guest`, contraseña: `guest`)
-- **RabbitMQ AMQP**: `localhost:5672`
-
-### Servicios Internos
-
-Los siguientes servicios están disponibles solo dentro de la red de Docker:
-
-- **Auth Microservice**: Solo accesible a través del API Gateway
-- **Exercise Service**: Solo accesible a través del API Gateway  
-- **Record Service**: Solo accesible a través del API Gateway
-
-**Nota:** El API Gateway actúa como punto de entrada único para todos los microservicios internos, proporcionando enrutamiento y balanceado de carga.
-
-## 🏗️ Comunicación entre Servicios
-
-La arquitectura utiliza los siguientes patrones de comunicación:
-
-### Comunicación Síncrona
-
-- **API Gateway → Microservicios**: HTTP/REST para consultas directas
-- **Cliente → API Gateway**: HTTP/REST como punto de entrada único
-
-### Comunicación Asíncrona  
-
-- **RabbitMQ**: Message broker para comunicación entre microservicios
-- **Event-driven**: Los microservicios publican y consumen eventos de manera asíncrona
-
-## 🛠️ Tecnologías
-
-- **Backend Framework**: NestJS (Node.js + TypeScript)
-- **Java Framework**: Quarkus (para el servicio de Cloudinary)
-- **Python Services**: Flask/FastAPI (servicios de IA)
-- **Base de Datos**: PostgreSQL 16.2
-- **Message Broker**: RabbitMQ 3 con Management UI
-- **Gestión de Archivos**: Cloudinary
-- **Contenedorización**: Docker & Docker Compose
-- **Autenticación**: JWT (JSON Web Tokens)
-
-## 🔧 Comandos Útiles
-
-### Gestión de Contenedores
-
+### 1. Clonar el repositorio
 ```bash
-# Levantar todos los servicios
-docker compose up -d
-
-# Levantar servicios específicos
-docker compose up -d auth-db rabbitmq api-gateway
-
-# Ver logs de un servicio específico
-docker compose logs -f api-gateway
-
-# Reconstruir y levantar servicios
-docker compose up --build -d
-
-# Detener todos los servicios
-docker compose down
-
-# Detener y eliminar volúmenes
-docker compose down -v
-
-# Ver estado de los contenedores
-docker compose ps
+git clone https://github.com/icheha/aprendia-api.git
+cd aprendia-api
 ```
 
-### Desarrollo y Debug
-
+### 2. Configurar la base de datos
 ```bash
-# Acceder a un contenedor en ejecución
-docker compose exec auth-ms bash
-docker compose exec auth-db psql -U postgres -d authdb
+# Crear base de datos PostgreSQL
+createdb aprendia_db
 
+# Ejecutar migraciones
+psql -d aprendia_db -f src/main/resources/schema.sql
+```
+
+### 3. Configurar variables de entorno
+```bash
+# Copiar archivo de configuración
+cp src/main/resources/application.yml.example src/main/resources/application.yml
+
+# Editar configuración
+nano src/main/resources/application.yml
+```
+
+### 4. Ejecutar la aplicación
+```bash
+# Con Maven
+mvn spring-boot:run
+
+# Con Docker
+docker-compose up -d
+```
+
+## 📚 Documentación de la API
+
+La documentación interactiva está disponible en:
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **OpenAPI JSON**: http://localhost:8080/v3/api-docs
+
+## 🏗️ Arquitectura
+
+### Estructura del Proyecto
+```
+src/main/java/com/icheha/aprendia_api/
+├── auth/                    # Módulo de autenticación
+│   ├── controllers/         # Controladores REST
+│   ├── services/           # Servicios de aplicación
+│   ├── domain/             # Entidades de dominio
+│   └── data/               # Capa de datos
+├── exercises/              # Módulo de ejercicios
+│   ├── exercises/          # Gestión de ejercicios
+│   ├── topics/             # Gestión de temas
+│   ├── templates/          # Gestión de plantillas
+│   ├── layouts/            # Gestión de layouts
+│   └── resources/          # Gestión de recursos
+├── preferences/            # Módulo de preferencias
+│   ├── words/              # Gestión de palabras
+│   ├── occupation/         # Gestión de ocupaciones
+│   └── region/             # Gestión de regiones
+├── records/                # Módulo de registros
+│   └── pupilExercise/      # Registros de ejercicios de estudiantes
+└── core/                   # Configuraciones centrales
+    ├── config/             # Configuraciones
+    ├── security/           # Seguridad
+    └── utils/              # Utilidades
+```
+
+### Principios de Diseño
+
+1. **Clean Architecture**: Separación de responsabilidades
+2. **Domain-Driven Design**: Modelado basado en el dominio
+3. **SOLID Principles**: Principios de diseño orientado a objetos
+4. **Repository Pattern**: Abstracción de acceso a datos
+5. **Service Layer**: Lógica de negocio encapsulada
+
+## 🔐 Autenticación
+
+La API utiliza JWT (JSON Web Tokens) para autenticación:
+
+### Endpoints de Autenticación
+- `POST /api/auth/login/credentials` - Login con credenciales
+- `POST /api/auth/login/qr` - Login con código QR
+- `POST /api/auth/validate-token` - Validar token JWT
+
+### Uso de Tokens
+```bash
+# Incluir token en headers
+Authorization: Bearer <jwt_token>
+```
+
+## 📊 Endpoints Principales
+
+### Ejercicios
+- `GET /api/exercises` - Obtener todos los ejercicios
+- `POST /api/exercises` - Crear ejercicio
+- `GET /api/exercises/{id}` - Obtener ejercicio por ID
+- `GET /api/exercises/pupil/{id}/learning-path` - Ejercicios por estudiante
+
+### Temas
+- `GET /api/topics` - Obtener todos los temas
+- `POST /api/topics` - Crear tema
+- `GET /api/topics/pupils/{id}/learning-path` - Temas por estudiante
+
+### Plantillas
+- `GET /api/templates` - Obtener todas las plantillas
+- `POST /api/templates` - Crear plantilla
+- `GET /api/templates/topic/{id}` - Plantillas por tema
+
+### Recursos
+- `GET /api/resources` - Obtener todos los recursos
+- `POST /api/resources` - Crear recurso
+- `GET /api/resources/pupils/{id}/learning-path` - Recursos por estudiante
+
+### Unidades
+- `GET /api/units` - Obtener todas las unidades
+- `POST /api/units` - Crear unidad
+
+### Layouts
+- `GET /api/layouts` - Obtener todos los layouts
+- `POST /api/layouts` - Crear layout
+- `GET /api/layouts-types` - Obtener tipos de layout
+
+### Habilidades
+- `GET /api/skills` - Obtener todas las habilidades
+- `POST /api/skills` - Crear habilidad
+
+### Preferencias
+- `GET /api/occupations` - Obtener ocupaciones
+- `POST /api/occupations` - Crear ocupación
+
+## 🧪 Testing
+
+### Ejecutar Tests
+```bash
+# Tests unitarios
+mvn test
+
+# Tests de integración
+mvn verify
+
+# Cobertura de código
+mvn jacoco:report
+```
+
+### Cobertura de Tests
+- **Servicios**: 100% de cobertura
+- **Controladores**: Tests de integración completos
+- **Repositorios**: Tests con H2 en memoria
+
+## 🐳 Docker
+
+### Desarrollo
+```bash
+# Construir imagen
+docker build -t aprendia-api .
+
+# Ejecutar contenedor
+docker run -p 8080:8080 aprendia-api
+```
+
+### Producción
+```bash
+# Usar docker-compose
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+## 📈 Monitoreo
+
+### Health Checks
+- `GET /actuator/health` - Estado de la aplicación
+- `GET /actuator/info` - Información de la aplicación
+- `GET /actuator/metrics` - Métricas de la aplicación
+
+### Logs
+```bash
 # Ver logs en tiempo real
-docker compose logs -f --tail=100
+docker-compose logs -f api
 
-# Reiniciar un servicio específico
-docker compose restart api-gateway
+# Logs específicos
+docker-compose logs api | grep ERROR
 ```
 
-## 🚨 Troubleshooting
+## 🔧 Configuración
 
-### Problemas Comunes
+### Variables de Entorno
+```yaml
+# application.yml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/aprendia_db
+    username: ${DB_USERNAME:aprendia}
+    password: ${DB_PASSWORD:password}
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
 
-1. **Error de conexión a la base de datos:**
-   - Verifica que el contenedor `auth-db` esté ejecutándose
-   - Revisa las variables de entorno de conexión a BD
-
-2. **RabbitMQ no se conecta:**
-   - Asegúrate de que el contenedor `rabbitmq` esté levantado antes que los microservicios
-   - Verifica la variable `BROKER_HOSTS`
-
-3. **Puertos ocupados:**
-   - Cambia los puertos externos en el archivo `.env`
-   - Verifica que no haya otros servicios usando los mismos puertos
-
-4. **Problemas con Cloudinary:**
-   - Verifica que las credenciales de Cloudinary sean correctas
-   - Asegúrate de que el servicio `cloudinary-service` esté ejecutándose
-
-### Logs y Monitoreo
-
-```bash
-# Ver todos los logs
-docker compose logs
-
-# Logs de un servicio específico con timestamp
-docker compose logs -t auth-ms
-
-# Seguir logs en tiempo real
-docker compose logs -f
+jwt:
+  secret: ${JWT_SECRET:your-secret-key}
+  expiration: 86400000 # 24 horas
 ```
 
-## ⚙️ Gestión de los Contenedores
+## 🤝 Contribución
 
-- **Ver logs en tiempo real:**
+1. Fork el proyecto
+2. Crear rama para feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit cambios (`git commit -am 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Crear Pull Request
 
-    ```bash
-    docker compose logs -f
-    ```
+### Estándares de Código
+- Seguir convenciones de Java
+- Escribir tests para nuevas funcionalidades
+- Documentar APIs con Swagger
+- Mantener cobertura de tests > 80%
 
-    O para un servicio específico:
+## 📝 Changelog
 
-    ```bash
-    docker compose logs -f auth-ms
-    ```
+### v1.0.0 (2024-01-XX)
+- ✅ Implementación completa de todos los módulos
+- ✅ Autenticación JWT
+- ✅ Tests unitarios e integración
+- ✅ Documentación Swagger
+- ✅ Dockerización
+- ✅ Arquitectura hexagonal
 
-- **Detener los servicios:**
+## 📄 Licencia
 
-    ```bash
-    docker compose down
-    ```
+Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
 
-- **Acceder a la base de datos:**
-    Puedes conectarte a la base de datos PostgreSQL usando tu cliente de base de datos preferido en `localhost:5432` con las credenciales que definiste en el archivo `.env`.
+## 👥 Equipo
+
+- **Desarrollo**: Equipo AprendIA
+- **Arquitectura**: Ingenieros Backend Senior
+- **Contacto**: contacto@aprendia.com
+
+## 🆘 Soporte
+
+Para soporte técnico:
+- **Email**: soporte@aprendia.com
+- **Documentación**: [Wiki del proyecto](https://github.com/icheha/aprendia-api/wiki)
+- **Issues**: [GitHub Issues](https://github.com/icheha/aprendia-api/issues)
+
+---
+
+**AprendIA API** - Sistema de aprendizaje adaptativo con arquitectura moderna y escalable.

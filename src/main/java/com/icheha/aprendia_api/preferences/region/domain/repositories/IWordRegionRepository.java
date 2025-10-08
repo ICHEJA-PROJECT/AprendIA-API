@@ -72,3 +72,4 @@ public interface IWordRegionRepository {
      */
     Long countByWordId(Long wordId);
 }
+

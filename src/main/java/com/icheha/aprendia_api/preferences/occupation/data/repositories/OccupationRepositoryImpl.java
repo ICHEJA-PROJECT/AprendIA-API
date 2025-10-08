@@ -76,3 +76,4 @@ public class OccupationRepositoryImpl implements IOccupationRepository {
         return occupationRepository.existsById(id);
     }
 }
+

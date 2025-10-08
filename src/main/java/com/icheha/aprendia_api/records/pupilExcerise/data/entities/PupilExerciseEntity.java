@@ -1,46 +1,42 @@
 package com.icheha.aprendia_api.records.pupilExcerise.data.entities;
 
-import com.icheha.aprendia_api.auth.data.entities.PersonaEntity;
-import com.icheha.aprendia_api.exercises.exercises.domain.entities.ExerciseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Table(name = "alumno_ejercicio")
+@Table(name = "educando_ejercicios")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PupilExerciseEntity {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_alumno_ejercicio")
+    @Column(name = "id_educando_ejercicio")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_alumno", nullable = false)
-    private PersonaEntity pupil;
+    @Column(name = "id_educando", nullable = false)
+    private Long pupilId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_ejercicio", nullable = false)
-    private ExerciseEntity exercise;
+    @Column(name = "id_ejercicio", nullable = false)
+    private Long exerciseId;
 
-    @Column(name = "puntuacion")
-    private Double puntuacion;
+    @Column(name = "fecha_asignacion")
+    private LocalDateTime assignedDate;
 
-    @Column(name = "tiempo_resolucion")
-    private Integer tiempoResolucion;
+    @Column(name = "fecha_completado")
+    private LocalDateTime completedDate;
 
-    @Column(name = "fecha_realizacion")
-    private LocalDateTime fechaRealizacion;
+    @Column(name = "tiempo_asignado", nullable = false)
+    private String assignedTime;
 
-    @Column(name = "completado", nullable = false)
-    private Boolean completado = false;
+    @Column(name = "por_educador", nullable = false)
+    private Boolean byTeacher;
 
-    @Column(name = "intentos")
-    private Integer intentos = 0;
+    @OneToMany(mappedBy = "pupilExercise", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PupilSkillEntity> skills;
 }

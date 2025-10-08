@@ -31,13 +31,13 @@ public interface OccupationRepository extends JpaRepository<OccupationEntity, Lo
     /**
      * Buscar ocupación con sus relaciones cargadas
      */
-    @Query("SELECT o FROM OccupationEntity o LEFT JOIN FETCH o.students LEFT JOIN FETCH o.exercises WHERE o.id = :id")
+    @Query("SELECT o FROM OccupationEntity o LEFT JOIN FETCH o.students WHERE o.id = :id")
     Optional<OccupationEntity> findByIdWithRelations(@Param("id") Long id);
     
     /**
      * Buscar todas las ocupaciones con sus relaciones cargadas
      */
-    @Query("SELECT o FROM OccupationEntity o LEFT JOIN FETCH o.students LEFT JOIN FETCH o.exercises")
+    @Query("SELECT o FROM OccupationEntity o LEFT JOIN FETCH o.students")
     List<OccupationEntity> findAllWithRelations();
     
     /**
@@ -47,8 +47,9 @@ public interface OccupationRepository extends JpaRepository<OccupationEntity, Lo
     List<OccupationEntity> findByStudentId(@Param("studentId") Long studentId);
     
     /**
-     * Buscar ocupaciones por ejercicio
+     * Buscar ocupaciones por ejercicio - No implementado ya que no hay relación directa
+     * TODO: Implementar si se requiere esta funcionalidad
      */
-    @Query("SELECT DISTINCT o FROM OccupationEntity o JOIN o.exercises eo WHERE eo.exerciseId = :exerciseId")
+    @Query("SELECT o FROM OccupationEntity o WHERE 1=0") // Consulta que siempre retorna vacío
     List<OccupationEntity> findByExerciseId(@Param("exerciseId") Long exerciseId);
 }

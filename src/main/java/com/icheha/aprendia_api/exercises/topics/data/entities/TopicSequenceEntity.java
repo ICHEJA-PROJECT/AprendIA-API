@@ -25,7 +25,7 @@ public class TopicSequenceEntity {
 
     @Column(name = "id_ruta_aprendizaje", nullable = false)
     private Long idRutaAprendizaje;
-
+    
     // Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tema", insertable = false, updatable = false)
@@ -37,7 +37,7 @@ public class TopicSequenceEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ruta_aprendizaje", insertable = false, updatable = false)
-    private TopicEntity rutaAprendizaje;
+    private LearningPath learningPath;
 
     @Data
     @NoArgsConstructor

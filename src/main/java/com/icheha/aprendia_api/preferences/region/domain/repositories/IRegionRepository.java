@@ -86,3 +86,4 @@ public interface IRegionRepository {
      */
     List<Region> findByExerciseId(Long exerciseId);
 }
+

@@ -52,3 +52,4 @@ public interface WordRepository extends JpaRepository<WordEntity, Long> {
     @Query("SELECT DISTINCT w FROM WordEntity w JOIN w.regions wr WHERE wr.regionId = :regionId")
     List<WordEntity> findByRegionId(@Param("regionId") Long regionId);
 }
+

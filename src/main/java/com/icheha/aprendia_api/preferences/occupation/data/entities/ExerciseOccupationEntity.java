@@ -1,5 +1,6 @@
 package com.icheha.aprendia_api.preferences.occupation.data.entities;
 
+import com.icheha.aprendia_api.preferences.occupation.domain.entities.ExerciseOccupationId;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,3 +30,4 @@ public class ExerciseOccupationEntity {
     @JoinColumn(name = "id_ocupacion", insertable = false, updatable = false)
     private OccupationEntity occupation;
 }
+

@@ -72,3 +72,4 @@ public interface IStudentRegionRepository {
      */
     Long countByStudentId(Long studentId);
 }
+

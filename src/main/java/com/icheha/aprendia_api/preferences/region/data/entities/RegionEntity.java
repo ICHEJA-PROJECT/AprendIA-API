@@ -35,3 +35,4 @@ public class RegionEntity {
     @OneToMany(mappedBy = "region", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ExerciseRegionEntity> exercises;
 }
+

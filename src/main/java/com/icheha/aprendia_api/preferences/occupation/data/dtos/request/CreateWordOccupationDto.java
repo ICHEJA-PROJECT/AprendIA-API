@@ -23,3 +23,4 @@ public class CreateWordOccupationDto {
     @Schema(description = "ID de la ocupación", example = "1")
     private Long occupationId;
 }
+
