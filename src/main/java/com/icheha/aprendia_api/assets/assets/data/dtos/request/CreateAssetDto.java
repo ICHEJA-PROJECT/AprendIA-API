@@ -4,18 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateAssetDto {
     private String name;
     private String description;
-    private String url;
-
-    public String getName(){ return name; }
-
-    public String getDescription(){ return description; }
-
-    public String getUrl(){ return url; }
-
+    private List<Long> tagIds;
 }

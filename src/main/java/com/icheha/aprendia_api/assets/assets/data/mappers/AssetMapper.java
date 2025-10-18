@@ -4,6 +4,8 @@ import com.icheha.aprendia_api.assets.assets.data.entities.AssetEntity;
 import com.icheha.aprendia_api.assets.assets.domain.entities.Asset;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component("assetDataMapper")
 public class AssetMapper {
 
@@ -14,9 +16,10 @@ public class AssetMapper {
 
         return Asset.builder()
                 .id(entity.getId())
-                .name(entity.getNombre())
-                .description(entity.getDescription())
+                .name(entity.getName())
                 .url(entity.getUrl())
+                .description(entity.getDescription())
+                .vector(entity.getVector())
                 .build();
     }
 
@@ -25,11 +28,11 @@ public class AssetMapper {
             return null;
         }
 
-        return new AssetEntity(
-                domain.getId(),
-                domain.getName(),
-                domain.getDescription(),
-                domain.getUrl()
-        );
+        AssetEntity entity = new AssetEntity();
+        entity.setName(domain.getName());
+        entity.setUrl(domain.getUrl());
+        entity.setDescription(domain.getDescription());
+        entity.setVector(domain.getVector());
+        return entity;
     }
 }
