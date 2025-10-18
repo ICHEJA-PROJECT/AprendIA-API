@@ -3,7 +3,7 @@ version: "3.9"
 services:
   db-aprend-ia:
     container_name: auth_db
-    image: postgres:16.2
+    image: pgvector/pgvector:pg16
     restart: always
     ports:
       - "${DB_PORT_EXT:-5432}:5432"
