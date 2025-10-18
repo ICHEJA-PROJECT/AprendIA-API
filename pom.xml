@@ -106,8 +106,8 @@
 		<!-- JSON Processing -->
 		<dependency>
 			<groupId>io.hypersistence</groupId>
-			<artifactId>hypersistence-utils-hibernate-62</artifactId>
-			<version>3.5.1</version>
+			<artifactId>hypersistence-utils-hibernate-63</artifactId>
+			<version>3.11.0</version>
 		</dependency>
 
 		<!-- Validation -->
