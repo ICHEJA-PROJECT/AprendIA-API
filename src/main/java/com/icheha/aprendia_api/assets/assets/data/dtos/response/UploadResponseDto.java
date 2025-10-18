@@ -5,11 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class AssetResponseDto {
-    private Long id;
-    private String name;
-    private String url;
-    private String description;
+@NoArgsConstructor
+public class UploadResponseDto {
+    private String publicId;
+    private String secureUrl;
 }
