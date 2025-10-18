@@ -29,6 +29,19 @@
 	<properties>
 		<java.version>21</java.version>
 	</properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ai.djl</groupId>
+                <artifactId>bom</artifactId>
+                <version>0.34.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -121,6 +134,38 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+
+        <!-- DJL core + model zoo -->
+        <dependency>
+            <groupId>ai.djl</groupId>
+            <artifactId>api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ai.djl</groupId>
+            <artifactId>model-zoo</artifactId>
+        </dependency>
+
+        <!-- Tokenizers + TextEmbedding translator -->
+        <dependency>
+            <groupId>ai.djl.huggingface</groupId>
+            <artifactId>tokenizers</artifactId>
+        </dependency>
+
+        <!-- PyTorch engine -->
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-engine</artifactId>
+        </dependency>
+
+        <!-- PyTorch native CPU binaries para Windows (ajustado) -->
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-native-cpu</artifactId>
+            <version>2.7.1</version> <!-- especificar la versión nativa -->
+            <classifier>win-x86_64</classifier>
+            <scope>runtime</scope>
+        </dependency>
 
 	</dependencies>
 
