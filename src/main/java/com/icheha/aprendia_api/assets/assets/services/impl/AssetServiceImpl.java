@@ -43,22 +43,20 @@ public class AssetServiceImpl implements IAssetService {
     public AssetResponseDto createAndSaveAsset(MultipartFile file, CreateAssetDto request) {
         UploadResponseDto imageUrl = null;
         try {
-            System.out.println(request);
-            // 1. Subir la imagen a Cloudinary
+            // Subir la imagen a Cloudinary
             imageUrl = toServerService.upload(file, request.getName());
             System.out.println(imageUrl);
             if (imageUrl == null) {
                 throw new RuntimeException("Error al subir la imagen a Cloudinary.");
             }
 
-            // 2. Generar el vector con el servicio de IA
+            // Generar el vector con el servicio de IA
             float[] vector = vectorService.generateVector(request.getDescription());
-            System.out.println(vector);
             if (vector == null) {
                 throw new RuntimeException("Error al generar el vector con el modelo de IA.");
             }
 
-            // 3. Construir y guardar la entidad de dominio Asset
+
             Asset newAsset = Asset.builder()
                     .name(request.getName())
                     .url(imageUrl.getSecureUrl())
@@ -68,21 +66,19 @@ public class AssetServiceImpl implements IAssetService {
 
             Asset savedAsset = assetRepository.save(newAsset);
 
-            // 4. Asociar los Tags
+            // Asociar los Tags
             if (request.getTagIds() != null && !request.getTagIds().isEmpty()) {
                 associatedTagService.associateTagsToAsset(savedAsset.getId(), request.getTagIds());
             }
 
-            // 5. Devolver la respuesta mapeada
             return assetMapper.toResponseDto(savedAsset);
 
         } catch (Exception e) {
             // Lógica de compensación: si algo falla, borrar el archivo subido
             if (imageUrl != null) {
-                // Asumiendo que el servicio de cloudinary puede extraer el public_id de la URL
                 toServerService.delete(imageUrl.getPublicId());
             }
-            // Envolver la excepción original en una excepción de dominio específica
+
             throw new AssetCreationException("Fallo la creación del asset: " + e.getMessage(), e);
         }
     }

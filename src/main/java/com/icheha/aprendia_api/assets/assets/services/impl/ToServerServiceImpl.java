@@ -3,7 +3,6 @@ package com.icheha.aprendia_api.assets.assets.services.impl;
 import com.icheha.aprendia_api.assets.assets.data.dtos.response.UploadResponseDto;
 import com.icheha.aprendia_api.assets.assets.services.IToServerService;
 import com.icheha.aprendia_api.assets.assets.services.dtos.CloudinaryApiResponse;
-import com.icheha.aprendia_api.assets.assets.services.dtos.CloudinaryData;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,7 @@ public class ToServerServiceImpl implements IToServerService {
 
     @Override
     public UploadResponseDto upload(MultipartFile file, String name) {
-        System.out.println(name);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
@@ -44,7 +43,6 @@ public class ToServerServiceImpl implements IToServerService {
         ResponseEntity<CloudinaryApiResponse> response;
         try {
             response = new RestTemplate().postForEntity(apiUrl+"/upload", request, CloudinaryApiResponse.class);
-            System.out.println(response);
         } catch (Exception e) {
             throw new RuntimeException("Error al enviar el archivo " + name + ": " + e.getMessage(), e);
         }
@@ -66,5 +64,37 @@ public class ToServerServiceImpl implements IToServerService {
 
     @Override
     public void delete(String publicId) {
+        if (publicId.isEmpty()) {
+            return;
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response;
+
+        String url = apiUrl + "/{id}";
+
+        try {
+            response = new RestTemplate().exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    requestEntity,
+                    String.class,
+                    publicId
+            );
+
+        } catch (Exception e) {
+            System.err.println("Error al intentar eliminar " + publicId + ": " + e.getMessage());
+            throw new RuntimeException("Error al conectar con la API de borrado: " + e.getMessage(), e);
+        }
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            System.out.println("Respuesta de la API (borrado): " + response.getBody());
+        } else {
+            System.err.println("Error en la llamada DELETE: " + response.getStatusCode());
+            throw new RuntimeException("La API devolvió un código de error: " + response.getStatusCode());
+        }
     }
 }
