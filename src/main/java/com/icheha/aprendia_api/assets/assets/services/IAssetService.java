@@ -1,9 +1,13 @@
 package com.icheha.aprendia_api.assets.assets.services;
 
 import com.icheha.aprendia_api.assets.assets.data.dtos.request.CreateAssetDto;
-import com.icheha.aprendia_api.assets.assets.data.dtos.response.AssetResponseDto;
+import com.icheha.aprendia_api.assets.assets.data.dtos.response.CreateAssetResponseDto;
+import com.icheha.aprendia_api.assets.assets.data.dtos.response.FindAssetDto;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 public interface IAssetService {
-    AssetResponseDto createAndSaveAsset(MultipartFile file, CreateAssetDto request);
+    CreateAssetResponseDto createAndSaveAsset(MultipartFile file, CreateAssetDto request);
+    List<FindAssetDto> findAssetByTagsIds(List<Long> tagsIds);
 }
