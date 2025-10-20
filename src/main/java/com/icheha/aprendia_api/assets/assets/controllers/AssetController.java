@@ -7,7 +7,6 @@ import com.icheha.aprendia_api.assets.assets.data.dtos.response.FindAssetDto;
 import com.icheha.aprendia_api.assets.assets.domain.exceptions.AssetCreationException;
 import com.icheha.aprendia_api.assets.assets.services.IAssetService;
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
-import com.icheha.aprendia_api.exercises.exercises.data.dtos.response.ExerciseResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -73,11 +72,20 @@ public class AssetController {
     }
 
     @GetMapping
-    @Operation(summary = "Obtener todos los ejercicios", description = "Retorna una lista de todos los ejercicios disponibles")
+    @Operation(summary = "Obtener activos", description = "Retorna una lista de 100 activos buscados por tags")
     public ResponseEntity<BaseResponse<List<FindAssetDto>>> getAssetsByTags(@RequestBody FindAssetByTagsDto tagsIds) {
-        List<FindAssetDto> exercises = assetService.findAssetByTagsIds(tagsIds.getTagsIds());
+        List<FindAssetDto> assets = assetService.findAssetByTagsIds(tagsIds.getTagsIds());
         BaseResponse<List<FindAssetDto>> response = new BaseResponse<>(
-                true, exercises, "Ejercicios obtenidos exitosamente", HttpStatus.OK);
+                true, assets, "Activos obtenidos exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
+
+    @GetMapping(path = "/")
+    @Operation(summary = "Obtener activos", description = "Retorna una lista de todos activos buscados por una descripcion")
+    public ResponseEntity<BaseResponse<List<FindAssetDto>>> getAssetsByDescription(@RequestParam("description") String description) {
+        List<FindAssetDto> assets = assetService.findAssetByDescription(description);
+        BaseResponse<List<FindAssetDto>> response = new BaseResponse<>(
+                true, assets, "Activos obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
 }

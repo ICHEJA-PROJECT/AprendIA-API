@@ -8,5 +8,5 @@ import java.util.List;
 public interface IAssetRepository {
     Asset save(Asset asset);
     List<AssetTags> findByTags(List<Long> tags);
-    List<AssetTags>  findByDescription(String description);
+    List<AssetTags> findByDescription(float[] description);
 }
