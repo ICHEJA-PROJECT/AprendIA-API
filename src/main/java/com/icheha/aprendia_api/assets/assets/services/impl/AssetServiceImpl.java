@@ -98,4 +98,15 @@ public class AssetServiceImpl implements IAssetService {
                 .map(assetTagsMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<FindAssetDto> findAssetByDescription(String description) {
+        float[] vector = vectorService.generateVector(description);
+        if (vector == null) {
+            throw new RuntimeException("Error al generar el vector con el modelo de IA.");
+        }
+        return assetRepository.findByDescription(vector).stream()
+                .map(assetTagsMapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
 }

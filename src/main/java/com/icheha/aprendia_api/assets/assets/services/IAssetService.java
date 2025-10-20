@@ -10,4 +10,5 @@ import java.util.List;
 public interface IAssetService {
     CreateAssetResponseDto createAndSaveAsset(MultipartFile file, CreateAssetDto request);
     List<FindAssetDto> findAssetByTagsIds(List<Long> tagsIds);
+    List<FindAssetDto> findAssetByDescription(String description);
 }

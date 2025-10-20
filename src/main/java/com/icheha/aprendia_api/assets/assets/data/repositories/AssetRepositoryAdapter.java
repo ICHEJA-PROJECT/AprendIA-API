@@ -44,9 +44,9 @@ public class AssetRepositoryAdapter implements IAssetRepository {
     }
 
     @Override
-    public List<AssetTags>  findByDescription(String description) {
-        return null;
+    public List<AssetTags>  findByDescription(float[] description) {
+        return assetRepository.getAssetByDescription(description).stream()
+                .map(assetTagsMapper::toDomain)
+                .collect(Collectors.toList());
     }
-
-
 }
