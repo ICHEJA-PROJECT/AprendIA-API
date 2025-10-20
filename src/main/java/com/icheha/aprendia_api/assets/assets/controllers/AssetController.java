@@ -1,10 +1,13 @@
 package com.icheha.aprendia_api.assets.assets.controllers;
 
 import com.icheha.aprendia_api.assets.assets.data.dtos.request.CreateAssetDto;
-import com.icheha.aprendia_api.assets.assets.data.dtos.response.AssetResponseDto;
+import com.icheha.aprendia_api.assets.assets.data.dtos.request.FindAssetByTagsDto;
+import com.icheha.aprendia_api.assets.assets.data.dtos.response.CreateAssetResponseDto;
+import com.icheha.aprendia_api.assets.assets.data.dtos.response.FindAssetDto;
 import com.icheha.aprendia_api.assets.assets.domain.exceptions.AssetCreationException;
 import com.icheha.aprendia_api.assets.assets.services.IAssetService;
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
+import com.icheha.aprendia_api.exercises.exercises.data.dtos.response.ExerciseResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/assets")
@@ -35,13 +40,13 @@ public class AssetController {
     )
     @ApiResponse(responseCode = "201", description = "Asset creado exitosamente")
     @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-    public ResponseEntity<BaseResponse<AssetResponseDto>> createAsset(
+    public ResponseEntity<BaseResponse<CreateAssetResponseDto>> createAsset(
         @RequestPart("file") MultipartFile file,
         @RequestPart("data") CreateAssetDto request
     ) {
         try {
-            AssetResponseDto response = assetService.createAndSaveAsset(file, request);
-            BaseResponse<AssetResponseDto> baseResponse = new BaseResponse<>(
+            CreateAssetResponseDto response = assetService.createAndSaveAsset(file, request);
+            BaseResponse<CreateAssetResponseDto> baseResponse = new BaseResponse<>(
                 true,
                 response,
                 "Asset creado exitosamente",
@@ -49,7 +54,7 @@ public class AssetController {
             );
             return baseResponse.buildResponseEntity();
         } catch (AssetCreationException e) {
-            BaseResponse<AssetResponseDto> baseResponse = new BaseResponse<>(
+            BaseResponse<CreateAssetResponseDto> baseResponse = new BaseResponse<>(
                 false,
                 null,
                 e.getMessage(),
@@ -57,7 +62,7 @@ public class AssetController {
             );
             return baseResponse.buildResponseEntity();
         } catch (Exception e) {
-            BaseResponse<AssetResponseDto> baseResponse = new BaseResponse<>(
+            BaseResponse<CreateAssetResponseDto> baseResponse = new BaseResponse<>(
                 false,
                 null,
                 "Ocurrió un error inesperado en el servidor.",
@@ -65,5 +70,14 @@ public class AssetController {
             );
             return baseResponse.buildResponseEntity();
         }
+    }
+
+    @GetMapping
+    @Operation(summary = "Obtener todos los ejercicios", description = "Retorna una lista de todos los ejercicios disponibles")
+    public ResponseEntity<BaseResponse<List<FindAssetDto>>> getAssetsByTags(@RequestBody FindAssetByTagsDto tagsIds) {
+        List<FindAssetDto> exercises = assetService.findAssetByTagsIds(tagsIds.getTagsIds());
+        BaseResponse<List<FindAssetDto>> response = new BaseResponse<>(
+                true, exercises, "Ejercicios obtenidos exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
     }
 }
