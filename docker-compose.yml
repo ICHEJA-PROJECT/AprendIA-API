@@ -1,8 +1,9 @@
 version: "3.9"
 
 services:
+  # Base de datos PostgreSQL con pgvector
   db-aprend-ia:
-    container_name: auth_db
+    container_name: aprendia_db
     image: pgvector/pgvector:pg16
     restart: always
     ports:
@@ -12,7 +13,58 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-1234567}
       POSTGRES_DB: ${DB_NAME:-authdb}
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - aprendia_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-authdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicación Spring Boot
+  aprendia-api:
+    container_name: aprendia_api
+    build: .
+    restart: always
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      # Configuración de la base de datos
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-aprend-ia:5432/${DB_NAME:-authdb}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-1234567}
+      
+      # Configuración JWT
+      JWT_SECRET: ${JWT_SECRET:-aprendia-secret-key-for-jwt-token-generation-2024}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600}
+      
+      # Configuración de encriptación
+      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET:-aprendia-encryption-key-2024}
+      
+      # Configuración del servidor
+      SERVER_PORT: 8080
+      SERVER_SERVLET_CONTEXT_PATH: /api
+      
+      # Configuración de logging
+      LOGGING_LEVEL_COM_ICHEHA_APRENDIA_API: DEBUG
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: DEBUG
+      LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
+    depends_on:
+      db-aprend-ia:
+        condition: service_healthy
+    networks:
+      - aprendia_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
 volumes:
-  postgres:
+  postgres_data:
+
+networks:
+  aprendia_network:
+    driver: bridge
