@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/templates-skills")
+@RequestMapping("/api/templates-skills")
 @Tag(name = "Template Skills", description = "API para gestión de template-skills")
 public class TemplateSkillController {
 
