@@ -6,6 +6,8 @@ server:
 spring:
   application:
     name: aprendia-api
+  main:
+    allow-circular-references: true
   
   datasource:
     url: jdbc:postgresql://localhost:5432/authdb
@@ -15,7 +17,7 @@ spring:
   
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -24,6 +26,8 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+        hbm2ddl:
+          auto: update
   
   security:
     jwt:

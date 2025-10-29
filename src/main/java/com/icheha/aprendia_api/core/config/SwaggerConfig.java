@@ -1,11 +1,14 @@
 package com.icheha.aprendia_api.core.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
@@ -15,14 +18,24 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("AprendIA API")
+                        .description("API REST para el sistema de aprendizaje adaptativo AprendIA. " +
+                                "Proporciona endpoints para gestión de ejercicios, temas, plantillas, " +
+                                "recursos, unidades, layouts, habilidades, preferencias y registros de estudiantes.")
                         .version("1.0.0")
-                        .description("API consolidada para la plataforma educativa AprendIA")
                         .contact(new Contact()
-                                .name("AprendIA Team")
-                                .email("support@aprendia.com")
+                                .name("Equipo AprendIA")
+                                .email("contacto@aprendia.com")
                                 .url("https://aprendia.com"))
                         .license(new License()
                                 .name("MIT License")
-                                .url("https://opensource.org/licenses/MIT")));
+                                .url("https://opensource.org/licenses/MIT")))
+                .servers(List.of(
+                        new Server()
+                                .url("http://localhost:8080/api")
+                                .description("Servidor de desarrollo"),
+                        new Server()
+                                .url("https://api.aprendia.com/api")
+                                .description("Servidor de producción")
+                ));
     }
 }

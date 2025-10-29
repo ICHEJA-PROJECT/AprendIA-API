@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BaseResponse<T> {
+
     @Schema(example = "true")
     private Boolean success;
 
@@ -22,7 +23,6 @@ public class BaseResponse<T> {
 
     @Schema
     private HttpStatus status;
-    
 
     public ResponseEntity<BaseResponse<T>> buildResponseEntity() {
         return new ResponseEntity<>(this, this.status);

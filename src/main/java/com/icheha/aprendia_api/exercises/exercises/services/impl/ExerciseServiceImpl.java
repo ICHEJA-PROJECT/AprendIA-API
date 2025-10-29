@@ -1,0 +1,101 @@
+package com.icheha.aprendia_api.exercises.exercises.services.impl;
+
+import com.icheha.aprendia_api.exercises.exercises.data.dtos.request.CreateExerciseDto;
+import com.icheha.aprendia_api.exercises.exercises.data.dtos.response.ExerciseResponseDto;
+import com.icheha.aprendia_api.exercises.exercises.data.entities.ExerciseEntity;
+import com.icheha.aprendia_api.exercises.exercises.data.repositories.ExerciseRepository;
+import com.icheha.aprendia_api.exercises.exercises.data.repositories.IExerciseRepository;
+import com.icheha.aprendia_api.exercises.exercises.services.IExerciseService;
+import com.icheha.aprendia_api.exercises.exercises.services.mappers.ExerciseMapper;
+import com.icheha.aprendia_api.exercises.templates.data.entities.TemplateEntity;
+import com.icheha.aprendia_api.exercises.templates.data.repositories.ITemplateRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class ExerciseServiceImpl implements IExerciseService {
+    
+    @Autowired
+    private ExerciseRepository exerciseRepository;
+    
+    @Autowired
+    private IExerciseRepository iExerciseRepository;
+    
+    @Autowired
+    private ITemplateRepository templateRepository;
+    
+    @Autowired
+    private ExerciseMapper exerciseMapper;
+    
+    @Override
+    public List<ExerciseResponseDto> getAllExercises() {
+        List<ExerciseEntity> entities = exerciseRepository.findAll();
+        return exerciseMapper.toResponseDtoList(entities);
+    }
+    
+    @Override
+    public ExerciseResponseDto createExercise(CreateExerciseDto createExerciseDto) {
+        // Buscar el template por ID
+        Optional<TemplateEntity> templateOpt = templateRepository.findById(createExerciseDto.getTemplateId());
+        if (templateOpt.isEmpty()) {
+            throw new RuntimeException("Template no encontrado con ID: " + createExerciseDto.getTemplateId());
+        }
+        
+        // Crear la entidad del ejercicio
+        ExerciseEntity exerciseEntity = exerciseMapper.toEntity(createExerciseDto, templateOpt.get());
+        
+        // Guardar en la base de datos
+        ExerciseEntity savedEntity = exerciseRepository.save(exerciseEntity);
+        
+        // Convertir a DTO de respuesta
+        return exerciseMapper.toResponseDto(savedEntity);
+    }
+    
+    @Override
+    public ExerciseResponseDto getExerciseById(Long id) {
+        Optional<ExerciseEntity> exerciseOpt = exerciseRepository.findById(id);
+        if (exerciseOpt.isEmpty()) {
+            throw new RuntimeException("Ejercicio no encontrado con ID: " + id);
+        }
+        return exerciseMapper.toResponseDto(exerciseOpt.get());
+    }
+    
+    @Override
+    public Double getPercentageByIdAndSkill(Integer exerciseId, Integer skillId) {
+        // Usar la consulta nativa del repositorio para obtener el porcentaje
+        return iExerciseRepository.findPercentageByExerciseAndSkill(exerciseId.longValue(), skillId.longValue());
+    }
+    
+    @Override
+    public List<ExerciseResponseDto> getExercisesByPupil(Integer pupilId, Integer learningPathId) {
+        // TODO: Implementar lógica de algoritmo genético para seleccionar ejercicios
+        // Por ahora, retornamos ejercicios aleatorios limitados
+        List<ExerciseEntity> entities = exerciseRepository.findAll();
+        
+        // Limitar a los primeros N ejercicios (simulando algoritmo genético)
+        int limit = Math.min(learningPathId != null ? learningPathId : 10, entities.size());
+        List<ExerciseEntity> limitedEntities = entities.stream()
+                .limit(limit)
+                .toList();
+        
+        return exerciseMapper.toResponseDtoList(limitedEntities);
+    }
+    
+    @Override
+    public List<ExerciseResponseDto> getExercisesByTemplateId(Long templateId) {
+        List<ExerciseEntity> entities = exerciseRepository.findByTemplateId(templateId);
+        return exerciseMapper.toResponseDtoList(entities);
+    }
+    
+    @Override
+    public ExerciseResponseDto getRandomExerciseByTemplate(Integer templateId) {
+        Optional<ExerciseEntity> exerciseOpt = exerciseRepository.findRandomByTemplateId(templateId.longValue());
+        if (exerciseOpt.isEmpty()) {
+            throw new RuntimeException("No se encontraron ejercicios para el template con ID: " + templateId);
+        }
+        return exerciseMapper.toResponseDto(exerciseOpt.get());
+    }
+}
