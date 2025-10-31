@@ -10,14 +10,14 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Entity
-@Table(name = "plantilla")
+@Table(name = "reactivo")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TemplateEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_plantilla")
+    @Column(name = "id_reactivo")
     private Long id;
     
     @Column(name = "titulo", nullable = false)

@@ -268,3 +268,94 @@ Para soporte técnico:
 ---
 
 **AprendIA API** - Sistema de aprendizaje adaptativo con arquitectura moderna y escalable.
+
+
+
+## 🎯 Próximos Pasos Recomendados (Basados en TODOs del Código)
+
+### **🔴 Prioridad Alta (TODOs Críticos)**
+
+1. **Implementar algoritmo genético** en `ExerciseServiceImpl.getExercisesByPupil()`
+   - **Archivo**: `src/main/java/com/icheha/aprendia_api/exercises/exercises/services/impl/ExerciseServiceImpl.java`
+   - **Línea**: 74
+   - **Estado**: Actualmente retorna ejercicios limitados, necesita algoritmo real
+
+2. **Completar lógica específica por alumno** en `TopicServiceImpl`
+   - **Archivo**: `src/main/java/com/icheha/aprendia_api/exercises/topics/services/impl/TopicServiceImpl.java`
+   - **Líneas**: 54, 61, 68
+   - **Estado**: Retorna todos los temas, necesita filtrado por alumno
+
+3. **Implementar lógica de recursos por alumno** en `ResourceServiceImpl`
+   - **Archivo**: `src/main/java/com/icheha/aprendia_api/exercises/topics/services/impl/ResourceServiceImpl.java`
+   - **Líneas**: 46, 53, 60, 67
+   - **Estado**: Retorna todos los recursos, necesita filtrado específico
+
+### **🟡 Prioridad Media (TODOs Importantes)**
+
+4. **Completar lógica de ejercicios asignados** en `PupilExerciseServiceImpl`
+   - **Archivo**: `src/main/java/com/icheha/aprendia_api/records/pupilExcerise/services/impl/PupilExerciseServiceImpl.java`
+   - **Línea**: 45
+   - **Estado**: Retorna lista vacía, necesita integración con servicio de ejercicios
+
+5. **Implementar relación con TypeLayout** en `LayoutServiceImpl`
+   - **Archivo**: `src/main/java/com/icheha/aprendia_api/exercises/layouts/services/impl/LayoutServiceImpl.java`
+   - **Línea**: 26
+   - **Estado**: Comentado, necesita implementación en entidad
+
+6. **Completar mappers con datos reales**
+   - **Archivos**: `PupilExerciseMapper.java`, `StudentImpairmentMapper.java`
+   - **Líneas**: 76, 78, 85, 32, 40
+   - **Estado**: Nombres hardcodeados, necesita obtener datos reales
+
+### **🟢 Prioridad Baja (Mejoras)**
+
+7. **Implementar atributos dinámicos** en `TemplateServiceImpl`
+   - **Archivo**: `src/main/java/com/icheha/aprendia_api/exercises/templates/services/impl/TemplateServiceImpl.java`
+   - **Línea**: 95
+   - **Estado**: Pendiente cuando esté disponible en entidad
+
+8. **Completar funcionalidad de conteo** en `OccupationRepository`
+   - **Archivo**: `src/main/java/com/icheha/aprendia_api/preferences/occupation/data/repositories/OccupationRepository.java`
+   - **Línea**: 51
+   - **Estado**: Método comentado, necesita implementación
+
+### **📋 Funcionalidades No Implementadas**
+
+9. **Sistema de notificaciones**: Crear módulo completo
+10. **Reportes y analytics**: Crear módulo de reportes
+11. **Cache distribuido**: Implementar Redis o similar
+12. **Monitoreo y métricas**: Implementar Actuator y métricas
+13. **Tests de integración**: Crear tests completos
+14. **Paginación**: Implementar en todos los endpoints
+15. **Validaciones avanzadas**: Mejorar validaciones de DTOs
+
+---
+
+## 📝 Resumen de TODOs Encontrados en el Código
+
+### **Total de TODOs Identificados: 18**
+
+| **Módulo** | **Archivo** | **Línea** | **Descripción** |
+|------------|-------------|-----------|-----------------|
+| **Layouts** | `LayoutServiceImpl.java` | 26 | Implementar relación con TypeLayout |
+| **Templates** | `TemplateServiceImpl.java` | 95 | Implementar attributes cuando esté disponible |
+| **Topics** | `TopicServiceImpl.java` | 54 | Lógica específica para temas por alumno y ruta |
+| **Topics** | `TopicServiceImpl.java` | 61 | Lógica específica para temas por alumno |
+| **Topics** | `TopicServiceImpl.java` | 68 | Lógica para rutas de aprendizaje por tema |
+| **Resources** | `ResourceServiceImpl.java` | 46 | Lógica específica para recursos por alumno y ruta |
+| **Resources** | `ResourceServiceImpl.java` | 53 | Lógica específica para recursos por tema y ruta |
+| **Resources** | `ResourceServiceImpl.java` | 60 | Lógica específica para recursos por alumno |
+| **Resources** | `ResourceServiceImpl.java` | 67 | Lógica específica para recursos por tema |
+| **Exercises** | `ExerciseServiceImpl.java` | 74 | Implementar algoritmo genético para selección |
+| **PupilExercise** | `PupilExerciseServiceImpl.java` | 45 | Implementar lógica de ejercicios asignados |
+| **PupilExercise** | `PupilExerciseServiceImpl.java` | 64 | Implementar lógica de actualización |
+| **PupilExercise** | `PupilExerciseMapper.java` | 76 | Obtener nombre real del alumno |
+| **PupilExercise** | `PupilExerciseMapper.java` | 78 | Obtener nombre real del ejercicio |
+| **PupilExercise** | `PupilExerciseMapper.java` | 85 | Implementar lógica de asignación por profesor |
+| **StudentImpairment** | `StudentImpairmentMapper.java` | 32 | Obtener nombre real del estudiante |
+| **StudentImpairment** | `StudentImpairmentMapper.java` | 40 | Mapear ruta de aprendizaje |
+| **Occupation** | `OccupationRepository.java` | 51 | Implementar funcionalidad de conteo |
+
+---
+
+*Este análisis fue generado mediante revisión exhaustiva del código fuente, controladores, servicios y entidades del sistema AprendIA API. Todos los TODOs identificados están basados en comentarios reales encontrados en el código.*

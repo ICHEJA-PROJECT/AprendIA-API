@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/templates-instructions-medias")
+@RequestMapping("/api/templates-instructions-medias")
 @Tag(name = "Template Instruction Media", description = "API para gestión de template-instruction-media")
 public class TemplateInstructionMediaController {
 
