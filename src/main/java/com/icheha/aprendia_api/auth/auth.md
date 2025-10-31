@@ -116,8 +116,9 @@ El servicio de autenticación es un microservicio basado en NestJS que maneja la
 **Propósito**: Define los valores de género
 
 **Valores**:
-- `MASCULINE = 'M'` - Masculino
-- `FEMININE = 'F'` - Femenino
+- `MASCULINO = 'MASCULINO'` - Masculino
+- `FEMENINO = 'FEMENINO'` - Femenino
+- `OTRO = 'OTRO'` - Otro
 
 ## Endpoints del Servicio
 
