@@ -1,11 +1,15 @@
 package com.icheha.aprendia_api.exercises.templates.services.impl;
 
+import com.icheha.aprendia_api.exercises.layouts.data.entities.LayoutEntity;
+import com.icheha.aprendia_api.exercises.layouts.data.repositories.LayoutRepository;
 import com.icheha.aprendia_api.exercises.templates.data.dtos.request.CreateTemplateDto;
 import com.icheha.aprendia_api.exercises.templates.data.dtos.request.GetTemplatesByTopicsDto;
 import com.icheha.aprendia_api.exercises.templates.data.dtos.response.TemplateResponseDto;
 import com.icheha.aprendia_api.exercises.templates.data.entities.TemplateEntity;
 import com.icheha.aprendia_api.exercises.templates.data.repositories.ITemplateRepository;
 import com.icheha.aprendia_api.exercises.templates.services.ITemplateService;
+import com.icheha.aprendia_api.exercises.topics.data.entities.TopicEntity;
+import com.icheha.aprendia_api.exercises.topics.data.repositories.TopicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +23,26 @@ public class TemplateServiceImpl implements ITemplateService {
     @Autowired
     private ITemplateRepository templateRepository;
     
+    @Autowired
+    private LayoutRepository layoutRepository;
+    
+    @Autowired
+    private TopicRepository topicRepository;
+    
     @Override
     public TemplateResponseDto createTemplate(CreateTemplateDto createTemplateDto) {
+        // Validar que el layout existe
+        Optional<LayoutEntity> layoutOpt = layoutRepository.findById(createTemplateDto.getLayout());
+        if (layoutOpt.isEmpty()) {
+            throw new RuntimeException("Layout no encontrado con ID: " + createTemplateDto.getLayout());
+        }
+        
+        // Validar que el topic existe
+        Optional<TopicEntity> topicOpt = topicRepository.findById(createTemplateDto.getTopic());
+        if (topicOpt.isEmpty()) {
+            throw new RuntimeException("Topic no encontrado con ID: " + createTemplateDto.getTopic());
+        }
+        
         // Crear nueva entidad
         TemplateEntity entity = new TemplateEntity();
         entity.setTitulo(createTemplateDto.getTitle());

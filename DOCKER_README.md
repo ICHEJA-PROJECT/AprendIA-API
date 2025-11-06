@@ -7,15 +7,18 @@ Este proyecto incluye una configuración completa de Docker para ejecutar la apl
 - `docker-compose.yml`: Configuración de servicios (BD + API)
 - `Dockerfile`: Imagen de la aplicación Spring Boot
 - `env.example`: Variables de entorno de ejemplo
+- `docker/postgres/init/`: Scripts de inicialización de PostgreSQL
 
 ## Servicios incluidos
 
 ### 1. Base de datos (db-aprend-ia)
 - **Imagen**: pgvector/pgvector:pg16
 - **Puerto**: 5432 (configurable)
-- **Base de datos**: authdb
-- **Usuario**: postgres
-- **Contraseña**: 1234567
+- **Base de datos**: authdb (configurable)
+- **Usuario**: postgres (configurable)
+- **Contraseña**: 1234567 (configurable)
+- **Volumen**: Los datos se guardan en `./postgres` (dentro del proyecto)
+- **Extensión pgvector**: Se habilita automáticamente en nuevas instalaciones
 
 ### 2. Aplicación Spring Boot (aprendia-api)
 - **Puerto**: 8080 (configurable)
@@ -81,7 +84,10 @@ docker-compose down -v
 docker-compose up --build aprendia-api
 
 # Acceder a la base de datos
-docker-compose exec db-aprend-ia psql -U postgres -d authdb
+docker-compose exec db-aprend-ia psql -U ${DB_USERNAME} -d ${DB_NAME}
+
+# Habilitar extensión vector en una base de datos existente (si no se habilitó automáticamente)
+docker-compose exec db-aprend-ia psql -U ${DB_USERNAME} -d ${DB_NAME} -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
 # Ver estado de los servicios
 docker-compose ps
@@ -101,12 +107,12 @@ docker-compose logs -f
 
 - ✅ Health checks para ambos servicios
 - ✅ Red interna para comunicación entre servicios
-- ✅ Volúmenes persistentes para la base de datos
-- ✅ Variables de entorno configurables
+- ✅ Volumen local persistente para la base de datos (en `./postgres`)
+- ✅ Variables de entorno configurables (sin valores por defecto)
 - ✅ Dependencias entre servicios (API espera a que BD esté lista)
 - ✅ Logs detallados para debugging
 - ✅ Configuración de seguridad JWT
-- ✅ Soporte para pgvector (embeddings)
+- ✅ Soporte para pgvector (embeddings) con inicialización automática
 
 ## Troubleshooting
 
@@ -128,3 +134,22 @@ docker-compose logs -f
 docker-compose down -v
 docker-compose up --build
 ```
+
+### La extensión vector no está disponible
+Si la base de datos ya existía antes de agregar los scripts de inicialización, la extensión vector puede no estar habilitada. Para habilitarla:
+
+```bash
+# Opción 1: Ejecutar directamente
+docker-compose exec db-aprend-ia psql -U ${DB_USERNAME} -d ${DB_NAME} -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+# Opción 2: Verificar si la extensión existe
+docker-compose exec db-aprend-ia psql -U ${DB_USERNAME} -d ${DB_NAME} -c "SELECT extname, extversion FROM pg_extension WHERE extname = 'vector';"
+```
+
+### Volumen de base de datos
+Los datos de PostgreSQL se guardan en el directorio `./postgres` dentro del proyecto. Esto permite:
+- Acceso directo a los datos desde el sistema de archivos
+- Backup fácil copiando el directorio
+- Persistencia de datos al eliminar contenedores
+
+**Nota**: Si eliminas el directorio `./postgres`, perderás todos los datos de la base de datos.

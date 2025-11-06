@@ -1,5 +1,6 @@
 package com.icheha.aprendia_api.exercises.templates.data.dtos.request;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -26,8 +27,10 @@ public class CreateTemplateDto {
     private Map<String, Object> attributes;
     
     @NotNull(message = "Layout ID es requerido")
+    @Min(value = 1, message = "Layout ID debe ser mayor que 0")
     private Long layout;
     
     @NotNull(message = "Topic ID es requerido")
+    @Min(value = 1, message = "Topic ID debe ser mayor que 0")
     private Long topic;
 }

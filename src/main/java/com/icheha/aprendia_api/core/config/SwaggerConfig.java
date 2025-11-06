@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,8 +14,17 @@ import java.util.List;
 @Configuration
 public class SwaggerConfig {
 
+    @Value("${swagger.server.url:http://localhost:8080}")
+    private String swaggerServerUrl;
+
+    @Value("${server.servlet.context-path:/api}")
+    private String contextPath;
+
     @Bean
     public OpenAPI customOpenAPI() {
+        // Construir la URL base usando la configuración de Swagger o el puerto del servidor
+        String baseUrl = swaggerServerUrl + contextPath;
+        
         return new OpenAPI()
                 .info(new Info()
                         .title("AprendIA API")
@@ -31,7 +41,7 @@ public class SwaggerConfig {
                                 .url("https://opensource.org/licenses/MIT")))
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:8080/api")
+                                .url(baseUrl)
                                 .description("Servidor de desarrollo"),
                         new Server()
                                 .url("https://api.aprendia.com/api")
