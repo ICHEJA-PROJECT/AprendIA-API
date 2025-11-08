@@ -1,0 +1,22 @@
+package com.icheha.aprendia_api.users.person.services;
+
+import com.icheha.aprendia_api.users.person.data.dtos.request.CreateTownDto;
+import com.icheha.aprendia_api.users.person.data.dtos.request.UpdateTownDto;
+import com.icheha.aprendia_api.users.person.data.dtos.response.TownResponseDto;
+
+import java.util.List;
+
+public interface ITownService {
+    List<TownResponseDto> findByMunicipality(Long municipalityId);
+    
+    TownResponseDto create(CreateTownDto createTownDto);
+    
+    TownResponseDto findById(Long id);
+    
+    List<TownResponseDto> findAll();
+    
+    TownResponseDto update(Long id, UpdateTownDto updateTownDto);
+    
+    void deleteById(Long id);
+}
+

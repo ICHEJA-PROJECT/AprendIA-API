@@ -13,12 +13,12 @@ import java.util.Optional;
 @Repository
 public interface ITemplateRepository extends JpaRepository<TemplateEntity, Long> {
     
-    // Buscar templates por ID de tema
-    @Query("SELECT t FROM TemplateEntity t WHERE t.tema.idTema = :topicId")
+    // Buscar templates por ID de tema (usando relación directa topicId)
+    @Query("SELECT t FROM TemplateEntity t WHERE t.topicId = :topicId")
     List<TemplateEntity> findByTopicId(@Param("topicId") Long topicId);
     
-    // Buscar templates por IDs de temas
-    @Query("SELECT t FROM TemplateEntity t WHERE t.tema.idTema IN :topicIds")
+    // Buscar templates por IDs de temas (usando relación directa topicId)
+    @Query("SELECT t FROM TemplateEntity t WHERE t.topicId IN :topicIds")
     List<TemplateEntity> findByTopicIds(@Param("topicIds") List<Long> topicIds);
     
     // Buscar template por ID

@@ -25,7 +25,7 @@ public interface WordRepository extends JpaRepository<WordEntity, Long> {
     /**
      * Buscar palabras que contengan el texto dado (búsqueda parcial)
      */
-    @Query("SELECT w FROM WordEntity w WHERE w.word LIKE %:word%")
+    @Query("SELECT w FROM WordEntity w WHERE w.word LIKE CONCAT('%', :word, '%')")
     List<WordEntity> findByWordContaining(@Param("word") String word);
     
     /**

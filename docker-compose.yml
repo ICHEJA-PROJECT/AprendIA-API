@@ -1,58 +1,67 @@
-version: "3.9"
-
 services:
   # Base de datos PostgreSQL con pgvector
+  # NOTA: Requiere archivo .env con las variables de entorno necesarias
   db-aprend-ia:
     container_name: aprendia_db
     image: pgvector/pgvector:pg16
     restart: always
     ports:
-      - "${DB_PORT_EXT:-5432}:5432"
+      - "${DB_PORT_EXT}:5432"
     environment:
-      POSTGRES_USER: ${DB_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-1234567}
-      POSTGRES_DB: ${DB_NAME:-authdb}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
     networks:
       - aprendia_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-authdb}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME} && psql -U ${DB_USERNAME} -d ${DB_NAME} -tc \"SELECT 1 FROM pg_extension WHERE extname = 'vector'\" | grep -q 1"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   # Aplicación Spring Boot
+  # NOTA: Requiere archivo .env con las variables de entorno necesarias
   aprendia-api:
     container_name: aprendia_api
     build: .
     restart: always
     ports:
-      - "${APP_PORT:-8080}:8080"
+      - "${APP_PORT}:8080"
     environment:
       # Configuración de la base de datos
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db-aprend-ia:5432/${DB_NAME:-authdb}
-      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-1234567}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-aprend-ia:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       
       # Configuración JWT
-      JWT_SECRET: ${JWT_SECRET:-aprendia-secret-key-for-jwt-token-generation-2024}
-      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
       
       # Configuración de encriptación
-      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET:-aprendia-encryption-key-2024}
+      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET}
       
       # Configuración del servidor
       SERVER_PORT: 8080
-      SERVER_SERVLET_CONTEXT_PATH: /api
+      SERVER_SERVLET_CONTEXT_PATH: ${SERVER_CONTEXT_PATH}
+      
+      # Configuración de Swagger (formato con doble guion bajo para propiedades anidadas)
+      SWAGGER__SERVER__URL: http://localhost:${APP_PORT}
       
       # Configuración de logging
-      LOGGING_LEVEL_COM_ICHEHA_APRENDIA_API: DEBUG
-      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: DEBUG
-      LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
+      LOGGING_LEVEL_COM_ICHEHA_APRENDIA_API: ${LOGGING_LEVEL_APP}
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: ${LOGGING_LEVEL_SECURITY}
+      LOGGING_LEVEL_ORG_HIBERNATE_SQL: ${LOGGING_LEVEL_SQL}
+      
+      # Configuración del servicio Cloudinary
+      APP_CLOUDINARY_SERVICE__URL: http://claudinary-image-service:8080/api/cloudinary
     depends_on:
       db-aprend-ia:
         condition: service_healthy
+      claudinary-image-service:
+        condition: service_started
     networks:
       - aprendia_network
     healthcheck:
@@ -62,8 +71,29 @@ services:
       retries: 3
       start_period: 60s
 
-volumes:
-  postgres_data:
+  # Servicio Cloudinary para manejo de imágenes
+  # NOTA: Requiere archivo .env con las variables de entorno de Cloudinary
+  claudinary-image-service:
+    container_name: claudinary_image_service
+    build:
+      context: ./claudinary-image-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "${CLOUDINARY_SERVICE_PORT:-8082}:8080"
+    environment:
+      # Configuración de Cloudinary
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+    networks:
+      - aprendia_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/q/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
 networks:
   aprendia_network:

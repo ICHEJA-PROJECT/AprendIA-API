@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/preferences")
-@Tag(name = "Preferences", description = "Endpoints de gestión de preferencias")
+@Tag(name = "3.16. Preferences", description = "Endpoints de gestión de preferencias")
 public class PreferencesController {
     
     private final IStudentImpairmentService studentImpairmentService;

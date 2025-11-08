@@ -13,4 +13,6 @@ public interface IExerciseService {
     List<ExerciseResponseDto> getExercisesByPupil(Integer pupilId, Integer learningPathId);
     List<ExerciseResponseDto> getExercisesByTemplateId(Long templateId);
     ExerciseResponseDto getRandomExerciseByTemplate(Integer templateId);
+    List<Double> getPorcentages(Integer exerciseId);
+    List<ExerciseResponseDto> findByIds(List<Integer> ids);
 }

@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/tags")
-@Tag(name="Tags", description = "API para gestión de tags de activos")
+@Tag(name = "6.2. Tags", description = "API para gestión de tags de activos")
 public class TagController {
     private final ITagService tagService;
 

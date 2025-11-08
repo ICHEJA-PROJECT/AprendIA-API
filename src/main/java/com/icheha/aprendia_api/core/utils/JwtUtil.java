@@ -36,6 +36,36 @@ public class JwtUtil {
                 .compact();
     }
     
+    /**
+     * Genera un token JWT desde un mapa de claims
+     * Usado principalmente para tokens de estudiantes con estructura personalizada
+     */
+    public String generateTokenFromClaims(java.util.Map<String, Object> claims) {
+        SecretKey key = Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
+        
+        var builder = Jwts.builder();
+        
+        // Agregar todos los claims del mapa
+        for (java.util.Map.Entry<String, Object> entry : claims.entrySet()) {
+            builder.claim(entry.getKey(), entry.getValue());
+        }
+        
+        // Establecer subject si existe studentId o personId
+        Object subject = claims.get("studentId");
+        if (subject == null) {
+            subject = claims.get("personId");
+        }
+        if (subject != null) {
+            builder.setSubject(subject.toString());
+        }
+        
+        return builder
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtConfig.getExpiration()))
+                .signWith(key)
+                .compact();
+    }
+    
     public boolean validateToken(String token) {
         try {
             SecretKey key = Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));

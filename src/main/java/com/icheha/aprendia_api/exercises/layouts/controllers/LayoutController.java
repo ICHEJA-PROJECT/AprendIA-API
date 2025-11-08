@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/layouts")
-@Tag(name = "Layouts", description = "API para gestión de diseños")
+@Tag(name = "4.07. Layouts", description = "API para gestión de diseños")
 public class LayoutController {
 
     private final ILayoutService layoutService;

@@ -6,9 +6,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -23,12 +21,14 @@ public class LayoutEntity {
     @Column(name = "id_layout")
     private Long idLayout;
 
-    @Column(name = "nombre", length = 64, nullable = false)
+    @Column(name = "nombre", length = 100, nullable = false)
     private String nombre;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "atributos", nullable = false)
-    private String atributos;
+    @Column(name = "descripcion", columnDefinition = "TEXT")
+    private String descripcion;
+    
+    @Column(name = "update_at")
+    private LocalDateTime updateAt;
 
     @Column(name = "id_tipo_layout", nullable = false)
     private Long idTipoLayout;
@@ -37,10 +37,17 @@ public class LayoutEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tipo_layout", insertable = false, updatable = false)
     private TypeLayoutEntity tipoLayout;
-
     @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ResourceEntity> recursos;
 
     @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TemplateEntity> templates;
+    
+    @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<BoxLayoutEntity> boxLayouts;
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updateAt = java.time.LocalDateTime.now();
+    }
 }

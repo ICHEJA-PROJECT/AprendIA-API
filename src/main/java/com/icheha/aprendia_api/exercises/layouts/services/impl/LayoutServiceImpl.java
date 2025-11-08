@@ -22,15 +22,13 @@ public class LayoutServiceImpl implements ILayoutService {
         // Crear nueva entidad
         LayoutEntity entity = new LayoutEntity();
         entity.setNombre(createLayoutDto.getName());
-        entity.setAtributos(createLayoutDto.getAttributes());
-        // TODO: Implementar relación con TypeLayout cuando esté disponible
-        // entity.setTypeLayoutId(createLayoutDto.getTypeLayoutId());
+        entity.setDescripcion(createLayoutDto.getAttributes()); // Usar descripcion en lugar de atributos
         
         // Guardar en la base de datos
         LayoutEntity savedEntity = layoutRepository.save(entity);
         
         // Convertir a DTO de respuesta
-        return toResponseDto(savedEntity, createLayoutDto.getTypeLayoutId());
+        return toResponseDto(savedEntity, null);
     }
     
     @Override
@@ -46,15 +44,8 @@ public class LayoutServiceImpl implements ILayoutService {
         LayoutResponseDto dto = new LayoutResponseDto();
         dto.setId(entity.getIdLayout());
         dto.setName(entity.getNombre());
-        dto.setAttributes(entity.getAtributos());
+        dto.setAttributes(entity.getDescripcion()); // Usar descripcion
         dto.setTypeLayoutId(typeLayoutId);
-        
-        // Obtener nombre del tipo de layout si está disponible
-        if (entity.getTipoLayout() != null) {
-            dto.setTypeLayoutName(entity.getTipoLayout().getNombre());
-        } else if (typeLayoutId != null) {
-            dto.setTypeLayoutName("Type Layout " + typeLayoutId);
-        }
         
         // Contar recursos y templates asociados
         dto.setResourceCount(entity.getRecursos() != null ? entity.getRecursos().size() : 0);

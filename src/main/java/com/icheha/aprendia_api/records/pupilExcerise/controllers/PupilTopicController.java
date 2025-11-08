@@ -13,9 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/pupil-topics")
-@Tag(name = "Pupil Topics", description = "Endpoints de gestión de temas de alumnos")
+@Tag(name = "5.3. Pupil Topics", description = "Endpoints de gestión de temas de alumnos")
 public class PupilTopicController {
     
     private final IPupilTopicService pupilTopicService;
@@ -52,6 +54,20 @@ public class PupilTopicController {
         PupilTopicResponseDto pupilTopic = pupilTopicService.getPupilTopicById(id);
         BaseResponse<PupilTopicResponseDto> response = new BaseResponse<>(
                 true, pupilTopic, "Topic obtenido exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
+    
+    @GetMapping("/pupil/{pupilId}")
+    @Operation(
+        summary = "Obtener topics por alumno",
+        description = "Obtener todos los topics de un alumno por su ID"
+    )
+    @ApiResponse(responseCode = "200", description = "Topics obtenidos exitosamente")
+    public ResponseEntity<BaseResponse<List<PupilTopicResponseDto>>> findByPupil(
+            @Parameter(description = "ID del alumno") @PathVariable Integer pupilId) {
+        List<PupilTopicResponseDto> pupilTopics = pupilTopicService.findByPupil(pupilId);
+        BaseResponse<List<PupilTopicResponseDto>> response = new BaseResponse<>(
+                true, pupilTopics, "Topics del alumno obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
 }

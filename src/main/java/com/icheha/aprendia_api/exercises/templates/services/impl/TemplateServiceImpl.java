@@ -1,11 +1,15 @@
 package com.icheha.aprendia_api.exercises.templates.services.impl;
 
+import com.icheha.aprendia_api.exercises.layouts.data.entities.LayoutEntity;
+import com.icheha.aprendia_api.exercises.layouts.data.repositories.LayoutRepository;
 import com.icheha.aprendia_api.exercises.templates.data.dtos.request.CreateTemplateDto;
 import com.icheha.aprendia_api.exercises.templates.data.dtos.request.GetTemplatesByTopicsDto;
 import com.icheha.aprendia_api.exercises.templates.data.dtos.response.TemplateResponseDto;
 import com.icheha.aprendia_api.exercises.templates.data.entities.TemplateEntity;
 import com.icheha.aprendia_api.exercises.templates.data.repositories.ITemplateRepository;
 import com.icheha.aprendia_api.exercises.templates.services.ITemplateService;
+import com.icheha.aprendia_api.exercises.topics.data.entities.TopicEntity;
+import com.icheha.aprendia_api.exercises.topics.data.repositories.TopicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,13 +23,38 @@ public class TemplateServiceImpl implements ITemplateService {
     @Autowired
     private ITemplateRepository templateRepository;
     
+    @Autowired
+    private LayoutRepository layoutRepository;
+    
+    @Autowired
+    private TopicRepository topicRepository;
+    
     @Override
     public TemplateResponseDto createTemplate(CreateTemplateDto createTemplateDto) {
+        // Validar que el layout existe
+        Optional<LayoutEntity> layoutOpt = layoutRepository.findById(createTemplateDto.getLayout());
+        if (layoutOpt.isEmpty()) {
+            throw new RuntimeException("Layout no encontrado con ID: " + createTemplateDto.getLayout());
+        }
+        
+        // Validar que el topic existe
+        Optional<TopicEntity> topicOpt = topicRepository.findById(createTemplateDto.getTopic());
+        if (topicOpt.isEmpty()) {
+            throw new RuntimeException("Topic no encontrado con ID: " + createTemplateDto.getTopic());
+        }
+        
         // Crear nueva entidad
         TemplateEntity entity = new TemplateEntity();
         entity.setTitulo(createTemplateDto.getTitle());
         entity.setInstrucciones(createTemplateDto.getInstructions());
-        entity.setSuggestTime(createTemplateDto.getSuggestTime());
+        // Convertir tiempo sugerido de String a Integer si es posible
+        try {
+            if (createTemplateDto.getSuggestTime() != null && !createTemplateDto.getSuggestTime().isEmpty()) {
+                entity.setTiempoSugerido(Integer.parseInt(createTemplateDto.getSuggestTime().replaceAll("[^0-9]", "")));
+            }
+        } catch (NumberFormatException e) {
+            entity.setTiempoSugerido(null);
+        }
         entity.setTopicId(createTemplateDto.getTopic());
         entity.setLayoutId(createTemplateDto.getLayout());
         
@@ -79,7 +108,7 @@ public class TemplateServiceImpl implements ITemplateService {
         dto.setId(entity.getId());
         dto.setTitle(entity.getTitulo());
         dto.setInstructions(entity.getInstrucciones());
-        dto.setSuggestTime(entity.getSuggestTime());
+        dto.setSuggestTime(entity.getTiempoSugerido() != null ? entity.getTiempoSugerido().toString() : null);
         dto.setLayoutId(entity.getLayoutId());
         dto.setTopicId(entity.getTopicId());
         

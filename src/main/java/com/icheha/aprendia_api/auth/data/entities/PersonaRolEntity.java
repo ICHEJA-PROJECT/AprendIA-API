@@ -26,7 +26,7 @@ public class PersonaRolEntity {
     @JoinColumn(name = "id_rol", insertable = false, updatable = false)
     private RolEntity rol;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity = com.icheha.aprendia_api.users.person.data.entities.PersonaEntity.class)
     @JoinColumn(name = "id_persona", insertable = false, updatable = false)
-    private PersonaEntity persona;
+    private com.icheha.aprendia_api.users.person.data.entities.PersonaEntity persona;
 }

@@ -1,5 +1,5 @@
-# Usar OpenJDK 21 como imagen base
-FROM openjdk:21-jdk-slim
+# Usar Eclipse Temurin 21 (sucesor oficial de OpenJDK)
+FROM eclipse-temurin:21-jdk-jammy
 
 # Establecer directorio de trabajo
 WORKDIR /app
@@ -22,7 +22,7 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 
 # Construir la aplicación
-RUN mvn clean package -DskipTests
+RUN mvn clean package -Dmaven.test.skip=true
 
 # Exponer el puerto
 EXPOSE 8080

@@ -1,6 +1,7 @@
 package com.icheha.aprendia_api.records.pupilExcerise.services;
 
 import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.request.CreatePupilSkillDto;
+import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.response.CalculateGradesBySkillsResponseDto;
 import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.response.GradeSkillResponseDto;
 import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.response.PupilSkillResponseDto;
 
@@ -17,4 +18,6 @@ public interface IPupilSkillService {
     List<PupilSkillResponseDto> getSkillsByPupilId(Integer id);
     
     List<GradeSkillResponseDto> getGradeSkills();
+    
+    List<CalculateGradesBySkillsResponseDto> calculateGradesBySkills(Integer pupilId, List<Integer> skillIds);
 }

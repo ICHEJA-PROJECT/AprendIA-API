@@ -3,7 +3,9 @@ package com.icheha.aprendia_api.preferences.impairments.data.entities;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -12,6 +14,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"students", "reactives", "resources", "learningPaths"})
+@EqualsAndHashCode(exclude = {"students", "reactives", "resources", "learningPaths"})
 public class Impairment {
     
     @Id

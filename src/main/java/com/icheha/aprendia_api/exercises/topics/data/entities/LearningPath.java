@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -16,12 +17,55 @@ public class LearningPath {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_ruta_aprendizaje")
-    private Long id;
+    @Column(name = "id_ruta")
+    private Long idRuta;
     
-    @Column(name = "nombre", nullable = false, length = 64)
-    private String name;
+    @Column(name = "id_metodologia", nullable = false)
+    private Long idMetodologia;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_metodologia", insertable = false, updatable = false)
+    private MetodologiaEntity metodologia;
+    
+    @Column(name = "id_perfil", nullable = false)
+    private Long idPerfil;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_perfil", insertable = false, updatable = false)
+    private PerfilEntity perfil;
+    
+    @Column(name = "nombre", length = 200, nullable = false)
+    private String nombre;
+    
+    @Column(name = "descripcion", columnDefinition = "TEXT")
+    private String descripcion;
+    
+    @Column(name = "url_imagen", length = 500)
+    private String urlImagen;
+
+    @OneToMany(mappedBy = "rutaAprendizaje", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CuadernilloEntity> cuadernillos;
     
     @OneToMany(mappedBy = "learningPath", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TopicSequenceEntity> sequences;
+    
+    
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "update_at")
+    private LocalDateTime updateAt;
+    
+
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updateAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updateAt = LocalDateTime.now();
+    }
 }

@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/layouts-types")
-@Tag(name = "Type Layout", description = "API para gestión de tipos de layout")
+@Tag(name = "4.06. Type Layout", description = "API para gestión de tipos de layout")
 public class TypeLayoutController {
 
     private final ITypeLayoutService typeLayoutService;

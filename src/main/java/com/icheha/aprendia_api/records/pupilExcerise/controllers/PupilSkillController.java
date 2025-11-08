@@ -2,8 +2,9 @@ package com.icheha.aprendia_api.records.pupilExcerise.controllers;
 
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
 import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.request.CreatePupilSkillDto;
-import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.response.PupilSkillResponseDto;
+import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.response.CalculateGradesBySkillsResponseDto;
 import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.response.GradeSkillResponseDto;
+import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.response.PupilSkillResponseDto;
 import com.icheha.aprendia_api.records.pupilExcerise.services.IPupilSkillService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/pupil-skills")
-@Tag(name = "Pupil Skills", description = "Endpoints de gestión de habilidades de alumnos")
+@Tag(name = "5.2. Pupil Skills", description = "Endpoints de gestión de habilidades de alumnos")
 public class PupilSkillController {
     
     private final IPupilSkillService pupilSkillService;
@@ -95,6 +96,22 @@ public class PupilSkillController {
         List<GradeSkillResponseDto> gradeSkills = pupilSkillService.getGradeSkills();
         BaseResponse<List<GradeSkillResponseDto>> response = new BaseResponse<>(
                 true, gradeSkills, "Skills por grados obtenidas exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
+    
+    @GetMapping("/pupil/{pupilId}/skills/grades")
+    @Operation(
+        summary = "Calcular calificaciones por skills específicos",
+        description = "Calcula las calificaciones por skills específicos para un alumno dado usando decaimiento temporal"
+    )
+    @ApiResponse(responseCode = "200", description = "Calificaciones calculadas exitosamente")
+    public ResponseEntity<BaseResponse<List<CalculateGradesBySkillsResponseDto>>> calculateGradesBySkills(
+            @Parameter(description = "ID del alumno") @PathVariable Integer pupilId,
+            @Parameter(description = "Lista de IDs de skills") @RequestParam List<Integer> skills) {
+        List<CalculateGradesBySkillsResponseDto> grades = 
+                pupilSkillService.calculateGradesBySkills(pupilId, skills);
+        BaseResponse<List<CalculateGradesBySkillsResponseDto>> response = new BaseResponse<>(
+                true, grades, "Calificaciones calculadas exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
 }

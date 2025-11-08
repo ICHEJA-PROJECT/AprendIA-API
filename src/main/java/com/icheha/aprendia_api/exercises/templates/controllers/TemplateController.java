@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/templates")
-@Tag(name = "Templates", description = "API para gestión de plantillas")
+@Tag(name = "4.09. Templates", description = "API para gestión de plantillas")
 public class TemplateController {
     
     private final ITemplateService templateService;

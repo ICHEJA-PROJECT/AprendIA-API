@@ -3,6 +3,7 @@ package com.icheha.aprendia_api.assets.assets.services.impl;
 import com.icheha.aprendia_api.assets.assets.data.dtos.response.UploadResponseDto;
 import com.icheha.aprendia_api.assets.assets.services.IToServerService;
 import com.icheha.aprendia_api.assets.assets.services.dtos.CloudinaryApiResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -15,8 +16,12 @@ import java.io.IOException;
 
 @Service
 public class ToServerServiceImpl implements IToServerService {
-    private final String apiUrl = "http://localhost:8000/api/cloudinary";
+    private final String apiUrl;
     private final String folder = "pruebasAlex";
+    
+    public ToServerServiceImpl(@Value("${app.cloudinary.service-url:http://claudinary-image-service:8080/api/cloudinary}") String apiUrl) {
+        this.apiUrl = apiUrl;
+    }
 
     @Override
     public UploadResponseDto upload(MultipartFile file, String name) {

@@ -25,18 +25,20 @@ public interface UnitRepository extends JpaRepository<UnitEntity, Long> {
     /**
      * Buscar unidades que contengan el nombre dado (búsqueda parcial)
      */
-    @Query("SELECT u FROM UnitEntity u WHERE u.nombre LIKE %:nombre%")
+    @Query("SELECT u FROM UnitEntity u WHERE u.nombre LIKE CONCAT('%', :nombre, '%')")
     List<UnitEntity> findByNombreContaining(@Param("nombre") String nombre);
     
     /**
      * Buscar unidad con sus relaciones cargadas
+     * Nota: La relación con temas se eliminó porque la tabla 'tema' no tiene columna 'id_unidad'
      */
-    @Query("SELECT u FROM UnitEntity u LEFT JOIN FETCH u.temas WHERE u.idUnidad = :id")
-    Optional<UnitEntity> findByIdWithTopics(@Param("id") Long id);
+    // @Query("SELECT u FROM UnitEntity u LEFT JOIN FETCH u.temas WHERE u.idUnidad = :id")
+    // Optional<UnitEntity> findByIdWithTopics(@Param("id") Long id);
     
     /**
      * Buscar todas las unidades con sus relaciones cargadas
+     * Nota: La relación con temas se eliminó porque la tabla 'tema' no tiene columna 'id_unidad'
      */
-    @Query("SELECT u FROM UnitEntity u LEFT JOIN FETCH u.temas")
-    List<UnitEntity> findAllWithTopics();
+    // @Query("SELECT u FROM UnitEntity u LEFT JOIN FETCH u.temas")
+    // List<UnitEntity> findAllWithTopics();
 }

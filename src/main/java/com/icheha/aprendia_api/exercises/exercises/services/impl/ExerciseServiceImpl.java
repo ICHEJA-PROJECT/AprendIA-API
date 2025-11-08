@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ExerciseServiceImpl implements IExerciseService {
@@ -65,8 +66,8 @@ public class ExerciseServiceImpl implements IExerciseService {
     
     @Override
     public Double getPercentageByIdAndSkill(Integer exerciseId, Integer skillId) {
-        // Usar la consulta nativa del repositorio para obtener el porcentaje
-        return iExerciseRepository.findPercentageByExerciseAndSkill(exerciseId.longValue(), skillId.longValue());
+        // Usar la consulta nativa del repositorio para obtener el peso
+        return iExerciseRepository.findWeightByExerciseAndSkill(exerciseId.longValue(), skillId.longValue());
     }
     
     @Override
@@ -97,5 +98,28 @@ public class ExerciseServiceImpl implements IExerciseService {
             throw new RuntimeException("No se encontraron ejercicios para el template con ID: " + templateId);
         }
         return exerciseMapper.toResponseDto(exerciseOpt.get());
+    }
+    
+    @Override
+    public List<Double> getPorcentages(Integer exerciseId) {
+        List<Object[]> results = iExerciseRepository.findWeightsByExercise(exerciseId.longValue());
+        return results.stream()
+                .map(result -> {
+                    // result[1] contiene el peso
+                    if (result[1] instanceof Number) {
+                        return ((Number) result[1]).doubleValue();
+                    }
+                    return 0.0;
+                })
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<ExerciseResponseDto> findByIds(List<Integer> ids) {
+        List<Long> longIds = ids.stream()
+                .map(Integer::longValue)
+                .collect(Collectors.toList());
+        List<ExerciseEntity> entities = iExerciseRepository.findByIds(longIds);
+        return exerciseMapper.toResponseDtoList(entities);
     }
 }

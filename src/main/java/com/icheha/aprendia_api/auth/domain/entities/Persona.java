@@ -123,6 +123,28 @@ public class Persona {
         return password != null && password.verificar(passwordPlana);
     }
     
+    /**
+     * Obtiene el valor del CURP de forma segura
+     * @return El valor del CURP o null si no está disponible
+     */
+    public String getCurpValue() {
+        return curp != null ? curp.getValue() : null;
+    }
+    
+    /**
+     * Verifica si la persona tiene CURP
+     */
+    public boolean tieneCurp() {
+        return curp != null;
+    }
+    
+    /**
+     * Verifica si la persona tiene password
+     */
+    public boolean tienePassword() {
+        return password != null;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -15,6 +15,9 @@ public interface PersonaRolRepository extends JpaRepository<PersonaRolEntity, Lo
     @Query("SELECT pr FROM PersonaRolEntity pr JOIN FETCH pr.rol WHERE pr.persona.idPersona = :personaId")
     Optional<PersonaRolEntity> findByPersonaId(@Param("personaId") Long personaId);
     
+    @Query("SELECT pr FROM PersonaRolEntity pr JOIN FETCH pr.rol WHERE pr.idPersona = :personaId")
+    java.util.List<PersonaRolEntity> findAllByPersonaId(@Param("personaId") Long personaId);
+    
     @Modifying
     @Query("DELETE FROM PersonaRolEntity pr WHERE pr.persona.idPersona = :personaId")
     void deleteByPersonaId(@Param("personaId") Long personaId);

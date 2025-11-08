@@ -45,10 +45,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 // Endpoints públicos
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/swagger-ui/**").permitAll()
-                .requestMatchers("/v3/api-docs/**").permitAll()
-                .requestMatchers("/swagger-ui.html").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/api/swagger-ui/**", "/swagger-ui/**").permitAll()
+                .requestMatchers("/api/v3/api-docs/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/api/swagger-ui.html", "/swagger-ui.html").permitAll()
+                .requestMatchers("/api/actuator/**", "/actuator/**").permitAll()
 
                 // Todos los demás endpoints requieren autenticación
                 .anyRequest().permitAll()

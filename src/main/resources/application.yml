@@ -24,6 +24,7 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+    defer-datasource-initialization: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -31,8 +32,12 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
-        hbm2ddl:
-          auto: update
+  
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:db/migration/dummy_data_postgresql.sql
+      continue-on-error: true
   
   security:
     jwt:
@@ -45,6 +50,12 @@ jwt:
 
 encryption:
   secret: aprendia-encryption-key-2024
+
+app:
+  encryption:
+    key: aprendia-encryption-key-2024-32x
+  cloudinary:
+    service-url: ${APP_CLOUDINARY_SERVICE__URL:http://claudinary-image-service:8080/api/cloudinary}
 
 logging:
   level:
@@ -67,4 +78,11 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui
-    operationsSorter: method
+    operationsSorter: alpha
+    tagsSorter: alpha
+    display-request-duration: true
+    filter: true
+
+swagger:
+  server:
+    url: ${SWAGGER_SERVER_URL:http://localhost:8080}

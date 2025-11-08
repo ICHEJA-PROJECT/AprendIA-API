@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/pupil-exercises")
-@Tag(name = "Pupil Exercises", description = "Endpoints de gestión de ejercicios de alumnos")
+@Tag(name = "5.1. Pupil Exercises", description = "Endpoints de gestión de ejercicios de alumnos")
 public class PupilExerciseController {
     
     private final IPupilExerciseService pupilExerciseService;

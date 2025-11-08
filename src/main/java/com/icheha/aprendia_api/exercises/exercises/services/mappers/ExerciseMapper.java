@@ -16,6 +16,7 @@ public class ExerciseMapper {
     public ExerciseEntity toEntity(CreateExerciseDto dto, TemplateEntity template) {
         ExerciseEntity entity = new ExerciseEntity();
         entity.setContext(parseContext(dto.getContext()));
+        entity.setIdReactivo(template != null ? template.getId() : null);
         entity.setTemplate(template);
         return entity;
     }
@@ -24,7 +25,8 @@ public class ExerciseMapper {
         ExerciseResponseDto dto = new ExerciseResponseDto();
         dto.setId(entity.getId());
         dto.setContext(entity.getContext());
-        dto.setTemplateId(entity.getTemplate() != null ? entity.getTemplate().getId() : null);
+        dto.setTemplateId(entity.getIdReactivo() != null ? entity.getIdReactivo() : 
+                         (entity.getTemplate() != null ? entity.getTemplate().getId() : null));
         
         if (entity.getTemplate() != null) {
             dto.setTemplateNombre(entity.getTemplate().getTitulo());

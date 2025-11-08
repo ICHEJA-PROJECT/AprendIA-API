@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/exercises")
-@Tag(name = "Exercises", description = "API para gestión de ejercicios")
+@Tag(name = "4.13. Exercises", description = "API para gestión de ejercicios")
 public class ExerciseController {
 
     private final IExerciseService exerciseService;
@@ -86,6 +86,39 @@ public class ExerciseController {
         ExerciseResponseDto exercise = exerciseService.getRandomExerciseByTemplate(id);
         BaseResponse<ExerciseResponseDto> response = new BaseResponse<>(
                 true, exercise, "Ejercicio aleatorio obtenido exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
+    
+    @GetMapping("/{id}/percentages")
+    @Operation(summary = "Obtener todos los porcentajes de un ejercicio", 
+               description = "Obtiene todos los porcentajes asociados a un ejercicio por su ID")
+    public ResponseEntity<BaseResponse<List<Double>>> getPorcentages(
+            @Parameter(description = "ID del ejercicio") @PathVariable Integer id) {
+        List<Double> percentages = exerciseService.getPorcentages(id);
+        BaseResponse<List<Double>> response = new BaseResponse<>(
+                true, percentages, "Porcentajes obtenidos exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
+    
+    @GetMapping("/ids")
+    @Operation(summary = "Obtener ejercicios por IDs", 
+               description = "Obtiene múltiples ejercicios por sus IDs")
+    public ResponseEntity<BaseResponse<List<ExerciseResponseDto>>> findByIds(
+            @Parameter(description = "Lista de IDs de ejercicios") @RequestParam List<Integer> ids) {
+        List<ExerciseResponseDto> exercises = exerciseService.findByIds(ids);
+        BaseResponse<List<ExerciseResponseDto>> response = new BaseResponse<>(
+                true, exercises, "Ejercicios obtenidos exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
+    
+    @GetMapping("/templates/{templateId}/all")
+    @Operation(summary = "Obtener todos los ejercicios por plantilla", 
+               description = "Obtiene todos los ejercicios de un template específico")
+    public ResponseEntity<BaseResponse<List<ExerciseResponseDto>>> getExercisesByTemplateId(
+            @Parameter(description = "ID de la plantilla") @PathVariable Long templateId) {
+        List<ExerciseResponseDto> exercises = exerciseService.getExercisesByTemplateId(templateId);
+        BaseResponse<List<ExerciseResponseDto>> response = new BaseResponse<>(
+                true, exercises, "Ejercicios obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
 }

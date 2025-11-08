@@ -1,6 +1,6 @@
 package com.icheha.aprendia_api.preferences.impairments.data.entities;
 
-import com.icheha.aprendia_api.auth.data.entities.PersonaEntity;
+import com.icheha.aprendia_api.users.person.data.entities.PersonaEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

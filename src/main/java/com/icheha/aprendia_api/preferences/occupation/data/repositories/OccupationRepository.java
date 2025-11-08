@@ -25,7 +25,7 @@ public interface OccupationRepository extends JpaRepository<OccupationEntity, Lo
     /**
      * Buscar ocupaciones que contengan el nombre dado (búsqueda parcial)
      */
-    @Query("SELECT o FROM OccupationEntity o WHERE o.name LIKE %:name%")
+    @Query("SELECT o FROM OccupationEntity o WHERE o.name LIKE CONCAT('%', :name, '%')")
     List<OccupationEntity> findByNameContaining(@Param("name") String name);
     
     /**

@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/units")
-@Tag(name = "Units", description = "API para gestión de unidades")
+@Tag(name = "4.01. Units", description = "API para gestión de unidades")
 public class UnitController {
 
     private final IUnitService unitService;

@@ -1,5 +1,6 @@
 package com.icheha.aprendia_api.core.dtos.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class BaseResponse<T> {
     private String message;
 
     @Schema
+    @JsonIgnore
     private HttpStatus status;
 
     public ResponseEntity<BaseResponse<T>> buildResponseEntity() {

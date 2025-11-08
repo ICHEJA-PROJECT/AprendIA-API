@@ -21,7 +21,7 @@ public interface WordMeaningRepository extends JpaRepository<WordMeaningEntity, 
     /**
      * Buscar significados que contengan el texto dado
      */
-    @Query("SELECT wm FROM WordMeaningEntity wm WHERE wm.meaning LIKE %:meaning%")
+    @Query("SELECT wm FROM WordMeaningEntity wm WHERE wm.meaning LIKE CONCAT('%', :meaning, '%')")
     List<WordMeaningEntity> findByMeaningContaining(@Param("meaning") String meaning);
     
     /**

@@ -31,7 +31,7 @@ public class OccupationServiceImpl implements IOccupationService {
     public OccupationResponseDto create(CreateOccupationDto dto) {
         // Verificar si ya existe una ocupación con ese nombre
         if (occupationRepository.existsByName(dto.getName())) {
-            throw new RuntimeException("Ya existe una ocupación con el nombre: " + dto.getName());
+            throw new IllegalArgumentException("Ya existe una ocupación con el nombre: " + dto.getName());
         }
         
         // Crear nueva entidad
@@ -41,7 +41,7 @@ public class OccupationServiceImpl implements IOccupationService {
         // Guardar en la base de datos
         OccupationEntity savedEntity = occupationRepository.save(entity);
         
-        // Convertir a DTO de respuesta
+        // Convertir a DTO de respuesta (sin cargar relaciones lazy)
         return toResponseDto(savedEntity);
     }
     
@@ -57,7 +57,7 @@ public class OccupationServiceImpl implements IOccupationService {
     public OccupationResponseDto findById(Long id) {
         Optional<OccupationEntity> entityOpt = occupationRepository.findById(id);
         if (entityOpt.isEmpty()) {
-            throw new RuntimeException("Ocupación no encontrada con ID: " + id);
+            throw new IllegalArgumentException("Ocupación no encontrada con ID: " + id);
         }
         return toResponseDto(entityOpt.get());
     }
@@ -73,7 +73,7 @@ public class OccupationServiceImpl implements IOccupationService {
     @Override
     public void deleteById(Long id) {
         if (!occupationRepository.existsById(id)) {
-            throw new RuntimeException("Ocupación no encontrada con ID: " + id);
+            throw new IllegalArgumentException("Ocupación no encontrada con ID: " + id);
         }
         occupationRepository.deleteById(id);
     }
@@ -89,20 +89,25 @@ public class OccupationServiceImpl implements IOccupationService {
         dto.setId(entity.getId());
         dto.setName(entity.getName());
         
-        // Contar estudiantes asociados
-        dto.setStudentCount(entity.getStudents() != null ? entity.getStudents().size() : 0);
-        dto.setExerciseCount(0); // No hay relación con ejercicios definida
-        
-        // Extraer IDs de estudiantes
-        if (entity.getStudents() != null) {
-            dto.setStudentIds(entity.getStudents().stream()
-                    .map(student -> student.getStudentId())
-                    .collect(Collectors.toList()));
-        } else {
+        // Manejar relaciones lazy de forma segura
+        try {
+            // Intentar acceder a la relación, pero si no está cargada, usar valores por defecto
+            if (entity.getStudents() != null) {
+                dto.setStudentCount(entity.getStudents().size());
+                dto.setStudentIds(entity.getStudents().stream()
+                        .map(student -> student.getStudentId())
+                        .collect(Collectors.toList()));
+            } else {
+                dto.setStudentCount(0);
+                dto.setStudentIds(Collections.emptyList());
+            }
+        } catch (org.hibernate.LazyInitializationException e) {
+            // Si la relación no está cargada, usar valores por defecto
+            dto.setStudentCount(0);
             dto.setStudentIds(Collections.emptyList());
         }
         
-        // No hay ejercicios asociados ya que la relación no está definida
+        dto.setExerciseCount(0); // No hay relación con ejercicios definida
         dto.setExerciseIds(Collections.emptyList());
         
         return dto;

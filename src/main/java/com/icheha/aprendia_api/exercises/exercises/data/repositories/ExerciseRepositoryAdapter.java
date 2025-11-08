@@ -25,6 +25,10 @@ public class ExerciseRepositoryAdapter implements IExerciseRepository {
     @Override
     public Exercise save(Exercise exercise) {
         ExerciseEntity entity = exerciseMapper.toEntity(exercise);
+        // Asegurar que idReactivo esté establecido
+        if (entity.getIdReactivo() == null && exercise.getTemplateId() != null) {
+            entity.setIdReactivo(exercise.getTemplateId());
+        }
         ExerciseEntity savedEntity = exerciseRepository.save(entity);
         return exerciseMapper.toDomain(savedEntity);
     }

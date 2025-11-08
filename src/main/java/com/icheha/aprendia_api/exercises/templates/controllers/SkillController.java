@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/skills")
-@Tag(name = "Skills", description = "API para gestión de habilidades")
+@Tag(name = "4.08. Skills", description = "API para gestión de habilidades")
 public class SkillController {
 
     private final ISkillService skillService;

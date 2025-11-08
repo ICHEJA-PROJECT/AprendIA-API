@@ -17,6 +17,7 @@ public class TokenPayloadDto {
     private String disabilityName;
     private Long disabilityId;
     private Long learningPathId;
+    private Long studentId;
     private Long iat;
     private Long exp;
 }

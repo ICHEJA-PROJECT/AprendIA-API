@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 /**
  * Entidad JPA para Unit
  * Mapea a la tabla 'unidad'
@@ -30,6 +28,8 @@ public class UnitEntity {
     private String descripcion;
 
     // Relaciones
-    @OneToMany(mappedBy = "unidad", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TopicEntity> temas;
+    // Nota: La relación con TopicEntity se eliminó porque la tabla 'tema' no tiene columna 'id_unidad'
+    // Si se necesita esta relación en el futuro, agregar la columna 'id_unidad' a la tabla 'tema'
+    // @OneToMany(mappedBy = "unidad", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // private List<TopicEntity> temas;
 }

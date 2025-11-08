@@ -23,8 +23,8 @@ public class TopicSequenceEntity {
     @Column(name = "id_tema_siguiente", nullable = false)
     private Long idTemaSiguiente;
 
-    @Column(name = "id_ruta_aprendizaje", nullable = false)
-    private Long idRutaAprendizaje;
+    @Column(name = "id_ruta", nullable = false)
+    private Long idRuta;
     
     // Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,7 +36,7 @@ public class TopicSequenceEntity {
     private TopicEntity temaSiguiente;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_ruta_aprendizaje", insertable = false, updatable = false)
+    @JoinColumn(name = "id_ruta", insertable = false, updatable = false)
     private LearningPath learningPath;
 
     @Data
