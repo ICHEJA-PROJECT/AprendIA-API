@@ -25,7 +25,7 @@ public interface RegionRepository extends JpaRepository<RegionEntity, Long> {
     /**
      * Buscar regiones que contengan el nombre dado (búsqueda parcial)
      */
-    @Query("SELECT r FROM RegionEntity r WHERE r.name LIKE %:name%")
+    @Query("SELECT r FROM RegionEntity r WHERE r.name LIKE CONCAT('%', :name, '%')")
     List<RegionEntity> findByNameContaining(@Param("name") String name);
     
     /**

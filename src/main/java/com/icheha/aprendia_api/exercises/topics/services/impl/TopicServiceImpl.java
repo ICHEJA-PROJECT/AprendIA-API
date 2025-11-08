@@ -4,15 +4,12 @@ import com.icheha.aprendia_api.exercises.topics.data.dtos.request.CreateTopicDto
 import com.icheha.aprendia_api.exercises.topics.data.dtos.response.TopicResponseDto;
 import com.icheha.aprendia_api.exercises.topics.data.dtos.response.LearningPathResponseDto;
 import com.icheha.aprendia_api.exercises.topics.data.entities.TopicEntity;
-import com.icheha.aprendia_api.exercises.topics.data.entities.UnitEntity;
 import com.icheha.aprendia_api.exercises.topics.data.repositories.TopicRepository;
-import com.icheha.aprendia_api.exercises.topics.data.repositories.UnitRepository;
 import com.icheha.aprendia_api.exercises.topics.services.ITopicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,24 +18,22 @@ public class TopicServiceImpl implements ITopicService {
     @Autowired
     private TopicRepository topicRepository;
     
-    @Autowired
-    private UnitRepository unitRepository;
+    // TODO: unitRepository eliminado - usar CuadernilloRepository cuando esté disponible
     
     @Override
     public TopicResponseDto createTopic(CreateTopicDto createTopicDto) {
-        // Verificar que la unidad existe
-        Optional<UnitEntity> unitOpt = unitRepository.findById(createTopicDto.getUnitId());
-        if (unitOpt.isEmpty()) {
-            throw new RuntimeException("Unidad no encontrada con ID: " + createTopicDto.getUnitId());
-        }
+        // Verificar que el cuadernillo existe
+        // TODO: Validar que el cuadernillo existe cuando se implemente CuadernilloRepository
+        // Por ahora, asumimos que el cuadernillo existe
         
         TopicEntity entity = new TopicEntity();
         entity.setNombre(createTopicDto.getName());
-        entity.setIdUnidad(createTopicDto.getUnitId());
+        // TODO: Cambiar a idCuadernillo cuando se actualice el DTO
+        // entity.setIdCuadernillo(createTopicDto.getCuadernilloId());
         
         TopicEntity savedEntity = topicRepository.save(entity);
         
-        return toResponseDto(savedEntity, createTopicDto.getUnitId());
+        return toResponseDto(savedEntity, null);
     }
     
     @Override
@@ -67,9 +62,11 @@ public class TopicServiceImpl implements ITopicService {
     public List<LearningPathResponseDto> getLearningPathsByTopicId(Integer id) {
         // TODO: Implementar lógica para obtener rutas de aprendizaje por tema
         // Por ahora, retornamos datos mock
-        return List.of(
-            new LearningPathResponseDto(1L, "Learning Path 1", "Descripción del learning path 1")
-        );
+        LearningPathResponseDto mockDto = new LearningPathResponseDto();
+        mockDto.setId(1L);
+        mockDto.setNombre("Learning Path 1");
+        mockDto.setDescripcion("Descripción del learning path 1");
+        return List.of(mockDto);
     }
     
     @Override
@@ -78,20 +75,19 @@ public class TopicServiceImpl implements ITopicService {
     }
     
     // Método helper para convertir entidad a DTO
-    private TopicResponseDto toResponseDto(TopicEntity entity, Long unitId) {
+    private TopicResponseDto toResponseDto(TopicEntity entity, Long cuadernilloId) {
         TopicResponseDto dto = new TopicResponseDto();
         dto.setId(entity.getIdTema());
         dto.setName(entity.getNombre());
-        dto.setUnitId(unitId != null ? unitId : entity.getIdUnidad());
+        dto.setUnitId(cuadernilloId != null ? cuadernilloId : entity.getIdCuadernillo()); // Usar cuadernilloId como unitId temporalmente
         
-        // Obtener el nombre de la unidad si está disponible
-        if (entity.getUnidad() != null) {
-            dto.setUnitName(entity.getUnidad().getNombre());
-        } else if (unitId != null) {
-            Optional<UnitEntity> unitOpt = unitRepository.findById(unitId);
-            dto.setUnitName(unitOpt.map(UnitEntity::getNombre).orElse("Unit " + unitId));
+        // Obtener el nombre del cuadernillo si está disponible
+        if (entity.getCuadernillo() != null) {
+            dto.setUnitName(entity.getCuadernillo().getNombre());
+        } else if (cuadernilloId != null) {
+            dto.setUnitName("Cuadernillo " + cuadernilloId);
         } else {
-            dto.setUnitName("Unit " + entity.getIdUnidad());
+            dto.setUnitName("Cuadernillo " + entity.getIdCuadernillo());
         }
         
         return dto;

@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/resources")
-@Tag(name = "Resources", description = "API para gestión de recursos")
+@RequestMapping("/resources")
+@Tag(name = "4.05. Resources", description = "API para gestión de recursos")
 public class ResourceController {
 
     private final IResourceService resourceService;

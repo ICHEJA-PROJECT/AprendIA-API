@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/topics-sequences")
-@Tag(name = "Topic Sequences", description = "API para gestión de secuencias de topics")
+@Tag(name = "4.04. Topic Sequences", description = "API para gestión de secuencias de topics")
 public class TopicSequenceController {
 
     private final ITopicSequenceService topicSequenceService;

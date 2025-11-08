@@ -25,11 +25,8 @@ public class TemplateSkillEntity {
     @Column(name = "id_habilidad", nullable = false)
     private Long skillId;
 
-    @Column(name = "porcentaje", nullable = false)
-    private Float porcentage;
-
-    @Column(name = "bandera", nullable = false)
-    private Boolean flag;
+    @Column(name = "peso", precision = 5, scale = 2, nullable = false)
+    private java.math.BigDecimal peso;
 
     // Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,7 +34,7 @@ public class TemplateSkillEntity {
     private TemplateEntity template;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_habilidad", insertable = false, updatable = false)
+    @JoinColumn(name = "id_habilidad", referencedColumnName = "id_agenda", insertable = false, updatable = false)
     private SkillEntity skill;
 
     @Data

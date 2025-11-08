@@ -11,9 +11,12 @@ import java.util.List;
 @Repository
 public interface PupilSkillRepository extends JpaRepository<PupilSkillEntity, Long> {
     
-    @Query("SELECT ps FROM PupilSkillEntity ps JOIN PupilExerciseEntity pe ON ps.pupilExerciseId = pe.id WHERE pe.pupilId = :pupilId")
+    @Query("SELECT ps FROM PupilSkillEntity ps JOIN ps.pupilExercise pe WHERE pe.pupilId = :pupilId")
     List<PupilSkillEntity> findByPupilId(@Param("pupilId") Long pupilId);
     
     @Query("SELECT ps FROM PupilSkillEntity ps WHERE ps.pupilExerciseId = :pupilExerciseId")
     List<PupilSkillEntity> findByPupilExerciseId(@Param("pupilExerciseId") Long pupilExerciseId);
+    
+    @Query("SELECT ps FROM PupilSkillEntity ps JOIN ps.pupilExercise pe WHERE pe.pupilId = :pupilId AND ps.skillId = :skillId ORDER BY pe.completedDate DESC")
+    List<PupilSkillEntity> findByPupilAndSkill(@Param("pupilId") Long pupilId, @Param("skillId") Long skillId);
 }

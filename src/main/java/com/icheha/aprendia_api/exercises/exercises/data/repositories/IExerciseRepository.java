@@ -11,34 +11,34 @@ import java.util.List;
 @Repository
 public interface IExerciseRepository extends JpaRepository<ExerciseEntity, Long> {
     
-    // Consulta para obtener porcentaje por ejercicio y habilidad
+    // Consulta para obtener peso por ejercicio y habilidad
     @Query(value = """
-        SELECT ts.porcentaje as percentage
+        SELECT ts.peso as weight
         FROM ejercicio e
-        INNER JOIN plantilla p ON e.id_plantilla = p.id_plantilla
-        INNER JOIN plantilla_habilidad ph ON p.id_plantilla = ph.id_plantilla
-        INNER JOIN habilidad h ON ph.id_habilidad = h.id_habilidad
-        WHERE e.id_ejercicio = :exerciseId AND h.id_habilidad = :skillId
+        INNER JOIN reactivo p ON e.id_reactivo = p.id_reactivo
+        INNER JOIN reactivo_habilidades ph ON p.id_reactivo = ph.id_reactivo
+        INNER JOIN habilidad h ON ph.id_habilidad = h.id_agenda
+        WHERE e.id_ejercicio = :exerciseId AND h.id_agenda = :skillId
         """, nativeQuery = true)
-    Double findPercentageByExerciseAndSkill(@Param("exerciseId") Long exerciseId, @Param("skillId") Long skillId);
+    Double findWeightByExerciseAndSkill(@Param("exerciseId") Long exerciseId, @Param("skillId") Long skillId);
     
-    // Consulta para obtener todos los porcentajes de un ejercicio
+    // Consulta para obtener todos los pesos de un ejercicio
     @Query(value = """
-        SELECT ph.id_habilidad as skillId, ph.porcentaje as percentage
+        SELECT ph.id_habilidad as skillId, ph.peso as weight
         FROM ejercicio e
-        INNER JOIN plantilla p ON e.id_plantilla = p.id_plantilla
-        INNER JOIN plantilla_habilidad ph ON p.id_plantilla = ph.id_plantilla
+        INNER JOIN reactivo p ON e.id_reactivo = p.id_reactivo
+        INNER JOIN reactivo_habilidades ph ON p.id_reactivo = ph.id_reactivo
         WHERE e.id_ejercicio = :exerciseId
         """, nativeQuery = true)
-    List<Object[]> findPercentagesByExercise(@Param("exerciseId") Long exerciseId);
+    List<Object[]> findWeightsByExercise(@Param("exerciseId") Long exerciseId);
     
     // Consulta para contar ejercicios por template
     @Query(value = """
-        SELECT p.id_plantilla as templateId, COUNT(DISTINCT e.id_ejercicio) as exerciseCount
+        SELECT p.id_reactivo as templateId, COUNT(DISTINCT e.id_ejercicio) as exerciseCount
         FROM ejercicio e
-        INNER JOIN plantilla p ON e.id_plantilla = p.id_plantilla
+        INNER JOIN reactivo p ON e.id_reactivo = p.id_reactivo
         WHERE e.id_ejercicio IN :exerciseIds
-        GROUP BY p.id_plantilla
+        GROUP BY p.id_reactivo
         """, nativeQuery = true)
     List<Object[]> countExercisesByTemplate(@Param("exerciseIds") List<Long> exerciseIds);
     

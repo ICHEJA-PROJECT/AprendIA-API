@@ -22,9 +22,9 @@ public class ResourceServiceImpl implements IResourceService {
     public ResourceResponseDto createResource(CreateResourceDto createResourceDto) {
         // Crear nueva entidad
         ResourceEntity entity = new ResourceEntity();
-        entity.setTitulo(createResourceDto.getTitle());
+        entity.setNombre(createResourceDto.getTitle()); // Usar nombre en lugar de titulo
         entity.setContenido(createResourceDto.getContent());
-        entity.setIdLayout(createResourceDto.getLayoutId());
+        entity.setIdTema(createResourceDto.getLayoutId()); // Temporalmente usar layoutId como temaId
         
         // Guardar en la base de datos
         ResourceEntity savedEntity = resourceRepository.save(entity);
@@ -82,13 +82,13 @@ public class ResourceServiceImpl implements IResourceService {
     private ResourceResponseDto toResponseDto(ResourceEntity entity) {
         ResourceResponseDto dto = new ResourceResponseDto();
         dto.setId(entity.getIdRecurso());
-        dto.setTitle(entity.getTitulo());
+        dto.setTitle(entity.getNombre()); // Usar nombre
         dto.setContent(entity.getContenido());
-        dto.setLayoutId(entity.getIdLayout());
+        dto.setLayoutId(entity.getIdTema()); // Temporalmente usar idTema como layoutId
         
-        // Obtener nombre del layout si está disponible
-        if (entity.getLayout() != null) {
-            dto.setLayoutName(entity.getLayout().getNombre());
+        // Obtener nombre del tema si está disponible
+        if (entity.getTema() != null) {
+            dto.setLayoutName(entity.getTema().getNombre());
         }
         
         // Extraer IDs de temas asociados

@@ -9,4 +9,14 @@ public interface IStudentImpairmentRepository {
     List<StudentImpairment> findByStudentId(Long studentId);
     
     List<StudentImpairment> findByStudentIdWithImpairment(Long studentId);
+    
+    List<Long> findStudentIdsByImpairmentId(Long impairmentId);
+    
+    List<Long> findImpairmentIdsByStudentId(Long studentId);
+    
+    List<StudentImpairment> findByImpairmentId(Long impairmentId);
+    
+    StudentImpairment save(StudentImpairment studentImpairment);
+    
+    List<StudentImpairment> findAll();
 }

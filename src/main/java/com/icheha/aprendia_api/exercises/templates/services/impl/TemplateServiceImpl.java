@@ -47,7 +47,14 @@ public class TemplateServiceImpl implements ITemplateService {
         TemplateEntity entity = new TemplateEntity();
         entity.setTitulo(createTemplateDto.getTitle());
         entity.setInstrucciones(createTemplateDto.getInstructions());
-        entity.setSuggestTime(createTemplateDto.getSuggestTime());
+        // Convertir tiempo sugerido de String a Integer si es posible
+        try {
+            if (createTemplateDto.getSuggestTime() != null && !createTemplateDto.getSuggestTime().isEmpty()) {
+                entity.setTiempoSugerido(Integer.parseInt(createTemplateDto.getSuggestTime().replaceAll("[^0-9]", "")));
+            }
+        } catch (NumberFormatException e) {
+            entity.setTiempoSugerido(null);
+        }
         entity.setTopicId(createTemplateDto.getTopic());
         entity.setLayoutId(createTemplateDto.getLayout());
         
@@ -101,7 +108,7 @@ public class TemplateServiceImpl implements ITemplateService {
         dto.setId(entity.getId());
         dto.setTitle(entity.getTitulo());
         dto.setInstructions(entity.getInstrucciones());
-        dto.setSuggestTime(entity.getSuggestTime());
+        dto.setSuggestTime(entity.getTiempoSugerido() != null ? entity.getTiempoSugerido().toString() : null);
         dto.setLayoutId(entity.getLayoutId());
         dto.setTopicId(entity.getTopicId());
         

@@ -25,7 +25,7 @@ public interface TypeLayoutRepository extends JpaRepository<TypeLayoutEntity, Lo
     /**
      * Buscar tipos de layout que contengan el nombre dado (búsqueda parcial)
      */
-    @Query("SELECT tl FROM TypeLayoutEntity tl WHERE tl.nombre LIKE %:nombre%")
+    @Query("SELECT tl FROM TypeLayoutEntity tl WHERE tl.nombre LIKE CONCAT('%', :nombre, '%')")
     List<TypeLayoutEntity> findByNombreContaining(@Param("nombre") String nombre);
     
     /**

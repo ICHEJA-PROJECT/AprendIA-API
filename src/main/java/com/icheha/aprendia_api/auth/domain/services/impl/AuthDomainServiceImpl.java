@@ -37,6 +37,11 @@ public class AuthDomainServiceImpl implements IAuthDomainService {
         
         Persona persona = findUserByCurp(curp);
         
+        // Verificar que la persona tenga password
+        if (!persona.tienePassword()) {
+            throw new InvalidCredentialsException("La persona no tiene contraseña configurada");
+        }
+        
         // Verificar contraseña usando PasswordEncoder directamente
         if (!passwordEncoder.matches(password, persona.getPassword().getHashedValue())) {
             throw new InvalidCredentialsException("Contraseña incorrecta");

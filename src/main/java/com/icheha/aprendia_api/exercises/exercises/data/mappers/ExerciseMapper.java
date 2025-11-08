@@ -15,7 +15,8 @@ public class ExerciseMapper {
         return Exercise.builder()
                 .id(entity.getId())
                 .context(entity.getContext())
-                .templateId(entity.getTemplate() != null ? entity.getTemplate().getId() : null)
+                .templateId(entity.getIdReactivo() != null ? entity.getIdReactivo() : 
+                           (entity.getTemplate() != null ? entity.getTemplate().getId() : null))
                 .build();
     }
     

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import java.time.LocalDateTime;
 
 import java.util.Map;
 
@@ -25,7 +26,27 @@ public class ExerciseEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, Object> context;
     
+    @Column(name = "id_reactivo", nullable = false)
+    private Long idReactivo;
+    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_plantilla")
+    @JoinColumn(name = "id_reactivo", insertable = false, updatable = false)
     private TemplateEntity template;
+
+        @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "update_at")
+    private LocalDateTime updateAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updateAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updateAt = LocalDateTime.now();
+    }
 }

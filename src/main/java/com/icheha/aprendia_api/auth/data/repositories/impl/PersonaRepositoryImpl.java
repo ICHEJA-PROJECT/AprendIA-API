@@ -2,7 +2,7 @@ package com.icheha.aprendia_api.auth.data.repositories.impl;
 
 import com.icheha.aprendia_api.auth.data.repositories.PersonaRepository;
 import com.icheha.aprendia_api.auth.services.mappers.PersonaMapper;
-import com.icheha.aprendia_api.auth.data.entities.PersonaEntity;
+import com.icheha.aprendia_api.users.person.data.entities.PersonaEntity;
 import com.icheha.aprendia_api.auth.domain.entities.Persona;
 import com.icheha.aprendia_api.auth.domain.repositories.IPersonaRepository;
 import com.icheha.aprendia_api.auth.domain.valueobjects.Curp;

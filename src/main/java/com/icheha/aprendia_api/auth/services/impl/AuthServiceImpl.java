@@ -53,13 +53,32 @@ public class AuthServiceImpl implements IAuthService {
     @Autowired
     private TokenPayloadMapper tokenPayloadMapper;
     
+    @Autowired
+    private com.icheha.aprendia_api.users.student.domain.repositories.IStudentRepository studentRepository;
+    
+    @Autowired
+    private com.icheha.aprendia_api.preferences.impairments.services.IStudentImpairmentService studentImpairmentService;
+    
     public LoginResponseDto loginWithCredentials(LoginCredentialsDto loginDto) {
         try {
             logger.debug("Attempting login with credentials for CURP: {}", loginDto.getCurp());
             
-            Curp curp = new Curp(loginDto.getCurp());
+            Curp curp;
+            try {
+                curp = new Curp(loginDto.getCurp());
+            } catch (IllegalArgumentException e) {
+                logger.warn("Invalid CURP format: {} - {}", loginDto.getCurp(), e.getMessage());
+                throw new InvalidCredentialsException("Formato de CURP inválido: " + e.getMessage());
+            }
+            
             Persona persona = authDomainService.authenticateUser(curp, loginDto.getPassword());
-            LoginResponseDto loginResponse = generateLoginResponse(persona);
+            
+            // Buscar si es estudiante para obtener información de discapacidad
+            Long studentId = null;
+            var studentOpt = studentRepository.findByPersonId(persona.getIdPersona());
+            studentId = studentOpt.map(com.icheha.aprendia_api.users.student.domain.entities.Student::getId).orElse(null);
+            
+            LoginResponseDto loginResponse = generateLoginResponse(persona, studentId);
             
             logger.info("User {} logged in successfully with credentials.", persona.getCurp().getValue());
             
@@ -77,8 +96,24 @@ public class AuthServiceImpl implements IAuthService {
         try {
             logger.debug("Attempting login with QR token");
             
-            Persona persona = validateQRToken(loginDto.getToken());
-            LoginResponseDto loginResponse = generateLoginResponse(persona);
+            String decryptedToken = encryptionUtil.decrypt(loginDto.getToken());
+            logger.debug("QR token decrypted successfully");
+            
+            if (!jwtUtil.validateToken(decryptedToken)) {
+                throw InvalidTokenException.qrToken();
+            }
+            
+            TokenPayloadDto payload = jwtUtil.extractPayload(decryptedToken);
+            logger.debug("QR token decoded successfully");
+            
+            Persona persona = authDomainService.findUserById(payload.getIdPersona());
+            
+            // Obtener studentId buscando por personId
+            Long studentId = null;
+            var studentOpt = studentRepository.findByPersonId(persona.getIdPersona());
+            studentId = studentOpt.map(com.icheha.aprendia_api.users.student.domain.entities.Student::getId).orElse(null);
+            
+            LoginResponseDto loginResponse = generateLoginResponse(persona, studentId);
             
             logger.info("User {} logged in successfully with QR.", persona.getCurp().getValue());
             
@@ -135,29 +170,41 @@ public class AuthServiceImpl implements IAuthService {
         }
     }
     
-    private Persona validateQRToken(String encryptedToken) {
-        String decryptedToken = encryptionUtil.decrypt(encryptedToken);
-        logger.debug("QR token decrypted successfully");
-        
-        if (!jwtUtil.validateToken(decryptedToken)) {
-            throw InvalidTokenException.qrToken();
-        }
-        
-        TokenPayloadDto payload = jwtUtil.extractPayload(decryptedToken);
-        logger.debug("QR token decoded successfully");
-        
-        return authDomainService.findUserById(payload.getIdPersona());
+    private LoginResponseDto generateLoginResponse(Persona persona) {
+        return generateLoginResponse(persona, null);
     }
     
-    
-    private LoginResponseDto generateLoginResponse(Persona persona) {
+    private LoginResponseDto generateLoginResponse(Persona persona, Long studentId) {
         PersonaRol personaRol = getUserRole(persona.getIdPersona());
+        
+        String disabilityName = null;
+        Long disabilityId = null;
+        Long learningPathId = null;
+        
+        // Si es estudiante, obtener información de discapacidad
+        if (studentId != null) {
+            try {
+                var impairmentDetails = studentImpairmentService.getStudentPreferencesWithDetails(persona.getIdPersona().intValue());
+                if (impairmentDetails != null && !impairmentDetails.getImpairments().isEmpty()) {
+                    var firstImpairment = impairmentDetails.getImpairments().get(0);
+                    disabilityName = firstImpairment.getName();
+                    disabilityId = firstImpairment.getId();
+                    
+                    if (impairmentDetails.getLearningPath() != null) {
+                        learningPathId = impairmentDetails.getLearningPath().getId();
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Error obteniendo información de discapacidad para estudiante {}: {}", studentId, e.getMessage());
+            }
+        }
         
         TokenPayloadDto payload = tokenPayloadMapper.toDto(persona, 
                 personaRol.getRol().getNombre(), 
-                null, // disabilityName
-                null, // disabilityId
-                null  // learningPathId
+                disabilityName,
+                disabilityId,
+                learningPathId,
+                studentId
         );
         String token = jwtUtil.generateToken(payload);
         

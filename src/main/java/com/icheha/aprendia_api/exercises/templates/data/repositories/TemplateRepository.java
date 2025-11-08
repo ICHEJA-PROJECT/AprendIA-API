@@ -11,10 +11,11 @@ import java.util.List;
 @Repository
 public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> {
     
-    @Query("SELECT t FROM TemplateEntity t WHERE t.tema.id = :topicId")
+    // Usar relación directa topicId (más eficiente)
+    @Query("SELECT t FROM TemplateEntity t WHERE t.topicId = :topicId")
     List<TemplateEntity> findByTopicId(@Param("topicId") Long topicId);
     
-    @Query("SELECT t FROM TemplateEntity t WHERE t.tema.id IN :topicIds")
+    @Query("SELECT t FROM TemplateEntity t WHERE t.topicId IN :topicIds")
     List<TemplateEntity> findByTopicIds(@Param("topicIds") List<Long> topicIds);
     
     @Query("SELECT t FROM TemplateEntity t JOIN FETCH t.tema WHERE t.id = :id")

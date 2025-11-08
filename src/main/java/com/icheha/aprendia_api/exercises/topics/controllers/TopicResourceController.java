@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/topic-resource")
-@Tag(name = "Topic Resources", description = "API para gestión de recursos de temas")
+@Tag(name = "4.03. Topic Resources", description = "API para gestión de recursos de temas")
 public class TopicResourceController {
 
     private final ITopicResourceService topicResourceService;

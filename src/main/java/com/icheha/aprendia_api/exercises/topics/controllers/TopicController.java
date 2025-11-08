@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/topics")
-@Tag(name = "Topics", description = "API para gestión de temas")
+@RequestMapping("/topics")
+@Tag(name = "4.02. Topics", description = "API para gestión de temas")
 public class TopicController {
 
     private final ITopicService topicService;

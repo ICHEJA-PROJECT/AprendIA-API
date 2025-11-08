@@ -20,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/preferences/exercise-occupations")
-@Tag(name = "Exercise-Occupation Management", description = "Endpoints para gestión de relaciones ejercicio-ocupación")
+@Tag(name = "3.08. Exercise-Occupation Management", description = "Endpoints para gestión de relaciones ejercicio-ocupación")
 public class ExerciseOccupationController {
     
     private static final Logger logger = LoggerFactory.getLogger(ExerciseOccupationController.class);

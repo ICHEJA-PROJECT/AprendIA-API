@@ -1,7 +1,6 @@
 package com.icheha.aprendia_api.assets.assets.controllers;
 
 import com.icheha.aprendia_api.assets.assets.data.dtos.request.CreateAssetDto;
-import com.icheha.aprendia_api.assets.assets.data.dtos.request.FindAssetByTagsDto;
 import com.icheha.aprendia_api.assets.assets.data.dtos.response.CreateAssetResponseDto;
 import com.icheha.aprendia_api.assets.assets.data.dtos.response.FindAssetDto;
 import com.icheha.aprendia_api.assets.assets.domain.exceptions.AssetCreationException;
@@ -21,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/assets")
-@Tag(name = "Assets", description = "Endpoints para la gestión de recursos (assets)")
+@Tag(name = "6.1. Assets", description = "Endpoints para la gestión de recursos (assets)")
 public class AssetController {
 
     private final IAssetService assetService;
@@ -73,8 +72,8 @@ public class AssetController {
 
     @GetMapping
     @Operation(summary = "Obtener activos", description = "Retorna una lista de 100 activos buscados por tags")
-    public ResponseEntity<BaseResponse<List<FindAssetDto>>> getAssetsByTags(@RequestBody FindAssetByTagsDto tagsIds) {
-        List<FindAssetDto> assets = assetService.findAssetByTagsIds(tagsIds.getTagsIds());
+    public ResponseEntity<BaseResponse<List<FindAssetDto>>> getAssetsByTags(@RequestParam("tagsIds") List<Long> tagsIds) {
+        List<FindAssetDto> assets = assetService.findAssetByTagsIds(tagsIds);
         BaseResponse<List<FindAssetDto>> response = new BaseResponse<>(
                 true, assets, "Activos obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();

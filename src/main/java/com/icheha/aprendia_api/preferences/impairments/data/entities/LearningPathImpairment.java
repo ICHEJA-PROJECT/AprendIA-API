@@ -23,7 +23,7 @@ public class LearningPathImpairment {
     private Long impairmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_ruta_aprendizaje", insertable = false, updatable = false)
+    @JoinColumn(name = "id_ruta_aprendizaje", referencedColumnName = "id_ruta", insertable = false, updatable = false)
     private LearningPath learningPath;
 
     @ManyToOne(fetch = FetchType.LAZY)

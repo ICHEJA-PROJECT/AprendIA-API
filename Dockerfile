@@ -22,7 +22,7 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 
 # Construir la aplicación
-RUN mvn clean package -DskipTests
+RUN mvn clean package -Dmaven.test.skip=true
 
 # Exponer el puerto
 EXPOSE 8080

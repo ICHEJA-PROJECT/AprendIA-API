@@ -11,9 +11,10 @@ import java.util.List;
 @Repository
 public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> {
     
-    @Query("SELECT r FROM ResourceEntity r JOIN r.topicResources tr WHERE tr.tema.idTema = :topicId")
+    // Usar relación directa id_tema (más eficiente que tabla pivot)
+    @Query("SELECT r FROM ResourceEntity r WHERE r.idTema = :topicId")
     List<ResourceEntity> findByTopicId(@Param("topicId") Long topicId);
     
-    @Query("SELECT r FROM ResourceEntity r JOIN r.topicResources tr WHERE tr.tema.idTema IN :topicIds")
+    @Query("SELECT r FROM ResourceEntity r WHERE r.idTema IN :topicIds")
     List<ResourceEntity> findByTopicIds(@Param("topicIds") List<Long> topicIds);
 }

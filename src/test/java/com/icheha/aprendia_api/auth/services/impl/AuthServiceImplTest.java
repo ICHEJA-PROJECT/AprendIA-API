@@ -81,7 +81,7 @@ class AuthServiceImplTest {
         // Given
         when(authDomainService.authenticateUser(any(Curp.class), eq("password123")))
                 .thenReturn(persona);
-        when(tokenPayloadMapper.toDto(any(Persona.class), anyString(), isNull(), isNull(), isNull()))
+        when(tokenPayloadMapper.toDto(any(Persona.class), anyString(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(createTokenPayload());
         when(jwtUtil.generateToken(any())).thenReturn("jwt_token");
 
@@ -131,7 +131,7 @@ class AuthServiceImplTest {
         when(jwtUtil.validateToken("decrypted_jwt_token")).thenReturn(true);
         when(jwtUtil.extractPayload("decrypted_jwt_token")).thenReturn(createTokenPayload());
         when(authDomainService.findUserById(1L)).thenReturn(persona);
-        when(tokenPayloadMapper.toDto(any(Persona.class), anyString(), isNull(), isNull(), isNull()))
+        when(tokenPayloadMapper.toDto(any(Persona.class), anyString(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(createTokenPayload());
         when(jwtUtil.generateToken(any())).thenReturn("new_jwt_token");
 

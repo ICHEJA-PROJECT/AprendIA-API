@@ -16,4 +16,13 @@ public interface StudentImpairmentRepository extends JpaRepository<StudentImpair
     
     @Query("SELECT si FROM StudentImpairment si WHERE si.student.idPersona = :studentId")
     List<StudentImpairment> findByStudentId(@Param("studentId") Long studentId);
+    
+    @Query("SELECT si.studentId FROM StudentImpairment si WHERE si.impairmentId = :impairmentId")
+    List<Long> findStudentIdsByImpairmentId(@Param("impairmentId") Long impairmentId);
+    
+    @Query("SELECT si.impairmentId FROM StudentImpairment si WHERE si.studentId = :studentId")
+    List<Long> findImpairmentIdsByStudentId(@Param("studentId") Long studentId);
+    
+    @Query("SELECT si FROM StudentImpairment si WHERE si.impairmentId = :impairmentId")
+    List<StudentImpairment> findByImpairmentId(@Param("impairmentId") Long impairmentId);
 }

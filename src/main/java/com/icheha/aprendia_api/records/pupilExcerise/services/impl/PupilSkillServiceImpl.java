@@ -1,16 +1,25 @@
 package com.icheha.aprendia_api.records.pupilExcerise.services.impl;
 
 import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.request.CreatePupilSkillDto;
+import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.response.CalculateGradesBySkillsResponseDto;
 import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.response.GradeSkillResponseDto;
 import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.response.PupilSkillResponseDto;
+import com.icheha.aprendia_api.records.pupilExcerise.data.entities.PupilSkillEntity;
+import com.icheha.aprendia_api.records.pupilExcerise.data.repositories.PupilSkillRepository;
 import com.icheha.aprendia_api.records.pupilExcerise.services.IPupilSkillService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PupilSkillServiceImpl implements IPupilSkillService {
+    
+    @Autowired
+    private PupilSkillRepository pupilSkillRepository;
     
     @Override
     public PupilSkillResponseDto createPupilSkill(CreatePupilSkillDto createPupilSkillDto) {
@@ -79,5 +88,73 @@ public class PupilSkillServiceImpl implements IPupilSkillService {
         gradeSkills.add(gradeSkill1);
         
         return gradeSkills;
+    }
+    
+    @Override
+    public List<CalculateGradesBySkillsResponseDto> calculateGradesBySkills(Integer pupilId, List<Integer> skillIds) {
+        if (skillIds == null || skillIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        return skillIds.stream()
+                .map(skillId -> {
+                    Double grade = calculateGradeBySkill(pupilId.longValue(), skillId.longValue());
+                    CalculateGradesBySkillsResponseDto response = new CalculateGradesBySkillsResponseDto();
+                    response.setSkillId(skillId.longValue());
+                    response.setGrade(grade);
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+    
+    private Double calculateGradeBySkill(Long pupilId, Long skillId) {
+        List<PupilSkillEntity> pupilSkills = pupilSkillRepository.findByPupilAndSkill(pupilId, skillId);
+        
+        if (pupilSkills == null || pupilSkills.isEmpty()) {
+            return 0.0;
+        }
+        
+        if (pupilSkills.size() == 1) {
+            return pupilSkills.get(0).getScore();
+        }
+        
+        // Filtrar solo los que tienen fecha de completado
+        List<PupilSkillEntity> skillsWithDate = pupilSkills.stream()
+                .filter(ps -> ps.getPupilExercise() != null && ps.getPupilExercise().getCompletedDate() != null)
+                .collect(Collectors.toList());
+        
+        if (skillsWithDate.isEmpty()) {
+            // Si no hay fechas, calcular promedio simple
+            return pupilSkills.stream()
+                    .mapToDouble(PupilSkillEntity::getScore)
+                    .average()
+                    .orElse(0.0);
+        }
+        
+        // Ordenar por fecha descendente
+        skillsWithDate.sort((a, b) -> {
+            LocalDateTime dateA = a.getPupilExercise().getCompletedDate();
+            LocalDateTime dateB = b.getPupilExercise().getCompletedDate();
+            return dateB.compareTo(dateA);
+        });
+        
+        LocalDateTime fechaReferencia = skillsWithDate.get(0).getPupilExercise().getCompletedDate();
+        double factorDecaimiento = 0.3;
+        double sumaProductos = 0.0;
+        double sumaPesos = 0.0;
+        
+        for (PupilSkillEntity skill : skillsWithDate) {
+            LocalDateTime fechaCompletado = skill.getPupilExercise().getCompletedDate();
+            long diasTranscurridos = Math.abs(java.time.Duration.between(fechaReferencia, fechaCompletado).toDays());
+            
+            // Peso usando función logarítmica con decaimiento temporal
+            // Peso = 1 / (1 + log(1 + días * factor))
+            double peso = 1.0 / (1.0 + Math.log(1.0 + diasTranscurridos * factorDecaimiento));
+            
+            sumaProductos += skill.getScore() * peso;
+            sumaPesos += peso;
+        }
+        
+        return sumaPesos > 0 ? sumaProductos / sumaPesos : 0.0;
     }
 }

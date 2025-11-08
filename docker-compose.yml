@@ -54,13 +54,42 @@ services:
       LOGGING_LEVEL_COM_ICHEHA_APRENDIA_API: ${LOGGING_LEVEL_APP}
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: ${LOGGING_LEVEL_SECURITY}
       LOGGING_LEVEL_ORG_HIBERNATE_SQL: ${LOGGING_LEVEL_SQL}
+      
+      # Configuración del servicio Cloudinary
+      APP_CLOUDINARY_SERVICE__URL: http://claudinary-image-service:8080/api/cloudinary
     depends_on:
       db-aprend-ia:
         condition: service_healthy
+      claudinary-image-service:
+        condition: service_started
     networks:
       - aprendia_network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Servicio Cloudinary para manejo de imágenes
+  # NOTA: Requiere archivo .env con las variables de entorno de Cloudinary
+  claudinary-image-service:
+    container_name: claudinary_image_service
+    build:
+      context: ./claudinary-image-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "${CLOUDINARY_SERVICE_PORT:-8082}:8080"
+    environment:
+      # Configuración de Cloudinary
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+    networks:
+      - aprendia_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/q/health"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -15,12 +15,12 @@ public interface ExerciseRepository extends JpaRepository<ExerciseEntity, Long> 
     @Query("SELECT e FROM ExerciseEntity e WHERE e.template.id = :templateId")
     List<ExerciseEntity> findByTemplateId(@Param("templateId") Long templateId);
     
-    @Query("SELECT e FROM ExerciseEntity e WHERE e.template.id = :templateId ORDER BY RANDOM() LIMIT 1")
+    @Query(value = "SELECT * FROM ejercicio e WHERE e.id_reactivo = :templateId ORDER BY RANDOM() LIMIT 1", nativeQuery = true)
     Optional<ExerciseEntity> findRandomByTemplateId(@Param("templateId") Long templateId);
     
-    @Query("SELECT e FROM ExerciseEntity e JOIN e.template t WHERE t.tema.id = :topicId")
+    @Query("SELECT e FROM ExerciseEntity e JOIN e.template t WHERE t.tema.idTema = :topicId")
     List<ExerciseEntity> findByTopicId(@Param("topicId") Long topicId);
     
-    @Query("SELECT e FROM ExerciseEntity e JOIN e.template t WHERE t.tema.id IN :topicIds")
+    @Query("SELECT e FROM ExerciseEntity e JOIN e.template t WHERE t.tema.idTema IN :topicIds")
     List<ExerciseEntity> findByTopicIds(@Param("topicIds") List<Long> topicIds);
 }
