@@ -177,6 +177,12 @@ public class AuthServiceImpl implements IAuthService {
     private LoginResponseDto generateLoginResponse(Persona persona, Long studentId) {
         PersonaRol personaRol = getUserRole(persona.getIdPersona());
         
+        // Validar que el rol esté presente
+        if (personaRol.getRol() == null) {
+            logger.error("Rol is null for PersonaRol with idPersona: {}", persona.getIdPersona());
+            throw new RuntimeException("Rol no encontrado para el usuario");
+        }
+        
         String disabilityName = null;
         Long disabilityId = null;
         Long learningPathId = null;
