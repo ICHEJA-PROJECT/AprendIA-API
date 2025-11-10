@@ -1,12 +1,15 @@
 package com.icheha.aprendia_api.preferences.occupation.services.impl;
 
 import com.icheha.aprendia_api.preferences.occupation.data.dtos.request.CreateOccupationDto;
+import com.icheha.aprendia_api.preferences.occupation.data.dtos.request.UpdateOccupationDto;
 import com.icheha.aprendia_api.preferences.occupation.data.dtos.response.OccupationResponseDto;
 import com.icheha.aprendia_api.preferences.occupation.data.entities.OccupationEntity;
 import com.icheha.aprendia_api.preferences.occupation.data.repositories.OccupationRepository;
 import com.icheha.aprendia_api.preferences.occupation.services.IOccupationService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -71,9 +74,31 @@ public class OccupationServiceImpl implements IOccupationService {
     }
     
     @Override
+    @Transactional
+    public OccupationResponseDto update(Long id, UpdateOccupationDto updateOccupationDto) {
+        OccupationEntity entity = occupationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ocupación no encontrada con ID: " + id));
+        
+        if (updateOccupationDto.getName() != null && !updateOccupationDto.getName().trim().isEmpty()) {
+            // Verificar si el nuevo nombre ya existe en otra ocupación
+            if (occupationRepository.existsByName(updateOccupationDto.getName())) {
+                Optional<OccupationEntity> existing = occupationRepository.findByName(updateOccupationDto.getName());
+                if (existing.isPresent() && !existing.get().getId().equals(id)) {
+                    throw new IllegalArgumentException("Ya existe una ocupación con el nombre: " + updateOccupationDto.getName());
+                }
+            }
+            entity.setName(updateOccupationDto.getName());
+        }
+        
+        OccupationEntity updatedEntity = occupationRepository.save(entity);
+        return toResponseDto(updatedEntity);
+    }
+    
+    @Override
+    @Transactional
     public void deleteById(Long id) {
         if (!occupationRepository.existsById(id)) {
-            throw new IllegalArgumentException("Ocupación no encontrada con ID: " + id);
+            throw new EntityNotFoundException("Ocupación no encontrada con ID: " + id);
         }
         occupationRepository.deleteById(id);
     }

@@ -1,20 +1,21 @@
 package com.icheha.aprendia_api.exercises.templates.services.impl;
 
-import com.icheha.aprendia_api.exercises.layouts.data.entities.LayoutEntity;
 import com.icheha.aprendia_api.exercises.layouts.data.repositories.LayoutRepository;
 import com.icheha.aprendia_api.exercises.templates.data.dtos.request.CreateTemplateDto;
 import com.icheha.aprendia_api.exercises.templates.data.dtos.request.GetTemplatesByTopicsDto;
+import com.icheha.aprendia_api.exercises.templates.data.dtos.request.UpdateTemplateDto;
 import com.icheha.aprendia_api.exercises.templates.data.dtos.response.TemplateResponseDto;
 import com.icheha.aprendia_api.exercises.templates.data.entities.TemplateEntity;
 import com.icheha.aprendia_api.exercises.templates.data.repositories.ITemplateRepository;
 import com.icheha.aprendia_api.exercises.templates.services.ITemplateService;
-import com.icheha.aprendia_api.exercises.topics.data.entities.TopicEntity;
 import com.icheha.aprendia_api.exercises.topics.data.repositories.TopicRepository;
+import com.icheha.aprendia_api.exercises.topics.data.repositories.ResourceRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,19 +30,19 @@ public class TemplateServiceImpl implements ITemplateService {
     @Autowired
     private TopicRepository topicRepository;
     
+    @Autowired
+    private ResourceRepository resourceRepository;
+    
     @Override
+    @Transactional
     public TemplateResponseDto createTemplate(CreateTemplateDto createTemplateDto) {
         // Validar que el layout existe
-        Optional<LayoutEntity> layoutOpt = layoutRepository.findById(createTemplateDto.getLayout());
-        if (layoutOpt.isEmpty()) {
-            throw new RuntimeException("Layout no encontrado con ID: " + createTemplateDto.getLayout());
-        }
+        layoutRepository.findById(createTemplateDto.getLayout())
+                .orElseThrow(() -> new EntityNotFoundException("Layout no encontrado con ID: " + createTemplateDto.getLayout()));
         
         // Validar que el topic existe
-        Optional<TopicEntity> topicOpt = topicRepository.findById(createTemplateDto.getTopic());
-        if (topicOpt.isEmpty()) {
-            throw new RuntimeException("Topic no encontrado con ID: " + createTemplateDto.getTopic());
-        }
+        topicRepository.findById(createTemplateDto.getTopic())
+                .orElseThrow(() -> new EntityNotFoundException("Topic no encontrado con ID: " + createTemplateDto.getTopic()));
         
         // Crear nueva entidad
         TemplateEntity entity = new TemplateEntity();
@@ -66,6 +67,7 @@ public class TemplateServiceImpl implements ITemplateService {
     }
     
     @Override
+    @Transactional(readOnly = true)
     public List<TemplateResponseDto> getAllTemplates() {
         List<TemplateEntity> entities = templateRepository.findAll();
         return entities.stream()
@@ -94,12 +96,59 @@ public class TemplateServiceImpl implements ITemplateService {
     }
     
     @Override
-    public TemplateResponseDto getTemplateById(Integer id) {
-        Optional<TemplateEntity> entityOpt = templateRepository.findById(id.longValue());
-        if (entityOpt.isEmpty()) {
-            throw new RuntimeException("Template no encontrado con ID: " + id);
+    @Transactional(readOnly = true)
+    public TemplateResponseDto getTemplateById(Long id) {
+        TemplateEntity entity = templateRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Template no encontrado con ID: " + id));
+        return toResponseDto(entity);
+    }
+    
+    @Override
+    @Transactional
+    public TemplateResponseDto update(Long id, UpdateTemplateDto updateTemplateDto) {
+        TemplateEntity entity = templateRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Template no encontrado con ID: " + id));
+        
+        if (updateTemplateDto.getTitle() != null && !updateTemplateDto.getTitle().trim().isEmpty()) {
+            entity.setTitulo(updateTemplateDto.getTitle());
         }
-        return toResponseDto(entityOpt.get());
+        
+        if (updateTemplateDto.getInstructions() != null) {
+            entity.setInstrucciones(updateTemplateDto.getInstructions());
+        }
+        
+        if (updateTemplateDto.getSuggestTime() != null) {
+            entity.setTiempoSugerido(updateTemplateDto.getSuggestTime());
+        }
+        
+        if (updateTemplateDto.getLayoutId() != null) {
+            layoutRepository.findById(updateTemplateDto.getLayoutId())
+                    .orElseThrow(() -> new EntityNotFoundException("Layout no encontrado con ID: " + updateTemplateDto.getLayoutId()));
+            entity.setLayoutId(updateTemplateDto.getLayoutId());
+        }
+        
+        if (updateTemplateDto.getTopicId() != null) {
+            topicRepository.findById(updateTemplateDto.getTopicId())
+                    .orElseThrow(() -> new EntityNotFoundException("Tema no encontrado con ID: " + updateTemplateDto.getTopicId()));
+            entity.setTopicId(updateTemplateDto.getTopicId());
+        }
+        
+        if (updateTemplateDto.getResourceId() != null) {
+            resourceRepository.findById(updateTemplateDto.getResourceId())
+                    .orElseThrow(() -> new EntityNotFoundException("Recurso no encontrado con ID: " + updateTemplateDto.getResourceId()));
+            entity.setIdRecurso(updateTemplateDto.getResourceId());
+        }
+        
+        TemplateEntity updatedEntity = templateRepository.save(entity);
+        return toResponseDto(updatedEntity);
+    }
+    
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        TemplateEntity entity = templateRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Template no encontrado con ID: " + id));
+        templateRepository.delete(entity);
     }
     
     // Método helper para convertir entidad a DTO

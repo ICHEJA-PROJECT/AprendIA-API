@@ -108,5 +108,53 @@ public class CellRepositoryImpl implements ICellRepository {
         return cellRepository.findByIdWithRelations(id)
                 .map(cellMapper::toDomain);
     }
+    
+    @Override
+    public Cell update(Cell cell, Long institutionId, Long coordinatorId) {
+        if (cell == null || cell.getId() == null) {
+            throw new IllegalArgumentException("Cell y su ID no pueden ser nulos");
+        }
+        
+        CellEntity entity = cellRepository.findByIdWithRelations(cell.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Célula no encontrada con ID: " + cell.getId()));
+        
+        if (institutionId != null) {
+            InstitutionEntity institution = institutionRepository.findById(institutionId)
+                    .orElseThrow(() -> new IllegalArgumentException("Institución no encontrada con ID: " + institutionId));
+            entity.setInstitution(institution);
+        }
+        
+        if (coordinatorId != null) {
+            if (!personaRepository.existsById(coordinatorId)) {
+                throw new IllegalArgumentException("Coordinador no encontrado con ID: " + coordinatorId);
+            }
+            PersonaEntity coordinator = entityManager.getReference(
+                    com.icheha.aprendia_api.users.person.data.entities.PersonaEntity.class, 
+                    coordinatorId);
+            entity.setCoordinator(coordinator);
+        }
+        
+        if (cell.getStartDate() != null) {
+            entity.setStartDate(cell.getStartDate());
+        }
+        
+        if (cell.getEndDate() != null) {
+            entity.setEndDate(cell.getEndDate());
+        }
+        
+        CellEntity updatedEntity = cellRepository.save(entity);
+        return cellMapper.toDomain(updatedEntity);
+    }
+    
+    @Override
+    public void delete(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID no puede ser nulo");
+        }
+        if (!cellRepository.existsById(id)) {
+            throw new IllegalArgumentException("Célula no encontrada con ID: " + id);
+        }
+        cellRepository.deleteById(id);
+    }
 }
 

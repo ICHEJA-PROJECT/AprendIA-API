@@ -12,5 +12,9 @@ public interface IInstitutionRepository {
     List<Institution> findAll();
     
     Optional<Institution> findById(Long id);
+    
+    Institution update(Institution institution);
+    
+    void delete(Long id);
 }
 

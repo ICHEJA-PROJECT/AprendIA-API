@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -59,6 +60,7 @@ public class AuthServiceImpl implements IAuthService {
     @Autowired
     private com.icheha.aprendia_api.preferences.impairments.services.IStudentImpairmentService studentImpairmentService;
     
+    @Transactional(readOnly = true)
     public LoginResponseDto loginWithCredentials(LoginCredentialsDto loginDto) {
         try {
             logger.debug("Attempting login with credentials for CURP: {}", loginDto.getCurp());
@@ -86,6 +88,9 @@ public class AuthServiceImpl implements IAuthService {
         } catch (InvalidCredentialsException | UserNotFoundException e) {
             logger.warn("Login failed for CURP: {} - {}", loginDto.getCurp(), e.getMessage());
             throw e;
+        } catch (UserRoleNotFoundException e) {
+            logger.warn("User role not found for CURP: {} - {}", loginDto.getCurp(), e.getMessage());
+            throw e;
         } catch (Exception e) {
             logger.error("Login with credentials failed", e);
             throw new RuntimeException(LOGIN_FAILED, e);
@@ -96,17 +101,62 @@ public class AuthServiceImpl implements IAuthService {
         try {
             logger.debug("Attempting login with QR token");
             
-            String decryptedToken = encryptionUtil.decrypt(loginDto.getToken());
-            logger.debug("QR token decrypted successfully");
+            String token = loginDto.getToken();
+            String jwtToken = null;
             
-            if (!jwtUtil.validateToken(decryptedToken)) {
+            // Detectar si el token es un JWT directo (tiene puntos) o está encriptado
+            if (token.contains(".") && token.split("\\.").length == 3) {
+                // Es un JWT directo, usarlo sin desencriptar
+                logger.debug("Token appears to be a JWT, using directly");
+                jwtToken = token;
+            } else {
+                // Intentar desencriptar el token
+                try {
+                    jwtToken = encryptionUtil.decrypt(token);
+                    logger.debug("QR token decrypted successfully");
+                } catch (Exception decryptException) {
+                    logger.warn("Failed to decrypt token, trying as JWT directly: {}", decryptException.getMessage());
+                    // Si falla la desencriptación, intentar usar el token como JWT directo
+                    jwtToken = token;
+                }
+            }
+            
+            if (!jwtUtil.validateToken(jwtToken)) {
+                logger.warn("JWT token validation failed");
                 throw InvalidTokenException.qrToken();
             }
             
-            TokenPayloadDto payload = jwtUtil.extractPayload(decryptedToken);
-            logger.debug("QR token decoded successfully");
+            TokenPayloadDto payload = jwtUtil.extractPayload(jwtToken);
+            if (payload == null) {
+                logger.warn("Failed to extract payload from JWT token");
+                throw InvalidTokenException.qrToken();
+            }
             
-            Persona persona = authDomainService.findUserById(payload.getIdPersona());
+            logger.debug("QR token decoded successfully, idPersona: {}", payload.getIdPersona());
+            
+            // El payload puede tener idPersona o personId dependiendo de cómo se generó el token
+            Long personId = payload.getIdPersona();
+            if (personId == null) {
+                // Intentar obtener personId desde los claims del JWT directamente
+                try {
+                    io.jsonwebtoken.Claims claims = jwtUtil.extractClaims(jwtToken);
+                    if (claims != null) {
+                        Object personIdObj = claims.get("personId");
+                        if (personIdObj != null) {
+                            personId = personIdObj instanceof Long ? (Long) personIdObj : Long.valueOf(personIdObj.toString());
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.warn("Could not extract personId from claims: {}", e.getMessage());
+                }
+            }
+            
+            if (personId == null) {
+                logger.warn("Could not determine personId from token payload");
+                throw InvalidTokenException.qrToken();
+            }
+            
+            Persona persona = authDomainService.findUserById(personId);
             
             // Obtener studentId buscando por personId
             Long studentId = null;
@@ -131,7 +181,12 @@ public class AuthServiceImpl implements IAuthService {
         try {
             logger.debug("Validating token");
             
-            if (!jwtUtil.validateToken(token)) {
+            // Primero intentar extraer el payload (esto puede funcionar incluso si está expirado)
+            TokenPayloadDto payload = jwtUtil.extractPayload(token);
+            
+            if (payload == null) {
+                // No se pudo extraer el payload, el token tiene formato inválido o firma incorrecta
+                logger.warn("Could not extract payload from token - invalid format or signature");
                 return new ValidateTokenResponseDto(
                     false,
                     false,
@@ -140,17 +195,29 @@ public class AuthServiceImpl implements IAuthService {
                 );
             }
             
-            if (jwtUtil.isTokenExpired(token)) {
-                TokenPayloadDto expiredPayload = jwtUtil.extractPayload(token);
+            // Verificar si el token está expirado
+            boolean isExpired = jwtUtil.isTokenExpired(token);
+            if (isExpired) {
+                logger.warn("Token is expired for user {}", payload.getUsername());
                 return new ValidateTokenResponseDto(
                     false,
                     true,
-                    expiredPayload,
+                    payload,
                     TOKEN_EXPIRED
                 );
             }
             
-            TokenPayloadDto payload = jwtUtil.extractPayload(token);
+            // Validar la firma del token
+            if (!jwtUtil.validateToken(token)) {
+                logger.warn("Token signature validation failed");
+                return new ValidateTokenResponseDto(
+                    false,
+                    false,
+                    payload,
+                    INVALID_TOKEN_FORMAT
+                );
+            }
+            
             logger.info("Token validated successfully for user {}", payload.getUsername());
             
             return new ValidateTokenResponseDto(
@@ -165,7 +232,7 @@ public class AuthServiceImpl implements IAuthService {
                 false,
                 false,
                 null,
-                TOKEN_VALIDATION_FAILED
+                TOKEN_VALIDATION_FAILED + ": " + e.getMessage()
             );
         }
     }
@@ -176,6 +243,12 @@ public class AuthServiceImpl implements IAuthService {
     
     private LoginResponseDto generateLoginResponse(Persona persona, Long studentId) {
         PersonaRol personaRol = getUserRole(persona.getIdPersona());
+        
+        // Validar que el rol esté presente
+        if (personaRol.getRol() == null) {
+            logger.error("Rol is null for PersonaRol with idPersona: {}", persona.getIdPersona());
+            throw new RuntimeException("Rol no encontrado para el usuario");
+        }
         
         String disabilityName = null;
         Long disabilityId = null;
