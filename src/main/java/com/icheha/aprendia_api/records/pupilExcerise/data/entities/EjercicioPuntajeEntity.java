@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
+//cambio para main
 @Entity
 @Table(name = "ejercicio_puntaje")
 @Data
