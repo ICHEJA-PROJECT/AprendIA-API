@@ -4,7 +4,7 @@
 
 INSERT INTO persona (id_persona, primer_nombre, segundo_nombre, apellido_paterno, apellido_materno, curp, numero_ine, fecha_nacimiento, genero, codigo_postal, estado, municipio, localidad, vialidad_nombre, id_vialidad_tipo, asentamiento, id_asentamiento_tipo, password)
 VALUES
-    (1, 'Fernando', 'José', 'García', 'López', 'GALF850101HCHRPS01', '1234567890123', '1985-01-01', 'MASCULINO', '29000', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', '5 de Mayo', 1, 'Centro', 1, '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
+    (1, 'Fernando', 'Emiliano', 'Flores', 'De la Riva', 'FORF040807HCSLVRA8', '2364956377', '2004-08-07', 'MASCULINO', '29000', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Versalles', 1, 'Centro', 1, '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
     (2, 'María', 'Elena', 'Hernández', 'Martínez', 'HEMM900215MCHRRL02', '2345678901234', '1990-02-15', 'FEMENINO', '29010', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Insurgentes', 2, 'Las Flores', 1, '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
     (3, 'Carlos', 'Alberto', 'Pérez', 'Sánchez', 'PESC880312HCHRRL03', '3456789012345', '1988-03-12', 'MASCULINO', '29020', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Revolución', 3, 'San José', 2, '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
     (4, 'Ana', 'Patricia', 'Rodríguez', 'González', 'ROGA920420MCHRDN04', '4567890123456', '1992-04-20', 'FEMENINO', '29030', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Hidalgo', 1, 'El Carmen', 1, '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy');
@@ -17,10 +17,10 @@ VALUES
     (4, 'Estudiante', 'Rol para estudiantes que realizan ejercicios');
 INSERT INTO persona_rol (id_persona_rol, id_persona, id_rol)
 VALUES
-    (1, 1, 4),
-    (2, 2, 1),
-    (3, 3, 1),
-    (4, 4, 4);
+    (1, 1, 4),  -- Fernando Flores (FORF040807HCSLVRA8) es Estudiante
+    (2, 2, 1),  -- María Elena es Educador
+    (3, 3, 1),  -- Carlos Alberto es Educador
+    (4, 4, 4);  -- Ana Patricia es Estudiante
 
 INSERT INTO tema (id_tema, nombre, id_unidad)
 VALUES (1, 'Introducción', NULL),

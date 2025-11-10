@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -59,6 +60,7 @@ public class AuthServiceImpl implements IAuthService {
     @Autowired
     private com.icheha.aprendia_api.preferences.impairments.services.IStudentImpairmentService studentImpairmentService;
     
+    @Transactional(readOnly = true)
     public LoginResponseDto loginWithCredentials(LoginCredentialsDto loginDto) {
         try {
             logger.debug("Attempting login with credentials for CURP: {}", loginDto.getCurp());
@@ -85,6 +87,9 @@ public class AuthServiceImpl implements IAuthService {
             return loginResponse;
         } catch (InvalidCredentialsException | UserNotFoundException e) {
             logger.warn("Login failed for CURP: {} - {}", loginDto.getCurp(), e.getMessage());
+            throw e;
+        } catch (UserRoleNotFoundException e) {
+            logger.warn("User role not found for CURP: {} - {}", loginDto.getCurp(), e.getMessage());
             throw e;
         } catch (Exception e) {
             logger.error("Login with credentials failed", e);

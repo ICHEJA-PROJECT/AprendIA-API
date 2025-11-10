@@ -86,13 +86,19 @@ public class PersonServiceImpl implements IPersonService {
                 throw new IllegalArgumentException("El CURP es obligatorio y no puede estar vacío");
             }
             
+            // Validar que el CURP no exista ya en la base de datos
+            Curp curp = new Curp(curpValue);
+            if (personaRepository.findByCurp(curp).isPresent()) {
+                throw new IllegalArgumentException("Ya existe una persona con el CURP: " + curpValue);
+            }
+            
             // Crear entidad de dominio Persona
             Persona persona = new Persona.Builder()
                     .primerNombre(createPersonDto.getFirstName())
                     .segundoNombre(createPersonDto.getMiddleName())
                     .apellidoPaterno(createPersonDto.getPaternalSurname())
                     .apellidoMaterno(createPersonDto.getMaternalSurname())
-                    .curp(new Curp(curpValue))
+                    .curp(curp)
                     .numeroIne(createPersonDto.getIneNumber())
                     .fechaNacimiento(birthdate)
                     .genero(gender)
