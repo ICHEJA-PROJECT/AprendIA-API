@@ -9,12 +9,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface StudentImpairmentRepository extends JpaRepository<StudentImpairment, Long> {
+public interface StudentImpairmentRepository extends JpaRepository<StudentImpairment, StudentImpairment.StudentImpairmentId> {
     
-    @Query("SELECT si FROM StudentImpairment si JOIN FETCH si.impairment WHERE si.student.idPersona = :studentId")
+    @Query("SELECT si FROM StudentImpairment si JOIN FETCH si.impairment WHERE si.studentId = :studentId")
     List<StudentImpairment> findByStudentIdWithImpairment(@Param("studentId") Long studentId);
     
-    @Query("SELECT si FROM StudentImpairment si WHERE si.student.idPersona = :studentId")
+    @Query("SELECT si FROM StudentImpairment si WHERE si.studentId = :studentId")
     List<StudentImpairment> findByStudentId(@Param("studentId") Long studentId);
     
     @Query("SELECT si.studentId FROM StudentImpairment si WHERE si.impairmentId = :impairmentId")
@@ -25,4 +25,10 @@ public interface StudentImpairmentRepository extends JpaRepository<StudentImpair
     
     @Query("SELECT si FROM StudentImpairment si WHERE si.impairmentId = :impairmentId")
     List<StudentImpairment> findByImpairmentId(@Param("impairmentId") Long impairmentId);
+    
+    @Query("SELECT si FROM StudentImpairment si JOIN FETCH si.impairment")
+    List<StudentImpairment> findAllWithImpairment();
+    
+    @Query("SELECT si FROM StudentImpairment si JOIN FETCH si.impairment WHERE si.studentId = :studentId")
+    List<StudentImpairment> findByStudentIdWithImpairmentForList(@Param("studentId") Long studentId);
 }

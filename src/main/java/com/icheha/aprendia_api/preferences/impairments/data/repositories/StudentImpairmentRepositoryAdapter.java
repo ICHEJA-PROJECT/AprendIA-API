@@ -66,4 +66,14 @@ public class StudentImpairmentRepositoryAdapter implements IStudentImpairmentRep
                 .map(studentImpairmentMapper::toDomain)
                 .collect(Collectors.toList());
     }
+    
+    @Override
+    public List<com.icheha.aprendia_api.preferences.impairments.data.entities.StudentImpairment> findAllWithImpairment() {
+        return studentImpairmentRepository.findAllWithImpairment();
+    }
+    
+    @Override
+    public List<com.icheha.aprendia_api.preferences.impairments.data.entities.StudentImpairment> findByStudentIdWithImpairmentForList(Long studentId) {
+        return studentImpairmentRepository.findByStudentIdWithImpairmentForList(studentId);
+    }
 }

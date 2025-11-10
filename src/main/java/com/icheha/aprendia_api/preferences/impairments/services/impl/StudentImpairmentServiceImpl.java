@@ -3,8 +3,9 @@ package com.icheha.aprendia_api.preferences.impairments.services.impl;
 import com.icheha.aprendia_api.preferences.impairments.data.dtos.request.CreateStudentImpairmentDto;
 import com.icheha.aprendia_api.preferences.impairments.data.dtos.response.StudentImpairmentDetailsResponseDto;
 import com.icheha.aprendia_api.preferences.impairments.data.dtos.response.StudentImpairmentResponseDto;
+import com.icheha.aprendia_api.preferences.impairments.data.entities.StudentImpairment;
 import com.icheha.aprendia_api.preferences.impairments.data.mappers.StudentImpairmentMapper;
-import com.icheha.aprendia_api.preferences.impairments.domain.entities.StudentImpairment;
+import com.icheha.aprendia_api.preferences.impairments.data.repositories.StudentImpairmentRepository;
 import com.icheha.aprendia_api.preferences.impairments.domain.repositories.IStudentImpairmentRepository;
 import com.icheha.aprendia_api.preferences.impairments.services.IStudentImpairmentService;
 import com.icheha.aprendia_api.users.student.domain.entities.Student;
@@ -19,13 +20,16 @@ import java.util.stream.Collectors;
 public class StudentImpairmentServiceImpl implements IStudentImpairmentService {
     
     private final IStudentImpairmentRepository studentImpairmentRepository;
+    private final StudentImpairmentRepository studentImpairmentJpaRepository;
     private final IStudentRepository studentRepository;
     private final StudentImpairmentMapper studentImpairmentMapper;
     
     public StudentImpairmentServiceImpl(IStudentImpairmentRepository studentImpairmentRepository,
+                                       StudentImpairmentRepository studentImpairmentJpaRepository,
                                        IStudentRepository studentRepository,
                                        StudentImpairmentMapper studentImpairmentMapper) {
         this.studentImpairmentRepository = studentImpairmentRepository;
+        this.studentImpairmentJpaRepository = studentImpairmentJpaRepository;
         this.studentRepository = studentRepository;
         this.studentImpairmentMapper = studentImpairmentMapper;
     }
@@ -47,8 +51,8 @@ public class StudentImpairmentServiceImpl implements IStudentImpairmentService {
         Long studentId = student.getId();
         
         // Obtener discapacidades del estudiante
-        List<StudentImpairment> studentImpairments = 
-                studentImpairmentRepository.findByStudentIdWithImpairment(personId);
+        List<com.icheha.aprendia_api.preferences.impairments.domain.entities.StudentImpairment> studentImpairments = 
+                studentImpairmentRepository.findByStudentIdWithImpairment(studentId);
         
         // Obtener nombre del estudiante
         String studentName = student.getPersona() != null ? 
@@ -64,30 +68,43 @@ public class StudentImpairmentServiceImpl implements IStudentImpairmentService {
     
     @Override
     public StudentImpairmentResponseDto create(CreateStudentImpairmentDto dto) {
-        StudentImpairment studentImpairment = 
-                StudentImpairment.builder()
+        com.icheha.aprendia_api.preferences.impairments.domain.entities.StudentImpairment studentImpairment = 
+                com.icheha.aprendia_api.preferences.impairments.domain.entities.StudentImpairment.builder()
                         .studentId(dto.getStudentId())
                         .impairmentId(dto.getImpairmentId())
                         .build();
         
-        StudentImpairment saved = 
+        com.icheha.aprendia_api.preferences.impairments.domain.entities.StudentImpairment saved = 
                 studentImpairmentRepository.save(studentImpairment);
+        
+        // Cargar la relación con Impairment para obtener el nombre usando repositorio JPA
+        List<StudentImpairment> savedWithImpairment = 
+                studentImpairmentJpaRepository.findByStudentIdWithImpairment(saved.getStudentId());
+        StudentImpairment entityWithImpairment = 
+                savedWithImpairment.stream()
+                .filter(si -> si.getImpairmentId().equals(saved.getImpairmentId()))
+                .findFirst()
+                .orElse(null);
         
         StudentImpairmentResponseDto response = new StudentImpairmentResponseDto();
         response.setStudentId(saved.getStudentId());
         response.setImpairmentId(saved.getImpairmentId());
+        response.setImpairmentName(entityWithImpairment != null && entityWithImpairment.getImpairment() != null ? 
+                entityWithImpairment.getImpairment().getName() : null);
         return response;
     }
     
     @Override
     public List<StudentImpairmentResponseDto> findAll() {
+        // Usar repositorio JPA directamente para obtener el nombre de la discapacidad
         List<StudentImpairment> entities = 
-                studentImpairmentRepository.findAll();
+                studentImpairmentJpaRepository.findAllWithImpairment();
         return entities.stream()
                 .map(entity -> {
                     StudentImpairmentResponseDto dto = new StudentImpairmentResponseDto();
                     dto.setStudentId(entity.getStudentId());
                     dto.setImpairmentId(entity.getImpairmentId());
+                    dto.setImpairmentName(entity.getImpairment() != null ? entity.getImpairment().getName() : null);
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -105,13 +122,15 @@ public class StudentImpairmentServiceImpl implements IStudentImpairmentService {
     
     @Override
     public List<StudentImpairmentResponseDto> findByStudent(Long studentId) {
+        // Usar repositorio JPA directamente para obtener el nombre de la discapacidad
         List<StudentImpairment> entities = 
-                studentImpairmentRepository.findByStudentId(studentId);
+                studentImpairmentJpaRepository.findByStudentIdWithImpairmentForList(studentId);
         return entities.stream()
                 .map(entity -> {
                     StudentImpairmentResponseDto dto = new StudentImpairmentResponseDto();
                     dto.setStudentId(entity.getStudentId());
                     dto.setImpairmentId(entity.getImpairmentId());
+                    dto.setImpairmentName(entity.getImpairment() != null ? entity.getImpairment().getName() : null);
                     return dto;
                 })
                 .collect(Collectors.toList());

@@ -58,6 +58,10 @@
             <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-health</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.cloudinary</groupId>
             <artifactId>cloudinary-http44</artifactId>
             <version>1.34.0</version>

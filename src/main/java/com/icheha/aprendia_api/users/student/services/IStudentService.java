@@ -3,6 +3,7 @@ package com.icheha.aprendia_api.users.student.services;
 import com.icheha.aprendia_api.users.student.data.dtos.CreateStudentDto;
 import com.icheha.aprendia_api.users.student.data.dtos.RegisterStudentResponseDto;
 import com.icheha.aprendia_api.users.student.data.dtos.StudentResponseDto;
+import com.icheha.aprendia_api.users.student.data.dtos.UpdateStudentDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,5 +21,11 @@ public interface IStudentService {
     Optional<StudentResponseDto> findById(Long id);
     
     List<String> findUniqueNames();
+    
+    List<StudentResponseDto> findAll();
+    
+    StudentResponseDto update(Long id, UpdateStudentDto updateStudentDto);
+    
+    void delete(Long id);
 }
 

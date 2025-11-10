@@ -1,6 +1,7 @@
 package com.icheha.aprendia_api.preferences.occupation.services;
 
 import com.icheha.aprendia_api.preferences.occupation.data.dtos.request.CreateOccupationDto;
+import com.icheha.aprendia_api.preferences.occupation.data.dtos.request.UpdateOccupationDto;
 import com.icheha.aprendia_api.preferences.occupation.data.dtos.response.OccupationResponseDto;
 
 import java.util.List;
@@ -14,6 +15,8 @@ public interface IOccupationService {
     List<OccupationResponseDto> findAll();
     
     OccupationResponseDto findById(Long id);
+    
+    OccupationResponseDto update(Long id, UpdateOccupationDto updateOccupationDto);
     
     List<OccupationResponseDto> findByNameContaining(String name);
     

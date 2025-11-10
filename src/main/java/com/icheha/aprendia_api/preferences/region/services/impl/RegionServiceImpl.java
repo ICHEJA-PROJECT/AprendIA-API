@@ -1,15 +1,17 @@
 package com.icheha.aprendia_api.preferences.region.services.impl;
 
 import com.icheha.aprendia_api.preferences.region.data.dtos.request.CreateRegionDto;
+import com.icheha.aprendia_api.preferences.region.data.dtos.request.UpdateRegionDto;
 import com.icheha.aprendia_api.preferences.region.data.dtos.response.RegionResponseDto;
 import com.icheha.aprendia_api.preferences.region.data.entities.RegionEntity;
 import com.icheha.aprendia_api.preferences.region.data.repositories.RegionRepository;
 import com.icheha.aprendia_api.preferences.region.services.IRegionService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,17 +47,40 @@ public class RegionServiceImpl implements IRegionService {
     }
     
     @Override
+    @Transactional(readOnly = true)
     public RegionResponseDto findById(Long id) {
-        Optional<RegionEntity> entityOpt = regionRepository.findById(id);
-        if (entityOpt.isEmpty()) {
-            throw new RuntimeException("Región no encontrada con ID: " + id);
-        }
+        RegionEntity entity = regionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Región no encontrada con ID: " + id));
         
-        RegionEntity entity = entityOpt.get();
         RegionResponseDto response = new RegionResponseDto();
         response.setId(entity.getId());
         response.setName(entity.getName());
         return response;
+    }
+    
+    @Override
+    @Transactional
+    public RegionResponseDto update(Long id, UpdateRegionDto updateRegionDto) {
+        RegionEntity entity = regionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Región no encontrada con ID: " + id));
+        
+        if (updateRegionDto.getName() != null && !updateRegionDto.getName().trim().isEmpty()) {
+            entity.setName(updateRegionDto.getName());
+        }
+        
+        RegionEntity updatedEntity = regionRepository.save(entity);
+        RegionResponseDto response = new RegionResponseDto();
+        response.setId(updatedEntity.getId());
+        response.setName(updatedEntity.getName());
+        return response;
+    }
+    
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        RegionEntity entity = regionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Región no encontrada con ID: " + id));
+        regionRepository.delete(entity);
     }
 }
 
