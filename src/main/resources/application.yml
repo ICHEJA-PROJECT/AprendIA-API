@@ -96,3 +96,5 @@ springdoc:
 swagger:
   server:
     url: ${SWAGGER_SERVER_URL:http://localhost:8080}
+    production:
+      url: ${SWAGGER_PRODUCTION_URL:}
