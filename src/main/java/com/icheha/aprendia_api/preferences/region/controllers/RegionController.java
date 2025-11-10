@@ -2,7 +2,6 @@ package com.icheha.aprendia_api.preferences.region.controllers;
 
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
 import com.icheha.aprendia_api.preferences.region.data.dtos.request.CreateRegionDto;
-import com.icheha.aprendia_api.preferences.region.data.dtos.request.UpdateRegionDto;
 import com.icheha.aprendia_api.preferences.region.data.dtos.response.RegionResponseDto;
 import com.icheha.aprendia_api.preferences.region.services.IRegionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,38 +64,6 @@ public class RegionController {
         RegionResponseDto region = regionService.findById(id);
         BaseResponse<RegionResponseDto> response = new BaseResponse<>(
                 true, region, "Región obtenida exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
-    }
-    
-    @PutMapping("/{id}")
-    @Operation(
-        summary = "Actualizar región",
-        description = "Actualiza una región existente"
-    )
-    @ApiResponse(responseCode = "200", description = "Región actualizada exitosamente")
-    @ApiResponse(responseCode = "404", description = "Región no encontrada")
-    @ApiResponse(responseCode = "400", description = "Datos inválidos")
-    public ResponseEntity<BaseResponse<RegionResponseDto>> update(
-            @Parameter(description = "ID de la región") @PathVariable Long id,
-            @Valid @RequestBody UpdateRegionDto updateDto) {
-        RegionResponseDto response = regionService.update(id, updateDto);
-        BaseResponse<RegionResponseDto> baseResponse = new BaseResponse<>(
-                true, response, "Región actualizada exitosamente", HttpStatus.OK);
-        return baseResponse.buildResponseEntity();
-    }
-    
-    @DeleteMapping("/{id}")
-    @Operation(
-        summary = "Eliminar región",
-        description = "Elimina una región por su ID"
-    )
-    @ApiResponse(responseCode = "200", description = "Región eliminada exitosamente")
-    @ApiResponse(responseCode = "404", description = "Región no encontrada")
-    public ResponseEntity<BaseResponse<Void>> deleteById(
-            @Parameter(description = "ID de la región") @PathVariable Long id) {
-        regionService.delete(id);
-        BaseResponse<Void> response = new BaseResponse<>(
-                true, null, "Región eliminada exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
 }

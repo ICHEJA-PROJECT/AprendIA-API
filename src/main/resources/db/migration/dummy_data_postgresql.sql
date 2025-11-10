@@ -2,21 +2,12 @@
 -- Este script se ejecuta automáticamente al iniciar la aplicación Spring Boot
 -- Configurado en application.yml con spring.sql.init.mode=always
 
--- =====================================================
--- ORDEN DE INSERCIÓN IMPORTANTE:
--- 1. Primero se insertan las tablas de referencia (estados, municipios, etc.)
--- 2. Luego las personas
--- 3. Finalmente los domicilios (que referencian personas, estados y municipios)
--- =====================================================
-
--- Insertar personas (solo campos de la tabla persona)
--- NOTA: Los domicilios se insertarán más adelante, después de que existan estados y municipios
-INSERT INTO persona (id_persona, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, curp, numero_ine, fecha_nacimiento, genero, password, created_at, update_at)
+INSERT INTO persona (id_persona, primer_nombre, segundo_nombre, apellido_paterno, apellido_materno, curp, numero_ine, fecha_nacimiento, genero, codigo_postal, estado, municipio, localidad, vialidad_nombre, id_vialidad_tipo, asentamiento, id_asentamiento_tipo, password)
 VALUES
-    (1, 'Fernando', 'Emiliano', 'Flores', 'De la Riva', 'FORF040807HCSLVRA8', '2364956377', '2004-08-07', 'M', '$2a$10$UCfkwoD89wngZbtACKqVbueESnw4ORgQA/p6QnbjUE0nmQLHdRN8m', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (2, 'María', 'Elena', 'Hernández', 'Martínez', 'HEMM900215MCHRRL02', '2345678901234', '1990-02-15', 'F', '$2a$10$UCfkwoD89wngZbtACKqVbueESnw4ORgQA/p6QnbjUE0nmQLHdRN8m', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (3, 'Carlos', 'Alberto', 'Pérez', 'Sánchez', 'PESC880312HCHRRL03', '3456789012345', '1988-03-12', 'M', '$2a$10$UCfkwoD89wngZbtACKqVbueESnw4ORgQA/p6QnbjUE0nmQLHdRN8m', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (4, 'Ana', 'Patricia', 'Rodríguez', 'González', 'ROGA920420MCHRDN04', '4567890123456', '1992-04-20', 'F', '$2a$10$UCfkwoD89wngZbtACKqVbueESnw4ORgQA/p6QnbjUE0nmQLHdRN8m', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    (1, 'Fernando', 'José', 'García', 'López', 'GALF850101HCHRPS01', '1234567890123', '1985-01-01', 'MASCULINO', '29000', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', '5 de Mayo', 1, 'Centro', 1, '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
+    (2, 'María', 'Elena', 'Hernández', 'Martínez', 'HEMM900215MCHRRL02', '2345678901234', '1990-02-15', 'FEMENINO', '29010', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Insurgentes', 2, 'Las Flores', 1, '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
+    (3, 'Carlos', 'Alberto', 'Pérez', 'Sánchez', 'PESC880312HCHRRL03', '3456789012345', '1988-03-12', 'MASCULINO', '29020', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Revolución', 3, 'San José', 2, '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
+    (4, 'Ana', 'Patricia', 'Rodríguez', 'González', 'ROGA920420MCHRDN04', '4567890123456', '1992-04-20', 'FEMENINO', '29030', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Hidalgo', 1, 'El Carmen', 1, '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy');
 
 INSERT INTO rol (id_rol, nombre, descripcion)
 VALUES
@@ -26,10 +17,10 @@ VALUES
     (4, 'Estudiante', 'Rol para estudiantes que realizan ejercicios');
 INSERT INTO persona_rol (id_persona_rol, id_persona, id_rol)
 VALUES
-    (1, 1, 4),  -- Fernando Flores (FORF040807HCSLVRA8) es Estudiante
-    (2, 2, 1),  -- María Elena es Educador
-    (3, 3, 1),  -- Carlos Alberto es Educador
-    (4, 4, 4);  -- Ana Patricia es Estudiante
+    (1, 1, 4),
+    (2, 2, 1),
+    (3, 3, 1),
+    (4, 4, 4);
 
 INSERT INTO tema (id_tema, nombre, id_unidad)
 VALUES (1, 'Introducción', NULL),
@@ -774,6 +765,8 @@ VALUES
     (7, 'Múltiple'),
     (8, 'Lenguaje');
 
+INSERT INTO educando_discapacidades (id_educando, id_discapacidad) VALUES (1, 2);
+
 INSERT INTO ruta_aprendizaje_discapacidades (id_ruta_aprendizaje, id_discapacidad)
 VALUES 
     (1, 2),
@@ -966,40 +959,20 @@ VALUES
     (46, 'Zona Universitaria', 23, 1, 20, 20);
 
 -- =====================================================
--- DOMICILIOS PARA LAS PERSONAS (debe ir después de estados y municipios)
--- =====================================================
-INSERT INTO domicilio (id_persona, calle, colonia, localidad, id_municipio, id_estado, cp)
-VALUES
-    (1, 'Versalles', 'Centro', 'Tuxtla Gutiérrez', 1, 1, '29000'),
-    (2, 'Insurgentes', 'Las Flores', 'Tuxtla Gutiérrez', 1, 1, '29010'),
-    (3, 'Revolución', 'San José', 'Tuxtla Gutiérrez', 1, 1, '29020'),
-    (4, 'Hidalgo', 'El Carmen', 'Tuxtla Gutiérrez', 1, 1, '29030');
-
--- =====================================================
 -- DATOS DUMMY PARA MÓDULOS DE USUARIOS
 -- =====================================================
 
 -- =====================================================
 -- 2.01. PERSONS - Más personas
 -- =====================================================
-INSERT INTO persona (id_persona, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, curp, numero_ine, fecha_nacimiento, genero, password, created_at, update_at)
+INSERT INTO persona (id_persona, primer_nombre, segundo_nombre, apellido_paterno, apellido_materno, curp, numero_ine, fecha_nacimiento, genero, codigo_postal, estado, municipio, localidad, vialidad_nombre, id_vialidad_tipo, asentamiento, id_asentamiento_tipo, password)
 VALUES
-    (5, 'Roberto', 'Antonio', 'Morales', 'Jiménez', 'MOJR750505HCHRRS05', '5678901234567', '1975-05-05', 'M', '$2a$10$wv963y/KNW.S/QZZQbGoAuaVjlT3twwfhW28orveib1uMpoMCQLse', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (6, 'Laura', 'Isabel', 'Torres', 'Vargas', 'TOVL820606MCHRRL06', '6789012345678', '1982-06-06', 'F', '$2a$10$wv963y/KNW.S/QZZQbGoAuaVjlT3twwfhW28orveib1uMpoMCQLse', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (7, 'Juan', 'Carlos', 'Ramírez', 'Díaz', 'RADJ880707HCHRRL07', '7890123456789', '1988-07-07', 'M', '$2a$10$wv963y/KNW.S/QZZQbGoAuaVjlT3twwfhW28orveib1uMpoMCQLse', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (8, 'Patricia', 'Sofía', 'Gómez', 'Castro', 'GOCP900808MCHRRL08', '8901234567890', '1990-08-08', 'F', '$2a$10$wv963y/KNW.S/QZZQbGoAuaVjlT3twwfhW28orveib1uMpoMCQLse', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (9, 'Miguel', 'Ángel', 'López', 'Ruiz', 'LORM920909HCHRRL09', '9012345678901', '1992-09-09', 'M', '$2a$10$wv963y/KNW.S/QZZQbGoAuaVjlT3twwfhW28orveib1uMpoMCQLse', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (10, 'Carmen', 'Rosa', 'Martínez', 'Ortega', 'MAOC851010MCHRRL10', '0123456789012', '1985-10-10', 'F', '$2a$10$wv963y/KNW.S/QZZQbGoAuaVjlT3twwfhW28orveib1uMpoMCQLse', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- Insertar domicilios para estas personas adicionales
-INSERT INTO domicilio (id_persona, calle, colonia, localidad, id_municipio, id_estado, cp)
-VALUES
-    (5, 'Central', 'Centro', 'Tuxtla Gutiérrez', 1, 1, '29000'),
-    (6, 'Norte', 'Las Flores', 'Tuxtla Gutiérrez', 1, 1, '29010'),
-    (7, 'Sur', 'San José', 'Tuxtla Gutiérrez', 1, 1, '29020'),
-    (8, 'Oriente', 'El Carmen', 'Tuxtla Gutiérrez', 1, 1, '29030'),
-    (9, 'Poniente', 'Centro', 'Tuxtla Gutiérrez', 1, 1, '29000'),
-    (10, 'Norte', 'Las Flores', 'Tuxtla Gutiérrez', 1, 1, '29010');
+    (5, 'Roberto', 'Antonio', 'Morales', 'Jiménez', 'MOJR750505HCHRRS05', '5678901234567', '1975-05-05', 'MASCULINO', '29000', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Central', 1, 'Centro', 1, '$2b$10$hashedpassword5'),
+    (6, 'Laura', 'Isabel', 'Torres', 'Vargas', 'TOVL820606MCHRRL06', '6789012345678', '1982-06-06', 'FEMENINO', '29010', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Norte', 2, 'Las Flores', 1, '$2b$10$hashedpassword6'),
+    (7, 'Juan', 'Carlos', 'Ramírez', 'Díaz', 'RADJ880707HCHRRL07', '7890123456789', '1988-07-07', 'MASCULINO', '29020', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Sur', 1, 'San José', 2, '$2b$10$hashedpassword7'),
+    (8, 'Patricia', 'Sofía', 'Gómez', 'Castro', 'GOCP900808MCHRRL08', '8901234567890', '1990-08-08', 'FEMENINO', '29030', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Oriente', 3, 'El Carmen', 1, '$2b$10$hashedpassword8'),
+    (9, 'Miguel', 'Ángel', 'López', 'Ruiz', 'LORM920909HCHRRL09', '9012345678901', '1992-09-09', 'MASCULINO', '29000', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Poniente', 1, 'Centro', 1, '$2b$10$hashedpassword9'),
+    (10, 'Carmen', 'Rosa', 'Martínez', 'Ortega', 'MAOC851010MCHRRL10', '0123456789012', '1985-10-10', 'FEMENINO', '29010', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Norte', 2, 'Las Flores', 1, '$2b$10$hashedpassword10');
 
 -- =====================================================
 -- 2.02. ROLES - Ya existen, pero verificamos
@@ -1076,14 +1049,9 @@ VALUES
 
 -- Estudiantes (educandos)
 -- Nota: Los estudiantes usan las personas con ID 1, 4, 9, 10 y creamos una nueva persona 11 para el estudiante 5
-INSERT INTO persona (id_persona, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, curp, numero_ine, fecha_nacimiento, genero, password, created_at, update_at)
+INSERT INTO persona (id_persona, primer_nombre, segundo_nombre, apellido_paterno, apellido_materno, curp, numero_ine, fecha_nacimiento, genero, codigo_postal, estado, municipio, localidad, vialidad_nombre, id_vialidad_tipo, asentamiento, id_asentamiento_tipo, password)
 VALUES
-    (11, 'Diego', 'Alejandro', 'López', 'Ruiz', 'LORD051111HCHRRL11', '1123456789012', '2005-11-11', 'M', '$2a$10$UCfkwoD89wngZbtACKqVbueESnw4ORgQA/p6QnbjUE0nmQLHdRN8m', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- Insertar domicilio para Diego
-INSERT INTO domicilio (id_persona, calle, colonia, localidad, id_municipio, id_estado, cp)
-VALUES
-    (11, 'Poniente', 'Centro', 'Tuxtla Gutiérrez', 1, 1, '29000');
+    (11, 'Diego', 'Alejandro', 'López', 'Ruiz', 'LORD051111HCHRRL11', '1123456789012', '2005-11-11', 'MASCULINO', '29000', 'Chiapas', 'Tuxtla Gutiérrez', 'Tuxtla Gutiérrez', 'Poniente', 1, 'Centro', 1, '$2b$10$hashedpassword11');
 
 -- Asignar rol de Estudiante a la nueva persona
 INSERT INTO persona_rol (id_persona_rol, id_persona, id_rol)
@@ -1104,43 +1072,5 @@ VALUES
     (3, 9, 6, 'https://res.cloudinary.com/dsiamqhuu/image/upload/v1751581287/ICHEJA/ICHEJA/qr_estudiante_3.png', 5, 6),   -- Miguel (persona 9) con educador Laura (persona 6)
     (4, 10, 7, 'https://res.cloudinary.com/dsiamqhuu/image/upload/v1751581287/ICHEJA/ICHEJA/qr_estudiante_4.png', 7, 8),  -- Carmen (persona 10) con educador Juan (persona 7)
     (5, 11, 8, 'https://res.cloudinary.com/dsiamqhuu/image/upload/v1751581287/ICHEJA/ICHEJA/qr_estudiante_5.png', 11, 12); -- Diego (persona 11) con educador Patricia (persona 8)
-
--- =====================================================
--- RELACIONES ESTUDIANTE-DISCAPACIDAD
--- IMPORTANTE: Debe ir DESPUÉS de insertar los estudiantes
--- =====================================================
-INSERT INTO educando_discapacidades (id_educando, id_discapacidad) 
-VALUES 
-    (1, 2),  -- Fernando: Discapacidad Auditiva
-    (2, 3),  -- Ana: Discapacidad Visual
-    (3, 4),  -- Miguel: Discapacidad Motriz
-    (4, 5),  -- Carmen: Discapacidad Intelectual
-    (5, 2),  -- Diego: Discapacidad Auditiva
-    (2, 8),  -- Ana: También tiene Discapacidad de Lenguaje
-    (3, 1);  -- Miguel: También tiene Ninguna (caso especial)
-
--- =====================================================
--- SINCRONIZAR SECUENCIAS DE POSTGRESQL
--- Esto es necesario porque se insertaron IDs manualmente
--- y las secuencias deben actualizarse para evitar conflictos
--- =====================================================
-
--- Sincronizar secuencia de persona
-SELECT setval(pg_get_serial_sequence('persona', 'id_persona'), COALESCE((SELECT MAX(id_persona) FROM persona), 1), true);
-
--- Sincronizar secuencia de rol
-SELECT setval(pg_get_serial_sequence('rol', 'id_rol'), COALESCE((SELECT MAX(id_rol) FROM rol), 1), true);
-
--- Sincronizar secuencia de persona_rol
-SELECT setval(pg_get_serial_sequence('persona_rol', 'id_persona_rol'), COALESCE((SELECT MAX(id_persona_rol) FROM persona_rol), 1), true);
-
--- Sincronizar secuencia de educando
-SELECT setval(pg_get_serial_sequence('educando', 'id_educando'), COALESCE((SELECT MAX(id_educando) FROM educando), 1), true);
-
--- Sincronizar secuencia de celula (si existe)
-SELECT setval(pg_get_serial_sequence('celula', 'id_celula'), COALESCE((SELECT MAX(id_celula) FROM celula), 1), true);
-
--- Sincronizar secuencia de discapacidad
-SELECT setval(pg_get_serial_sequence('discapacidad', 'id_discapacidad'), COALESCE((SELECT MAX(id_discapacidad) FROM discapacidad), 1), true);
 
 -- Fin del script de datos dummy

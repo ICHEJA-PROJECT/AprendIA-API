@@ -7,7 +7,6 @@ import com.icheha.aprendia_api.auth.domain.entities.PersonaRol;
 import com.icheha.aprendia_api.auth.domain.repositories.IRolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -21,7 +20,6 @@ public class RolRepositoryImpl implements IRolRepository {
     private PersonaRolMapper personaRolMapper;
     
     @Override
-    @Transactional(readOnly = true)
     public Optional<PersonaRol> findByPersonaId(Long personaId) {
         return personaRolRepository.findByPersonaId(personaId)
                 .map(personaRolMapper::toDomain);

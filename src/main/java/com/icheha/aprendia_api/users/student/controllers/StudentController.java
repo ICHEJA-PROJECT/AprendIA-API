@@ -4,7 +4,6 @@ import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
 import com.icheha.aprendia_api.users.student.data.dtos.CreateStudentDto;
 import com.icheha.aprendia_api.users.student.data.dtos.RegisterStudentResponseDto;
 import com.icheha.aprendia_api.users.student.data.dtos.StudentResponseDto;
-import com.icheha.aprendia_api.users.student.data.dtos.UpdateStudentDto;
 import com.icheha.aprendia_api.users.student.services.IStudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -96,38 +95,6 @@ public class StudentController {
         List<String> names = studentService.findUniqueNames();
         BaseResponse<List<String>> response = new BaseResponse<>(
                 true, names, "Nombres obtenidos exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
-    }
-    
-    @GetMapping
-    @Operation(summary = "Listar todos los estudiantes", description = "Obtiene una lista de todos los estudiantes del sistema")
-    public ResponseEntity<BaseResponse<List<StudentResponseDto>>> findAll() {
-        List<StudentResponseDto> students = studentService.findAll();
-        BaseResponse<List<StudentResponseDto>> response = new BaseResponse<>(
-                true, students, "Estudiantes obtenidos exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
-    }
-    
-    @PutMapping("/{id}")
-    @Operation(summary = "Actualizar estudiante", description = "Actualiza los datos de un estudiante existente")
-    public ResponseEntity<BaseResponse<StudentResponseDto>> update(
-            @Parameter(description = "ID del estudiante", required = true)
-            @PathVariable Long id,
-            @Valid @RequestBody UpdateStudentDto updateStudentDto) {
-        StudentResponseDto updatedStudent = studentService.update(id, updateStudentDto);
-        BaseResponse<StudentResponseDto> response = new BaseResponse<>(
-                true, updatedStudent, "Estudiante actualizado exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
-    }
-    
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar estudiante", description = "Elimina un estudiante del sistema")
-    public ResponseEntity<BaseResponse<Void>> delete(
-            @Parameter(description = "ID del estudiante", required = true)
-            @PathVariable Long id) {
-        studentService.delete(id);
-        BaseResponse<Void> response = new BaseResponse<>(
-                true, null, "Estudiante eliminado exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
 }

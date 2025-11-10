@@ -1,20 +1,15 @@
 package com.icheha.aprendia_api.exercises.topics.services.impl;
 
 import com.icheha.aprendia_api.exercises.topics.data.dtos.request.CreateTopicDto;
-import com.icheha.aprendia_api.exercises.topics.data.dtos.request.UpdateTopicDto;
 import com.icheha.aprendia_api.exercises.topics.data.dtos.response.TopicResponseDto;
 import com.icheha.aprendia_api.exercises.topics.data.dtos.response.LearningPathResponseDto;
 import com.icheha.aprendia_api.exercises.topics.data.entities.TopicEntity;
 import com.icheha.aprendia_api.exercises.topics.data.repositories.TopicRepository;
-import com.icheha.aprendia_api.exercises.topics.data.repositories.CuadernilloRepository;
 import com.icheha.aprendia_api.exercises.topics.services.ITopicService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,19 +18,18 @@ public class TopicServiceImpl implements ITopicService {
     @Autowired
     private TopicRepository topicRepository;
     
-    @Autowired
-    private CuadernilloRepository cuadernilloRepository;
+    // TODO: unitRepository eliminado - usar CuadernilloRepository cuando esté disponible
     
     @Override
-    @Transactional
     public TopicResponseDto createTopic(CreateTopicDto createTopicDto) {
-        // Validar que el cuadernillo existe
-        cuadernilloRepository.findById(createTopicDto.getUnitId())
-                .orElseThrow(() -> new EntityNotFoundException("Cuadernillo no encontrado con ID: " + createTopicDto.getUnitId()));
+        // Verificar que el cuadernillo existe
+        // TODO: Validar que el cuadernillo existe cuando se implemente CuadernilloRepository
+        // Por ahora, asumimos que el cuadernillo existe
         
         TopicEntity entity = new TopicEntity();
         entity.setNombre(createTopicDto.getName());
-        entity.setIdCuadernillo(createTopicDto.getUnitId());
+        // TODO: Cambiar a idCuadernillo cuando se actualice el DTO
+        // entity.setIdCuadernillo(createTopicDto.getCuadernilloId());
         
         TopicEntity savedEntity = topicRepository.save(entity);
         
@@ -43,55 +37,11 @@ public class TopicServiceImpl implements ITopicService {
     }
     
     @Override
-    @Transactional(readOnly = true)
     public List<TopicResponseDto> getAllTopics() {
         List<TopicEntity> entities = topicRepository.findAll();
         return entities.stream()
                 .map(entity -> toResponseDto(entity, null))
                 .collect(Collectors.toList());
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<TopicResponseDto> findById(Long id) {
-        return topicRepository.findById(id)
-                .map(entity -> toResponseDto(entity, null));
-    }
-    
-    @Override
-    @Transactional
-    public TopicResponseDto update(Long id, UpdateTopicDto updateTopicDto) {
-        TopicEntity entity = topicRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Tema no encontrado con ID: " + id));
-        
-        if (updateTopicDto.getName() != null && !updateTopicDto.getName().trim().isEmpty()) {
-            entity.setNombre(updateTopicDto.getName());
-        }
-        
-        if (updateTopicDto.getCuadernilloId() != null) {
-            cuadernilloRepository.findById(updateTopicDto.getCuadernilloId())
-                    .orElseThrow(() -> new EntityNotFoundException("Cuadernillo no encontrado con ID: " + updateTopicDto.getCuadernilloId()));
-            entity.setIdCuadernillo(updateTopicDto.getCuadernilloId());
-        }
-        
-        if (updateTopicDto.getDescripcion() != null) {
-            entity.setDescripcion(updateTopicDto.getDescripcion());
-        }
-        
-        if (updateTopicDto.getUrlImagen() != null) {
-            entity.setUrlImagen(updateTopicDto.getUrlImagen());
-        }
-        
-        TopicEntity updatedEntity = topicRepository.save(entity);
-        return toResponseDto(updatedEntity, null);
-    }
-    
-    @Override
-    @Transactional
-    public void delete(Long id) {
-        TopicEntity entity = topicRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Tema no encontrado con ID: " + id));
-        topicRepository.delete(entity);
     }
     
     @Override

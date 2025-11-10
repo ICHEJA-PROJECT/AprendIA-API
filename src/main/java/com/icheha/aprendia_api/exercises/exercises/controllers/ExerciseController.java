@@ -2,7 +2,6 @@ package com.icheha.aprendia_api.exercises.exercises.controllers;
 
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
 import com.icheha.aprendia_api.exercises.exercises.data.dtos.request.CreateExerciseDto;
-import com.icheha.aprendia_api.exercises.exercises.data.dtos.request.UpdateExerciseDto;
 import com.icheha.aprendia_api.exercises.exercises.data.dtos.response.ExerciseResponseDto;
 import com.icheha.aprendia_api.exercises.exercises.services.IExerciseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/exercises")
-@Tag(name = "4.16. Exercises", description = "API para gestión de ejercicios")
+@Tag(name = "4.13. Exercises", description = "API para gestión de ejercicios")
 public class ExerciseController {
 
     private final IExerciseService exerciseService;
@@ -120,27 +119,6 @@ public class ExerciseController {
         List<ExerciseResponseDto> exercises = exerciseService.getExercisesByTemplateId(templateId);
         BaseResponse<List<ExerciseResponseDto>> response = new BaseResponse<>(
                 true, exercises, "Ejercicios obtenidos exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
-    }
-    
-    @PutMapping("/{id}")
-    @Operation(summary = "Actualizar ejercicio", description = "Actualizar un ejercicio existente")
-    public ResponseEntity<BaseResponse<ExerciseResponseDto>> update(
-            @Parameter(description = "ID del ejercicio") @PathVariable Long id,
-            @RequestBody UpdateExerciseDto updateExerciseDto) {
-        ExerciseResponseDto updated = exerciseService.update(id, updateExerciseDto);
-        BaseResponse<ExerciseResponseDto> response = new BaseResponse<>(
-                true, updated, "Ejercicio actualizado exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
-    }
-    
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar ejercicio", description = "Eliminar un ejercicio del sistema")
-    public ResponseEntity<BaseResponse<Void>> delete(
-            @Parameter(description = "ID del ejercicio") @PathVariable Long id) {
-        exerciseService.delete(id);
-        BaseResponse<Void> response = new BaseResponse<>(
-                true, null, "Ejercicio eliminado exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
 }

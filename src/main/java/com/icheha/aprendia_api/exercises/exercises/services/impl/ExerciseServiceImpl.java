@@ -1,7 +1,6 @@
 package com.icheha.aprendia_api.exercises.exercises.services.impl;
 
 import com.icheha.aprendia_api.exercises.exercises.data.dtos.request.CreateExerciseDto;
-import com.icheha.aprendia_api.exercises.exercises.data.dtos.request.UpdateExerciseDto;
 import com.icheha.aprendia_api.exercises.exercises.data.dtos.response.ExerciseResponseDto;
 import com.icheha.aprendia_api.exercises.exercises.data.entities.ExerciseEntity;
 import com.icheha.aprendia_api.exercises.exercises.data.repositories.ExerciseRepository;
@@ -10,10 +9,8 @@ import com.icheha.aprendia_api.exercises.exercises.services.IExerciseService;
 import com.icheha.aprendia_api.exercises.exercises.services.mappers.ExerciseMapper;
 import com.icheha.aprendia_api.exercises.templates.data.entities.TemplateEntity;
 import com.icheha.aprendia_api.exercises.templates.data.repositories.ITemplateRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -118,40 +115,11 @@ public class ExerciseServiceImpl implements IExerciseService {
     }
     
     @Override
-    @Transactional(readOnly = true)
     public List<ExerciseResponseDto> findByIds(List<Integer> ids) {
         List<Long> longIds = ids.stream()
                 .map(Integer::longValue)
                 .collect(Collectors.toList());
         List<ExerciseEntity> entities = iExerciseRepository.findByIds(longIds);
         return exerciseMapper.toResponseDtoList(entities);
-    }
-    
-    @Override
-    @Transactional
-    public ExerciseResponseDto update(Long id, UpdateExerciseDto updateExerciseDto) {
-        ExerciseEntity entity = exerciseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Ejercicio no encontrado con ID: " + id));
-        
-        if (updateExerciseDto.getContext() != null) {
-            entity.setContext(updateExerciseDto.getContext());
-        }
-        
-        if (updateExerciseDto.getTemplateId() != null) {
-            templateRepository.findById(updateExerciseDto.getTemplateId())
-                    .orElseThrow(() -> new EntityNotFoundException("Template no encontrado con ID: " + updateExerciseDto.getTemplateId()));
-            entity.setIdReactivo(updateExerciseDto.getTemplateId());
-        }
-        
-        ExerciseEntity updatedEntity = exerciseRepository.save(entity);
-        return exerciseMapper.toResponseDto(updatedEntity);
-    }
-    
-    @Override
-    @Transactional
-    public void delete(Long id) {
-        ExerciseEntity entity = exerciseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Ejercicio no encontrado con ID: " + id));
-        exerciseRepository.delete(entity);
     }
 }

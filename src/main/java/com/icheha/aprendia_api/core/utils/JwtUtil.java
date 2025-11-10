@@ -74,9 +74,6 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token);
             return true;
-        } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            // Token expirado pero formato válido
-            return true; // Retornar true para que isTokenExpired lo maneje
         } catch (Exception e) {
             return false;
         }
@@ -91,72 +88,31 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
             return claims.getExpiration().before(new Date());
-        } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            // Token expirado
-            return true;
         } catch (Exception e) {
-            // Si hay otro error, asumir que no está expirado (el problema es otro)
-            return false;
+            return true;
         }
     }
     
     public TokenPayloadDto extractPayload(String token) {
         try {
             SecretKey key = Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
-            Claims claims;
-            
-            try {
-                // Intentar parsear el token normalmente
-                claims = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-            } catch (io.jsonwebtoken.ExpiredJwtException e) {
-                // Si el token está expirado, aún podemos extraer los claims
-                claims = e.getClaims();
-            } catch (io.jsonwebtoken.security.SignatureException | io.jsonwebtoken.MalformedJwtException e) {
-                // Si hay un problema con la firma o formato, no podemos extraer el payload
-                return null;
-            }
-            
-            // Intentar obtener idPersona, si no existe intentar personId
-            Long idPersona = claims.get("idPersona", Long.class);
-            if (idPersona == null) {
-                Object personIdObj = claims.get("personId");
-                if (personIdObj != null) {
-                    idPersona = personIdObj instanceof Long ? (Long) personIdObj : Long.valueOf(personIdObj.toString());
-                }
-            }
+            Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
             
             return TokenPayloadDto.builder()
-                    .idPersona(idPersona)
+                    .idPersona(claims.get("idPersona", Long.class))
                     .username(claims.get("username", String.class))
                     .nombre(claims.get("nombre", String.class))
                     .roleName(claims.get("roleName", String.class))
                     .disabilityName(claims.get("disabilityName", String.class))
                     .disabilityId(claims.get("disabilityId", Long.class))
                     .learningPathId(claims.get("learningPathId", Long.class))
-                    .iat(claims.getIssuedAt() != null ? claims.getIssuedAt().getTime() : null)
-                    .exp(claims.getExpiration() != null ? claims.getExpiration().getTime() : null)
+                    .iat(claims.getIssuedAt().getTime())
+                    .exp(claims.getExpiration().getTime())
                     .build();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-    
-    /**
-     * Extrae los claims directamente del token JWT sin convertirlos a TokenPayloadDto
-     * Útil cuando se necesita acceder a claims personalizados
-     */
-    public Claims extractClaims(String token) {
-        try {
-            SecretKey key = Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
-            return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
         } catch (Exception e) {
             return null;
         }
