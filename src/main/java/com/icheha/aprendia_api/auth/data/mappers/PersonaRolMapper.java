@@ -23,8 +23,8 @@ public class PersonaRolMapper {
         // Mapear el rol si está disponible (cargado con JOIN FETCH)
         // Manejar LazyInitializationException de forma segura
         try {
-            if (entity.getRol() != null) {
-                builder.rol(roleMapper.toDomain(entity.getRol()));
+        if (entity.getRol() != null) {
+            builder.rol(roleMapper.toDomain(entity.getRol()));
             }
         } catch (org.hibernate.LazyInitializationException e) {
             // Si la relación no está cargada, dejar el rol como null

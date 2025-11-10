@@ -50,5 +50,33 @@ public class InstitutionRepositoryImpl implements IInstitutionRepository {
         return institutionRepository.findById(id)
                 .map(institutionMapper::toDomain);
     }
+    
+    @Override
+    public Institution update(Institution institution) {
+        if (institution == null || institution.getId() == null) {
+            throw new IllegalArgumentException("Institution y su ID no pueden ser nulos");
+        }
+        
+        InstitutionEntity entity = institutionRepository.findById(institution.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Institución no encontrada con ID: " + institution.getId()));
+        
+        entity.setRfc(institution.getRfc());
+        entity.setRct(institution.getRct());
+        entity.setName(institution.getName());
+        
+        InstitutionEntity updatedEntity = institutionRepository.save(entity);
+        return institutionMapper.toDomain(updatedEntity);
+    }
+    
+    @Override
+    public void delete(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID no puede ser nulo");
+        }
+        if (!institutionRepository.existsById(id)) {
+            throw new IllegalArgumentException("Institución no encontrada con ID: " + id);
+        }
+        institutionRepository.deleteById(id);
+    }
 }
 

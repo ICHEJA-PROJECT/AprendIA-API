@@ -19,4 +19,9 @@ public interface IStudentImpairmentRepository {
     StudentImpairment save(StudentImpairment studentImpairment);
     
     List<StudentImpairment> findAll();
+    
+    // Métodos para obtener datos con relaciones cargadas (para obtener nombres)
+    List<com.icheha.aprendia_api.preferences.impairments.data.entities.StudentImpairment> findAllWithImpairment();
+    
+    List<com.icheha.aprendia_api.preferences.impairments.data.entities.StudentImpairment> findByStudentIdWithImpairmentForList(Long studentId);
 }

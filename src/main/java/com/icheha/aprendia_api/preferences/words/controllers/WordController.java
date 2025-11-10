@@ -2,6 +2,7 @@ package com.icheha.aprendia_api.preferences.words.controllers;
 
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
 import com.icheha.aprendia_api.preferences.words.data.dtos.request.CreateWordDto;
+import com.icheha.aprendia_api.preferences.words.data.dtos.request.UpdateWordDto;
 import com.icheha.aprendia_api.preferences.words.data.dtos.response.WordResponseDto;
 import com.icheha.aprendia_api.preferences.words.services.IWordService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,6 +65,38 @@ public class WordController {
         WordResponseDto word = wordService.findById(id);
         BaseResponse<WordResponseDto> response = new BaseResponse<>(
                 true, word, "Palabra obtenida exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
+    
+    @PutMapping("/{id}")
+    @Operation(
+        summary = "Actualizar palabra",
+        description = "Actualiza una palabra existente"
+    )
+    @ApiResponse(responseCode = "200", description = "Palabra actualizada exitosamente")
+    @ApiResponse(responseCode = "404", description = "Palabra no encontrada")
+    @ApiResponse(responseCode = "400", description = "Datos inválidos")
+    public ResponseEntity<BaseResponse<WordResponseDto>> update(
+            @Parameter(description = "ID de la palabra") @PathVariable Long id,
+            @Valid @RequestBody UpdateWordDto updateDto) {
+        WordResponseDto response = wordService.update(id, updateDto);
+        BaseResponse<WordResponseDto> baseResponse = new BaseResponse<>(
+                true, response, "Palabra actualizada exitosamente", HttpStatus.OK);
+        return baseResponse.buildResponseEntity();
+    }
+    
+    @DeleteMapping("/{id}")
+    @Operation(
+        summary = "Eliminar palabra",
+        description = "Elimina una palabra por su ID"
+    )
+    @ApiResponse(responseCode = "200", description = "Palabra eliminada exitosamente")
+    @ApiResponse(responseCode = "404", description = "Palabra no encontrada")
+    public ResponseEntity<BaseResponse<Void>> deleteById(
+            @Parameter(description = "ID de la palabra") @PathVariable Long id) {
+        wordService.delete(id);
+        BaseResponse<Void> response = new BaseResponse<>(
+                true, null, "Palabra eliminada exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
 }

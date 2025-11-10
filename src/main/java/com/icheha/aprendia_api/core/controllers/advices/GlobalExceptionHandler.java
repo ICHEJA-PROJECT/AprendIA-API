@@ -121,7 +121,7 @@ public class GlobalExceptionHandler {
         
         // Detectar específicamente errores de CURP duplicado
         String causeMessage = ex.getMostSpecificCause() != null ? 
-            ex.getMostSpecificCause().getMessage() : ex.getMessage();
+                ex.getMostSpecificCause().getMessage() : ex.getMessage();
         
         if (causeMessage != null && causeMessage.contains("persona_curp_key")) {
             // Extraer el CURP del mensaje de error si es posible

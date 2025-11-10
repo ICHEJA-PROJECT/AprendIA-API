@@ -25,7 +25,7 @@ public class InstitutionEntity {
     @Column(name = "rct", length = 20, nullable = false)
     private String rct;
     
-    @Column(name = "nombre", length = 64, nullable = false)
+    @Column(name = "nombre", length = 255, nullable = false)
     private String name;
     
     @OneToMany(mappedBy = "institution", fetch = FetchType.LAZY)
