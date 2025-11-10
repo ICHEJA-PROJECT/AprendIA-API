@@ -86,13 +86,19 @@ public class PersonServiceImpl implements IPersonService {
                 throw new IllegalArgumentException("El CURP es obligatorio y no puede estar vacío");
             }
             
+            // Validar que el CURP no exista ya en la base de datos
+            Curp curp = new Curp(curpValue);
+            if (personaRepository.findByCurp(curp).isPresent()) {
+                throw new IllegalArgumentException("Ya existe una persona con el CURP: " + curpValue);
+            }
+            
             // Crear entidad de dominio Persona
             Persona persona = new Persona.Builder()
                     .primerNombre(createPersonDto.getFirstName())
                     .segundoNombre(createPersonDto.getMiddleName())
                     .apellidoPaterno(createPersonDto.getPaternalSurname())
                     .apellidoMaterno(createPersonDto.getMaternalSurname())
-                    .curp(new Curp(curpValue))
+                    .curp(curp)
                     .numeroIne(createPersonDto.getIneNumber())
                     .fechaNacimiento(birthdate)
                     .genero(gender)
@@ -147,12 +153,15 @@ public class PersonServiceImpl implements IPersonService {
             return java.util.Collections.emptyList();
         }
         
-        Map<Long, String> imagePathsMap = personaJpaRepository.findProfileImagePathsByIds(personaIds).stream()
-                .collect(Collectors.toMap(
-                    row -> (Long) row[0],
-                    row -> (String) row[1],
-                    (existing, replacement) -> existing
-                ));
+        // Construir el Map manualmente para permitir valores null
+        Map<Long, String> imagePathsMap = new java.util.HashMap<>();
+        personaJpaRepository.findProfileImagePathsByIds(personaIds).forEach(row -> {
+            if (row[0] != null) {
+                Long id = (Long) row[0];
+                String imagePath = row[1] != null ? (String) row[1] : null;
+                imagePathsMap.put(id, imagePath);
+            }
+        });
         
         return personas.stream()
                 .map(persona -> {
@@ -279,7 +288,8 @@ public class PersonServiceImpl implements IPersonService {
         dto.setCurp(persona.getCurpValue()); // Usar método seguro que maneja null
         dto.setNumeroIne(persona.getNumeroIne());
         dto.setFechaNacimiento(persona.getFechaNacimiento());
-        dto.setGenero(persona.getGenero().getValue());
+        // Manejar null de forma segura para getGenero()
+        dto.setGenero(persona.getGenero() != null ? persona.getGenero().getValue() : null);
         dto.setVialidadNombre(persona.getVialidadNombre());
         dto.setProfileImagePath(imageUrl);
         return dto;

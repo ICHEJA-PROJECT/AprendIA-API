@@ -24,13 +24,13 @@ public class TeacherCellServiceImpl implements ITeacherCellService {
     @Override
     @Transactional
     public TeacherCellResponseDto create(CreateTeacherCellDto createTeacherCellDto) {
-        // Validar que la persona tenga el rol de educador (rol ID 2)
+        // Validar que la persona tenga el rol de educador (rol ID 1)
         var teacherRoles = rolePersonService.findByPersonId(createTeacherCellDto.getTeacherId());
         boolean hasTeacherRole = teacherRoles.stream()
-                .anyMatch(rp -> rp.getRoleId() != null && rp.getRoleId().equals(2L));
+                .anyMatch(rp -> rp.getRoleId() != null && rp.getRoleId().equals(1L));
         
         if (!hasTeacherRole) {
-            throw new IllegalArgumentException("La persona seleccionada como educador no cuenta con el rol de educador (rol ID 2).");
+            throw new IllegalArgumentException("La persona seleccionada como educador no cuenta con el rol de educador (rol ID 1).");
         }
         
         TeacherCell teacherCell = new TeacherCell.Builder()

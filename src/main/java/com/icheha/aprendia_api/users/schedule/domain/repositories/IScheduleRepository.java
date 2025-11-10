@@ -12,5 +12,9 @@ public interface IScheduleRepository {
     List<Schedule> findAll();
     
     Optional<Schedule> findById(Long id);
+    
+    Schedule update(Schedule schedule);
+    
+    void delete(Long id);
 }
 

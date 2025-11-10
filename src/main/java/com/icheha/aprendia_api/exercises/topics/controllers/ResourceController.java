@@ -2,11 +2,14 @@ package com.icheha.aprendia_api.exercises.topics.controllers;
 
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
 import com.icheha.aprendia_api.exercises.topics.data.dtos.request.CreateResourceDto;
+import com.icheha.aprendia_api.exercises.topics.data.dtos.request.UpdateResourceDto;
 import com.icheha.aprendia_api.exercises.topics.data.dtos.response.ResourceResponseDto;
 import com.icheha.aprendia_api.exercises.topics.services.IResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +31,10 @@ public class ResourceController {
 
     @PostMapping
     @Operation(summary = "Crear recurso", description = "Crear nuevo recurso")
+    @ApiResponse(responseCode = "201", description = "Recurso creado exitosamente")
+    @ApiResponse(responseCode = "400", description = "Datos inválidos")
     public ResponseEntity<BaseResponse<ResourceResponseDto>> createResource(
-            @RequestBody CreateResourceDto createResourceDto) {
+            @Valid @RequestBody CreateResourceDto createResourceDto) {
         ResourceResponseDto resource = resourceService.createResource(createResourceDto);
         BaseResponse<ResourceResponseDto> response = new BaseResponse<>(
                 true, resource, "Recurso creado exitosamente", HttpStatus.CREATED);
@@ -78,12 +83,58 @@ public class ResourceController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener recurso por ID", description = "Obtener recurso por ID")
+    @ApiResponse(responseCode = "200", description = "Recurso obtenido exitosamente")
+    @ApiResponse(responseCode = "404", description = "Recurso no encontrado")
     public ResponseEntity<BaseResponse<ResourceResponseDto>> getResourceById(
-            @Parameter(description = "ID del recurso") @PathVariable Integer id) {
-        ResourceResponseDto resource = resourceService.getResourceById(id);
-        BaseResponse<ResourceResponseDto> response = new BaseResponse<>(
-                true, resource, "Recurso obtenido exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
+            @Parameter(description = "ID del recurso", required = true) @PathVariable Long id) {
+        try {
+            ResourceResponseDto resource = resourceService.getResourceById(id);
+            BaseResponse<ResourceResponseDto> response = new BaseResponse<>(
+                    true, resource, "Recurso obtenido exitosamente", HttpStatus.OK);
+            return response.buildResponseEntity();
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            BaseResponse<ResourceResponseDto> response = new BaseResponse<>(
+                    false, null, e.getMessage(), HttpStatus.NOT_FOUND);
+            return response.buildResponseEntity();
+        }
+    }
+    
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar recurso", description = "Actualizar un recurso existente")
+    @ApiResponse(responseCode = "200", description = "Recurso actualizado exitosamente")
+    @ApiResponse(responseCode = "404", description = "Recurso no encontrado")
+    @ApiResponse(responseCode = "400", description = "Datos inválidos")
+    public ResponseEntity<BaseResponse<ResourceResponseDto>> update(
+            @Parameter(description = "ID del recurso", required = true) @PathVariable Long id,
+            @Valid @RequestBody UpdateResourceDto updateResourceDto) {
+        try {
+            ResourceResponseDto resource = resourceService.update(id, updateResourceDto);
+            BaseResponse<ResourceResponseDto> response = new BaseResponse<>(
+                    true, resource, "Recurso actualizado exitosamente", HttpStatus.OK);
+            return response.buildResponseEntity();
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            BaseResponse<ResourceResponseDto> response = new BaseResponse<>(
+                    false, null, e.getMessage(), HttpStatus.NOT_FOUND);
+            return response.buildResponseEntity();
+        }
+    }
+    
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Eliminar recurso", description = "Eliminar un recurso del sistema")
+    @ApiResponse(responseCode = "200", description = "Recurso eliminado exitosamente")
+    @ApiResponse(responseCode = "404", description = "Recurso no encontrado")
+    public ResponseEntity<BaseResponse<Void>> delete(
+            @Parameter(description = "ID del recurso", required = true) @PathVariable Long id) {
+        try {
+            resourceService.delete(id);
+            BaseResponse<Void> response = new BaseResponse<>(
+                    true, null, "Recurso eliminado exitosamente", HttpStatus.OK);
+            return response.buildResponseEntity();
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            BaseResponse<Void> response = new BaseResponse<>(
+                    false, null, e.getMessage(), HttpStatus.NOT_FOUND);
+            return response.buildResponseEntity();
+        }
     }
 
     @GetMapping("/topic/{id}/learning-path/{learningPathId}")

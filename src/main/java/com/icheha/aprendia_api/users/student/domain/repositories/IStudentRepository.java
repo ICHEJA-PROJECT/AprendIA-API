@@ -22,5 +22,11 @@ public interface IStudentRepository {
     Optional<Student> findByPersonId(Long personId);
     
     List<String> findUniqueNames();
+    
+    Student update(Long studentId, Long teacherId, Long fatherId, Long motherId, String qrPath);
+    
+    void delete(Long studentId);
+    
+    List<Student> findAll();
 }
 

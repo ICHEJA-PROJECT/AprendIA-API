@@ -2,11 +2,14 @@ package com.icheha.aprendia_api.users.cell.services.impl;
 
 import com.icheha.aprendia_api.users.cell.data.dtos.CellResponseDto;
 import com.icheha.aprendia_api.users.cell.data.dtos.CreateCellDto;
+import com.icheha.aprendia_api.users.cell.data.dtos.UpdateCellDto;
 import com.icheha.aprendia_api.users.cell.domain.entities.Cell;
 import com.icheha.aprendia_api.users.cell.domain.repositories.ICellRepository;
+import com.icheha.aprendia_api.users.cell.domain.repositories.IInstitutionRepository;
 import com.icheha.aprendia_api.users.cell.services.ICellService;
 import com.icheha.aprendia_api.users.person.domain.repositories.IPersonaRepository;
 import com.icheha.aprendia_api.users.role.services.IRolePersonService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,13 +24,16 @@ import java.util.stream.Collectors;
 public class CellServiceImpl implements ICellService {
     
     private final ICellRepository cellRepository;
+    private final IInstitutionRepository institutionRepository;
     private final IPersonaRepository personaRepository;
     private final IRolePersonService rolePersonService;
     
     public CellServiceImpl(ICellRepository cellRepository,
+                         IInstitutionRepository institutionRepository,
                          @Qualifier("userPersonaRepositoryImpl") IPersonaRepository personaRepository,
                          IRolePersonService rolePersonService) {
         this.cellRepository = cellRepository;
+        this.institutionRepository = institutionRepository;
         this.personaRepository = personaRepository;
         this.rolePersonService = rolePersonService;
     }
@@ -86,9 +92,60 @@ public class CellServiceImpl implements ICellService {
     }
     
     @Override
+    @Transactional(readOnly = true)
     public Optional<CellResponseDto> findById(Long id) {
         return cellRepository.findById(id)
                 .map(this::toResponseDto);
+    }
+    
+    @Override
+    @Transactional
+    public CellResponseDto update(Long id, UpdateCellDto updateCellDto) {
+        Cell cell = cellRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Célula no encontrada con ID: " + id));
+        
+        // Validar coordinador si se está actualizando
+        if (updateCellDto.getCoordinatorId() != null) {
+            personaRepository.findById(updateCellDto.getCoordinatorId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                            "Coordinador no encontrado con ID: " + updateCellDto.getCoordinatorId()));
+            
+            var coordinatorRoles = rolePersonService.findByPersonId(updateCellDto.getCoordinatorId());
+            boolean hasCoordinatorRole = coordinatorRoles.stream()
+                    .anyMatch(role -> role.getRoleId() != null && role.getRoleId() == 3L);
+            
+            if (!hasCoordinatorRole) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, 
+                        "La persona seleccionada como coordinador no cuenta con ese rol");
+            }
+        }
+        
+        Cell.Builder builder = new Cell.Builder()
+                .id(cell.getId())
+                .institution(updateCellDto.getInstitutionId() != null ? 
+                        institutionRepository.findById(updateCellDto.getInstitutionId())
+                                .orElse(cell.getInstitution()) : cell.getInstitution())
+                .coordinator(updateCellDto.getCoordinatorId() != null ?
+                        personaRepository.findById(updateCellDto.getCoordinatorId())
+                                .orElse(cell.getCoordinator()) : cell.getCoordinator())
+                .startDate(updateCellDto.getStartDate() != null ? updateCellDto.getStartDate() : cell.getStartDate())
+                .endDate(updateCellDto.getEndDate() != null ? updateCellDto.getEndDate() : cell.getEndDate())
+                .teachers(cell.getTeachers());
+        
+        Cell updated = cellRepository.update(
+                builder.build(),
+                updateCellDto.getInstitutionId() != null ? updateCellDto.getInstitutionId() : cell.getInstitution().getId(),
+                updateCellDto.getCoordinatorId() != null ? updateCellDto.getCoordinatorId() : cell.getCoordinator().getIdPersona());
+        
+        return toResponseDto(updated);
+    }
+    
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        cellRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Célula no encontrada con ID: " + id));
+        cellRepository.delete(id);
     }
     
     private CellResponseDto toResponseDto(Cell cell) {

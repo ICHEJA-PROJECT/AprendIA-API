@@ -1,6 +1,6 @@
 package com.icheha.aprendia_api.preferences.impairments.data.entities;
 
-import com.icheha.aprendia_api.users.person.data.entities.PersonaEntity;
+import com.icheha.aprendia_api.users.student.data.entities.StudentEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,8 +23,8 @@ public class StudentImpairment {
     private Long impairmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_educando", insertable = false, updatable = false)
-    private PersonaEntity student;
+    @JoinColumn(name = "id_educando", referencedColumnName = "id_educando", insertable = false, updatable = false)
+    private StudentEntity student;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_discapacidad", insertable = false, updatable = false)

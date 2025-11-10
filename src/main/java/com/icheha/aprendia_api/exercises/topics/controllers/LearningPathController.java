@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/learning-paths")
-@Tag(name = "4.03. Learning Paths", description = "API para gestión de rutas de aprendizaje")
+@Tag(name = "4.02. Learning Paths", description = "API para gestión de rutas de aprendizaje")
 public class LearningPathController {
 
     private final ILearningPathService learningPathService;

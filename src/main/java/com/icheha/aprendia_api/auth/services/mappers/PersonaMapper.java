@@ -13,6 +13,7 @@ public class PersonaMapper {
         if (entity == null) return null;
         
         // Obtener datos de dirección desde DomicilioEntity si existe
+        // IMPORTANTE: Manejar LazyInitializationException de forma segura
         String codigoPostal = null;
         String estado = null;
         String municipio = null;
@@ -22,6 +23,7 @@ public class PersonaMapper {
         Integer idAsentamientoTipo = null;
         String vialidadNombre = null;
         
+        try {
         if (entity.getDomicilio() != null) {
             DomicilioEntity domicilio = entity.getDomicilio();
             codigoPostal = domicilio.getCp();
@@ -30,6 +32,12 @@ public class PersonaMapper {
             localidad = domicilio.getLocalidad();
             asentamiento = domicilio.getColonia();
             vialidadNombre = domicilio.getCalle();
+            }
+        } catch (org.hibernate.LazyInitializationException e) {
+            // Si la relación no está cargada, dejar los valores como null
+            // Esto es normal cuando findByCurp no carga las relaciones
+        } catch (Exception e) {
+            // Manejar cualquier otra excepción de forma segura
         }
         
         // Construir Persona con valores reales cuando estén disponibles
