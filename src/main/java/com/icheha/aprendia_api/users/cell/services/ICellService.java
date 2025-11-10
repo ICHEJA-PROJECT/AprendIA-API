@@ -2,7 +2,6 @@ package com.icheha.aprendia_api.users.cell.services;
 
 import com.icheha.aprendia_api.users.cell.data.dtos.CellResponseDto;
 import com.icheha.aprendia_api.users.cell.data.dtos.CreateCellDto;
-import com.icheha.aprendia_api.users.cell.data.dtos.UpdateCellDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,9 +17,5 @@ public interface ICellService {
     List<CellResponseDto> findByCoordinator(Long coordinatorId);
     
     Optional<CellResponseDto> findById(Long id);
-    
-    CellResponseDto update(Long id, UpdateCellDto updateCellDto);
-    
-    void delete(Long id);
 }
 

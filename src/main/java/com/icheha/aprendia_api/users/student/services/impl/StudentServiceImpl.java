@@ -10,7 +10,6 @@ import com.icheha.aprendia_api.preferences.impairments.services.IStudentImpairme
 import com.icheha.aprendia_api.users.student.data.dtos.CreateStudentDto;
 import com.icheha.aprendia_api.users.student.data.dtos.RegisterStudentResponseDto;
 import com.icheha.aprendia_api.users.student.data.dtos.StudentResponseDto;
-import com.icheha.aprendia_api.users.student.data.dtos.UpdateStudentDto;
 import com.icheha.aprendia_api.users.student.domain.entities.Progenitor;
 import com.icheha.aprendia_api.users.student.domain.entities.Student;
 import com.icheha.aprendia_api.users.student.domain.repositories.IEncryptDataRepository;
@@ -81,17 +80,12 @@ public class StudentServiceImpl implements IStudentService {
                 teacher = personaRepository.findById(createStudentDto.getTeacherId())
                         .orElseThrow(() -> new IllegalArgumentException("Educador no encontrado con ID: " + createStudentDto.getTeacherId()));
                 
-                // Validar que el educador tenga rol de educador (rol ID 1)
+                // Validar que el educador tenga rol de educador (rol ID 2)
                 var teacherRoles = rolePersonService.findByPersonId(createStudentDto.getTeacherId());
-                
                 boolean hasTeacherRole = teacherRoles.stream()
-                        .anyMatch(rp -> rp.getRoleId() != null && rp.getRoleId().equals(1L));
+                        .anyMatch(rp -> rp.getRoleId() != null && rp.getRoleId().equals(2L));
                 if (!hasTeacherRole) {
-                    String rolesFound = teacherRoles.isEmpty() ? "ninguno" : 
-                        teacherRoles.stream()
-                            .map(rp -> String.valueOf(rp.getRoleId()))
-                            .collect(java.util.stream.Collectors.joining(", "));
-                    throw new IllegalArgumentException("La persona seleccionada como educador no cuenta con ese rol. Roles encontrados: " + rolesFound);
+                    throw new IllegalArgumentException("La persona seleccionada como educador no cuenta con ese rol.");
                 }
             }
             
@@ -106,11 +100,11 @@ public class StudentServiceImpl implements IStudentService {
             Progenitor father = fatherOpt.get();
             Progenitor mother = motherOpt.get();
             
-            // Asignar rol de estudiante (rol ID 4) a la persona
+            // Asignar rol de estudiante (rol ID 1) a la persona
             com.icheha.aprendia_api.users.role.data.dtos.CreateRolePersonDto rolePersonDto = 
                     new com.icheha.aprendia_api.users.role.data.dtos.CreateRolePersonDto();
             rolePersonDto.setPersonId(createStudentDto.getPersonId());
-            rolePersonDto.setRoleId(4L); // Rol de Estudiante
+            rolePersonDto.setRoleId(1L); // Rol de Estudiante
             rolePersonService.create(rolePersonDto);
             
             // Crear estudiante
@@ -253,117 +247,6 @@ public class StudentServiceImpl implements IStudentService {
     @Override
     public List<String> findUniqueNames() {
         return studentRepository.findUniqueNames();
-    }
-    
-    @Override
-    @Transactional
-    public List<StudentResponseDto> findAll() {
-        return studentRepository.findAll().stream()
-                .map(this::toResponseDto)
-                .collect(Collectors.toList());
-    }
-    
-    @Override
-    @Transactional
-    public StudentResponseDto update(Long id, UpdateStudentDto updateStudentDto) {
-        try {
-            // Validar que el estudiante existe
-            Student existingStudent = studentRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado con ID: " + id));
-            
-            // Validar educador si se proporciona
-            Long teacherId = updateStudentDto.getTeacherId();
-            if (teacherId != null) {
-                Persona teacher = personaRepository.findById(teacherId)
-                        .orElseThrow(() -> new IllegalArgumentException("Educador no encontrado con ID: " + teacherId));
-                
-                // Validar que el educador tenga rol de educador (rol ID 1)
-                var teacherRoles = rolePersonService.findByPersonId(teacherId);
-                boolean hasTeacherRole = teacherRoles.stream()
-                        .anyMatch(rp -> rp.getRoleId() != null && rp.getRoleId().equals(1L));
-                if (!hasTeacherRole) {
-                    throw new IllegalArgumentException("La persona seleccionada como educador no cuenta con ese rol");
-                }
-            }
-            
-            // Crear o actualizar progenitores si se proporcionan
-            Long fatherId = null;
-            Long motherId = null;
-            
-            if (updateStudentDto.getFather() != null) {
-                Optional<Progenitor> fatherOpt = progenitorService.create(updateStudentDto.getFather());
-                if (fatherOpt.isEmpty()) {
-                    throw new RuntimeException("Error al crear/actualizar padre");
-                }
-                fatherId = fatherOpt.get().getId();
-            } else {
-                fatherId = existingStudent.getFather() != null ? existingStudent.getFather().getId() : null;
-            }
-            
-            if (updateStudentDto.getMother() != null) {
-                Optional<Progenitor> motherOpt = progenitorService.create(updateStudentDto.getMother());
-                if (motherOpt.isEmpty()) {
-                    throw new RuntimeException("Error al crear/actualizar madre");
-                }
-                motherId = motherOpt.get().getId();
-            } else {
-                motherId = existingStudent.getMother() != null ? existingStudent.getMother().getId() : null;
-            }
-            
-            // Actualizar estudiante
-            Student updatedStudent = studentRepository.update(
-                    id,
-                    teacherId,
-                    fatherId,
-                    motherId,
-                    updateStudentDto.getQrPath()
-            );
-            
-            // Actualizar discapacidades si se proporcionan
-            if (updateStudentDto.getImpairments() != null) {
-                // Eliminar discapacidades existentes
-                List<StudentImpairment> existingImpairments = 
-                        studentImpairmentRepository.findByStudentId(updatedStudent.getId());
-                studentImpairmentRepository.deleteAll(existingImpairments);
-                
-                // Crear nuevas discapacidades
-                if (!updateStudentDto.getImpairments().isEmpty()) {
-                    for (Long impairmentId : updateStudentDto.getImpairments()) {
-                        StudentImpairment studentImpairment = new StudentImpairment();
-                        studentImpairment.setStudentId(updatedStudent.getId());
-                        studentImpairment.setImpairmentId(impairmentId);
-                        studentImpairmentRepository.save(studentImpairment);
-                    }
-                }
-            }
-            
-            return toResponseDto(updatedStudent);
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Error al actualizar estudiante: " + e.getMessage(), e);
-        }
-    }
-    
-    @Override
-    @Transactional
-    public void delete(Long id) {
-        try {
-            // Validar que el estudiante existe
-            Student student = studentRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado con ID: " + id));
-            
-            // Eliminar discapacidades asociadas
-            List<StudentImpairment> impairments = studentImpairmentRepository.findByStudentId(id);
-            if (!impairments.isEmpty()) {
-                studentImpairmentRepository.deleteAll(impairments);
-            }
-            
-            // Eliminar estudiante
-            studentRepository.delete(id);
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar estudiante: " + e.getMessage(), e);
-        }
     }
     
     private StudentResponseDto toResponseDto(Student student) {

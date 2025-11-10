@@ -15,8 +15,5 @@ public class CreateRoleDto {
     @NotBlank(message = "El nombre del rol es obligatorio")
     @Schema(description = "Nombre del rol", example = "ESTUDIANTE")
     private String name;
-    
-    @Schema(description = "Descripción del rol", example = "Rol para estudiantes que realizan ejercicios")
-    private String description;
 }
 

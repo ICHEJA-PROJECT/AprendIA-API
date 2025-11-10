@@ -80,7 +80,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "${APP_PORT_CLOUDINARY:-8082}:8080"
+      - "${CLOUDINARY_SERVICE_PORT:-8082}:8080"
     environment:
       # Configuración de Cloudinary
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}

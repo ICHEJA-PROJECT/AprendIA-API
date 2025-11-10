@@ -2,7 +2,6 @@ package com.icheha.aprendia_api.preferences.occupation.controllers;
 
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
 import com.icheha.aprendia_api.preferences.occupation.data.dtos.request.CreateOccupationDto;
-import com.icheha.aprendia_api.preferences.occupation.data.dtos.request.UpdateOccupationDto;
 import com.icheha.aprendia_api.preferences.occupation.data.dtos.response.OccupationResponseDto;
 import com.icheha.aprendia_api.preferences.occupation.services.IOccupationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -228,55 +227,6 @@ public class OccupationController {
             logger.error("Unexpected error deleting occupation with ID: {}", id, e);
             
             BaseResponse<Void> baseResponse = new BaseResponse<>(
-                false,
-                null,
-                "Error interno del servidor",
-                HttpStatus.INTERNAL_SERVER_ERROR
-            );
-            
-            return baseResponse.buildResponseEntity();
-        }
-    }
-    
-    @PutMapping("/{id}")
-    @Operation(
-        summary = "Actualizar ocupación",
-        description = "Actualiza una ocupación existente"
-    )
-    @ApiResponse(responseCode = "200", description = "Ocupación actualizada exitosamente")
-    @ApiResponse(responseCode = "404", description = "Ocupación no encontrada")
-    @ApiResponse(responseCode = "400", description = "Datos inválidos")
-    public ResponseEntity<BaseResponse<OccupationResponseDto>> update(
-            @Parameter(description = "ID de la ocupación") @PathVariable Long id,
-            @Valid @RequestBody UpdateOccupationDto updateDto) {
-        try {
-            logger.debug("Received request to update occupation with ID: {}", id);
-            
-            OccupationResponseDto response = occupationService.update(id, updateDto);
-            
-            BaseResponse<OccupationResponseDto> baseResponse = new BaseResponse<>(
-                true,
-                response,
-                "Ocupación actualizada exitosamente",
-                HttpStatus.OK
-            );
-            
-            return baseResponse.buildResponseEntity();
-        } catch (IllegalArgumentException e) {
-            logger.warn("Failed to update occupation with ID: {} - {}", id, e.getMessage());
-            
-            BaseResponse<OccupationResponseDto> baseResponse = new BaseResponse<>(
-                false,
-                null,
-                e.getMessage(),
-                HttpStatus.BAD_REQUEST
-            );
-            
-            return baseResponse.buildResponseEntity();
-        } catch (Exception e) {
-            logger.error("Unexpected error updating occupation with ID: {}", id, e);
-            
-            BaseResponse<OccupationResponseDto> baseResponse = new BaseResponse<>(
                 false,
                 null,
                 "Error interno del servidor",

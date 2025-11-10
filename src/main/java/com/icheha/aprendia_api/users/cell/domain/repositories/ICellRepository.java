@@ -16,9 +16,5 @@ public interface ICellRepository {
     List<Cell> findByCoordinator(Long coordinatorId);
     
     Optional<Cell> findById(Long id);
-    
-    Cell update(Cell cell, Long institutionId, Long coordinatorId);
-    
-    void delete(Long id);
 }
 

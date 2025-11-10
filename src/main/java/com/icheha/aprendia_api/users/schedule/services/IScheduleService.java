@@ -2,7 +2,6 @@ package com.icheha.aprendia_api.users.schedule.services;
 
 import com.icheha.aprendia_api.users.schedule.data.dtos.CreateScheduleDto;
 import com.icheha.aprendia_api.users.schedule.data.dtos.ScheduleResponseDto;
-import com.icheha.aprendia_api.users.schedule.data.dtos.UpdateScheduleDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,9 +13,5 @@ public interface IScheduleService {
     List<ScheduleResponseDto> findAll();
     
     Optional<ScheduleResponseDto> findById(Long id);
-    
-    ScheduleResponseDto update(Long id, UpdateScheduleDto updateScheduleDto);
-    
-    void delete(Long id);
 }
 

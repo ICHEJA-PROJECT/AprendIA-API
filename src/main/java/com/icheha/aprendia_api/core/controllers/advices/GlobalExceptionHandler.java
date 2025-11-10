@@ -117,24 +117,9 @@ public class GlobalExceptionHandler {
             DataIntegrityViolationException ex) {
         
         String errorMessage = "Violación de integridad de datos";
-        String userMessage = "Error de integridad de datos";
-        
-        // Detectar específicamente errores de CURP duplicado
-        String causeMessage = ex.getMostSpecificCause() != null ? 
+        if (isDevelopment()) {
+            errorMessage = ex.getMostSpecificCause() != null ? 
                 ex.getMostSpecificCause().getMessage() : ex.getMessage();
-        
-        if (causeMessage != null && causeMessage.contains("persona_curp_key")) {
-            // Extraer el CURP del mensaje de error si es posible
-            String curp = extractCurpFromErrorMessage(causeMessage);
-            if (curp != null) {
-                errorMessage = "Ya existe una persona con el CURP: " + curp;
-                userMessage = "El CURP proporcionado ya está registrado en el sistema";
-            } else {
-                errorMessage = "Ya existe una persona con este CURP";
-                userMessage = "El CURP proporcionado ya está registrado en el sistema";
-            }
-        } else if (isDevelopment()) {
-            errorMessage = causeMessage;
         }
         
         ErrorResponse errorResponse = new ErrorResponse(
@@ -147,30 +132,12 @@ public class GlobalExceptionHandler {
         BaseResponse<ErrorResponse> response = new BaseResponse<>(
                 false,
                 errorResponse,
-                userMessage,
+                "Error de integridad de datos",
                 HttpStatus.CONFLICT
         );
         
         logger.error("Data integrity violation: {}", ex.getMessage(), ex);
         return response.buildResponseEntity();
-    }
-    
-    /**
-     * Extrae el CURP del mensaje de error de la base de datos
-     */
-    private String extractCurpFromErrorMessage(String errorMessage) {
-        if (errorMessage == null) {
-            return null;
-        }
-        // Buscar el patrón Key (curp)=(CURP_VALUE)
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
-            "Key \\(curp\\)=\\(([A-Z0-9]{18})\\)"
-        );
-        java.util.regex.Matcher matcher = pattern.matcher(errorMessage);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
     }
     
     @ExceptionHandler(DataAccessException.class)

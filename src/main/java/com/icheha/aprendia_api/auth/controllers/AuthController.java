@@ -9,7 +9,6 @@ import com.icheha.aprendia_api.auth.data.dtos.response.ValidateTokenResponseDto;
 import com.icheha.aprendia_api.auth.domain.exceptions.InvalidCredentialsException;
 import com.icheha.aprendia_api.auth.domain.exceptions.InvalidTokenException;
 import com.icheha.aprendia_api.auth.domain.exceptions.UserNotFoundException;
-import com.icheha.aprendia_api.auth.domain.exceptions.UserRoleNotFoundException;
 import com.icheha.aprendia_api.auth.services.IAuthService;
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -63,17 +62,6 @@ public class AuthController {
                 null,
                 e.getMessage(),
                 HttpStatus.UNAUTHORIZED
-            );
-            
-            return baseResponse.buildResponseEntity();
-        } catch (UserRoleNotFoundException e) {
-            logger.warn("User role not found for CURP: {} - {}", loginDto.getCurp(), e.getMessage());
-            
-            BaseResponse<LoginResponseDto> baseResponse = new BaseResponse<LoginResponseDto>(
-                false,
-                null,
-                e.getMessage(),
-                HttpStatus.NOT_FOUND
             );
             
             return baseResponse.buildResponseEntity();

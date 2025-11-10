@@ -2,12 +2,10 @@ package com.icheha.aprendia_api.users.schedule.services.impl;
 
 import com.icheha.aprendia_api.users.schedule.data.dtos.CreateScheduleDto;
 import com.icheha.aprendia_api.users.schedule.data.dtos.ScheduleResponseDto;
-import com.icheha.aprendia_api.users.schedule.data.dtos.UpdateScheduleDto;
 import com.icheha.aprendia_api.users.schedule.data.mappers.ScheduleMapper;
 import com.icheha.aprendia_api.users.schedule.domain.entities.Schedule;
 import com.icheha.aprendia_api.users.schedule.domain.repositories.IScheduleRepository;
 import com.icheha.aprendia_api.users.schedule.services.IScheduleService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,34 +44,9 @@ public class ScheduleServiceImpl implements IScheduleService {
     }
     
     @Override
-    @Transactional(readOnly = true)
     public Optional<ScheduleResponseDto> findById(Long id) {
         return scheduleRepository.findById(id)
                 .map(this::toResponseDto);
-    }
-    
-    @Override
-    @Transactional
-    public ScheduleResponseDto update(Long id, UpdateScheduleDto updateScheduleDto) {
-        Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Horario no encontrado con ID: " + id));
-        
-        Schedule.Builder builder = new Schedule.Builder()
-                .id(schedule.getId())
-                .day(updateScheduleDto.getDay() != null ? updateScheduleDto.getDay() : schedule.getDay())
-                .hour(updateScheduleDto.getHour() != null ? updateScheduleDto.getHour() : schedule.getHour())
-                .schedulePeople(schedule.getSchedulePeople());
-        
-        Schedule updated = scheduleRepository.update(builder.build());
-        return toResponseDto(updated);
-    }
-    
-    @Override
-    @Transactional
-    public void delete(Long id) {
-        scheduleRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Horario no encontrado con ID: " + id));
-        scheduleRepository.delete(id);
     }
     
     private ScheduleResponseDto toResponseDto(Schedule schedule) {

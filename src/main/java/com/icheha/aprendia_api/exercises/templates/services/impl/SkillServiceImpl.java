@@ -2,18 +2,14 @@ package com.icheha.aprendia_api.exercises.templates.services.impl;
 
 import com.icheha.aprendia_api.exercises.templates.data.dtos.request.CreateSkillDto;
 import com.icheha.aprendia_api.exercises.templates.data.dtos.request.GetSkillsByTemplatesDto;
-import com.icheha.aprendia_api.exercises.templates.data.dtos.request.UpdateSkillDto;
 import com.icheha.aprendia_api.exercises.templates.data.dtos.response.SkillResponseDto;
 import com.icheha.aprendia_api.exercises.templates.data.entities.SkillEntity;
 import com.icheha.aprendia_api.exercises.templates.data.repositories.SkillRepository;
 import com.icheha.aprendia_api.exercises.templates.services.ISkillService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,7 +19,6 @@ public class SkillServiceImpl implements ISkillService {
     private SkillRepository skillRepository;
     
     @Override
-    @Transactional
     public SkillResponseDto createSkill(CreateSkillDto createSkillDto) {
         // Crear nueva entidad
         SkillEntity entity = new SkillEntity();
@@ -37,57 +32,11 @@ public class SkillServiceImpl implements ISkillService {
     }
     
     @Override
-    @Transactional(readOnly = true)
     public List<SkillResponseDto> getAllSkills() {
         List<SkillEntity> entities = skillRepository.findAll();
         return entities.stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<SkillResponseDto> findById(Long id) {
-        return skillRepository.findById(id)
-                .map(this::toResponseDto);
-    }
-    
-    @Override
-    @Transactional
-    public SkillResponseDto update(Long id, UpdateSkillDto updateSkillDto) {
-        SkillEntity entity = skillRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Habilidad no encontrada con ID: " + id));
-        
-        if (updateSkillDto.getName() != null && !updateSkillDto.getName().trim().isEmpty()) {
-            entity.setNombre(updateSkillDto.getName());
-        }
-        
-        if (updateSkillDto.getUrl() != null) {
-            entity.setUrl(updateSkillDto.getUrl());
-        }
-        
-        if (updateSkillDto.getTipo() != null) {
-            try {
-                entity.setTipo(SkillEntity.TipoHabilidadEnum.valueOf(updateSkillDto.getTipo()));
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Tipo de habilidad inválido: " + updateSkillDto.getTipo());
-            }
-        }
-        
-        if (updateSkillDto.getIdCategoria() != null) {
-            entity.setIdCategoria(updateSkillDto.getIdCategoria());
-        }
-        
-        SkillEntity updatedEntity = skillRepository.save(entity);
-        return toResponseDto(updatedEntity);
-    }
-    
-    @Override
-    @Transactional
-    public void delete(Long id) {
-        SkillEntity entity = skillRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Habilidad no encontrada con ID: " + id));
-        skillRepository.delete(entity);
     }
     
     @Override

@@ -3,7 +3,6 @@ package com.icheha.aprendia_api.users.cell.controllers;
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
 import com.icheha.aprendia_api.users.cell.data.dtos.CellResponseDto;
 import com.icheha.aprendia_api.users.cell.data.dtos.CreateCellDto;
-import com.icheha.aprendia_api.users.cell.data.dtos.UpdateCellDto;
 import com.icheha.aprendia_api.users.cell.services.ICellService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -81,27 +80,6 @@ public class CellController {
                     false, null, "Célula no encontrada", HttpStatus.NOT_FOUND);
             return response.buildResponseEntity();
         }
-    }
-    
-    @PutMapping("/{id}")
-    @Operation(summary = "Actualizar célula", description = "Actualiza una célula existente")
-    public ResponseEntity<BaseResponse<CellResponseDto>> update(
-            @Parameter(description = "ID de la célula", required = true) @PathVariable Long id,
-            @Valid @RequestBody UpdateCellDto updateCellDto) {
-        CellResponseDto updated = cellService.update(id, updateCellDto);
-        BaseResponse<CellResponseDto> response = new BaseResponse<>(
-                true, updated, "Célula actualizada exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
-    }
-    
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar célula", description = "Elimina una célula del sistema")
-    public ResponseEntity<BaseResponse<Void>> delete(
-            @Parameter(description = "ID de la célula", required = true) @PathVariable Long id) {
-        cellService.delete(id);
-        BaseResponse<Void> response = new BaseResponse<>(
-                true, null, "Célula eliminada exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
     }
 }
 

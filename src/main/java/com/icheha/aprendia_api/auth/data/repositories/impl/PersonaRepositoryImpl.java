@@ -8,7 +8,6 @@ import com.icheha.aprendia_api.auth.domain.repositories.IPersonaRepository;
 import com.icheha.aprendia_api.auth.domain.valueobjects.Curp;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -28,7 +27,6 @@ public class PersonaRepositoryImpl implements IPersonaRepository {
     }
     
     @Override
-    @Transactional(readOnly = true)
     public Optional<Persona> findByCurp(Curp curp) {
         if (curp == null) {
             return Optional.empty();
@@ -39,7 +37,6 @@ public class PersonaRepositoryImpl implements IPersonaRepository {
     }
     
     @Override
-    @Transactional(readOnly = true)
     public Optional<Persona> findByCurpWithRoles(Curp curp) {
         if (curp == null) {
             return Optional.empty();
@@ -50,7 +47,6 @@ public class PersonaRepositoryImpl implements IPersonaRepository {
     }
     
     @Override
-    @Transactional(readOnly = true)
     public Optional<Persona> findById(Long id) {
         if (id == null) {
             return Optional.empty();

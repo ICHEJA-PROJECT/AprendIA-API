@@ -3,7 +3,6 @@ package com.icheha.aprendia_api.users.cell.controllers;
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
 import com.icheha.aprendia_api.users.cell.data.dtos.CreateInstitutionDto;
 import com.icheha.aprendia_api.users.cell.data.dtos.InstitutionResponseDto;
-import com.icheha.aprendia_api.users.cell.data.dtos.UpdateInstitutionDto;
 import com.icheha.aprendia_api.users.cell.services.IInstitutionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -61,27 +60,6 @@ public class InstitutionController {
                     false, null, "Institución no encontrada", HttpStatus.NOT_FOUND);
             return response.buildResponseEntity();
         }
-    }
-    
-    @PutMapping("/{id}")
-    @Operation(summary = "Actualizar institución", description = "Actualiza una institución existente")
-    public ResponseEntity<BaseResponse<InstitutionResponseDto>> update(
-            @Parameter(description = "ID de la institución", required = true) @PathVariable Long id,
-            @Valid @RequestBody UpdateInstitutionDto updateInstitutionDto) {
-        InstitutionResponseDto updated = institutionService.update(id, updateInstitutionDto);
-        BaseResponse<InstitutionResponseDto> response = new BaseResponse<>(
-                true, updated, "Institución actualizada exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
-    }
-    
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar institución", description = "Elimina una institución del sistema")
-    public ResponseEntity<BaseResponse<Void>> delete(
-            @Parameter(description = "ID de la institución", required = true) @PathVariable Long id) {
-        institutionService.delete(id);
-        BaseResponse<Void> response = new BaseResponse<>(
-                true, null, "Institución eliminada exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
     }
 }
 

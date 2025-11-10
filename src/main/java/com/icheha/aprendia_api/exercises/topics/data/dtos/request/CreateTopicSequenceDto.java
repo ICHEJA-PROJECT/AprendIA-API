@@ -13,9 +13,9 @@ public class CreateTopicSequenceDto {
     @NotNull(message = "Topic ID es requerido")
     private Long topicId;
     
-    @NotNull(message = "Next Topic ID es requerido")
-    private Long nextTopicId;
+    @NotNull(message = "Sequence ID es requerido")
+    private Long sequenceId;
     
-    @NotNull(message = "Learning Path ID es requerido")
-    private Long learningPathId;
+    @NotNull(message = "Order es requerido")
+    private Integer order;
 }

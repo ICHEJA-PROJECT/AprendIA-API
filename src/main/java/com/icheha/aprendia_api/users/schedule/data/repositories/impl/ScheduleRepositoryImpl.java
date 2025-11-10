@@ -49,37 +49,5 @@ public class ScheduleRepositoryImpl implements IScheduleRepository {
         return scheduleRepository.findById(id)
                 .map(scheduleMapper::toDomain);
     }
-    
-    @Override
-    public Schedule update(Schedule schedule) {
-        if (schedule == null || schedule.getId() == null) {
-            throw new IllegalArgumentException("Schedule y su ID no pueden ser nulos");
-        }
-        
-        ScheduleEntity entity = scheduleRepository.findById(schedule.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Horario no encontrado con ID: " + schedule.getId()));
-        
-        if (schedule.getDay() != null) {
-            entity.setDay(schedule.getDay());
-        }
-        
-        if (schedule.getHour() != null) {
-            entity.setHour(schedule.getHour());
-        }
-        
-        ScheduleEntity updatedEntity = scheduleRepository.save(entity);
-        return scheduleMapper.toDomain(updatedEntity);
-    }
-    
-    @Override
-    public void delete(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("ID no puede ser nulo");
-        }
-        if (!scheduleRepository.existsById(id)) {
-            throw new IllegalArgumentException("Horario no encontrado con ID: " + id);
-        }
-        scheduleRepository.deleteById(id);
-    }
 }
 

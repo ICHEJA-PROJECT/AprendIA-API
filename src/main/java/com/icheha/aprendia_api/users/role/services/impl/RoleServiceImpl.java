@@ -39,9 +39,10 @@ public class RoleServiceImpl implements IRoleService {
                 .nombre(createRoleDto.getName())
                 .build();
         
-        // Crear la entidad con la descripción usando el mapper
-        RolEntity entity = roleMapper.toEntity(rol, createRoleDto.getDescription());
-        RolEntity savedEntity = rolRepository.save(entity);
+        Rol savedRol = roleRepository.create(rol);
+        // Obtener la entidad JPA para incluir la descripción en la respuesta
+        RolEntity savedEntity = rolRepository.findById(savedRol.getIdRol())
+                .orElseThrow(() -> new RuntimeException("Error al obtener el rol creado"));
         return roleMapper.toResponseDto(savedEntity);
     }
     

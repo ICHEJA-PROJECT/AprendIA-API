@@ -3,7 +3,6 @@ package com.icheha.aprendia_api.users.schedule.controllers;
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
 import com.icheha.aprendia_api.users.schedule.data.dtos.CreateScheduleDto;
 import com.icheha.aprendia_api.users.schedule.data.dtos.ScheduleResponseDto;
-import com.icheha.aprendia_api.users.schedule.data.dtos.UpdateScheduleDto;
 import com.icheha.aprendia_api.users.schedule.services.IScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -61,27 +60,6 @@ public class ScheduleController {
                     false, null, "Horario no encontrado", HttpStatus.NOT_FOUND);
             return response.buildResponseEntity();
         }
-    }
-    
-    @PutMapping("/{id}")
-    @Operation(summary = "Actualizar horario", description = "Actualiza un horario existente")
-    public ResponseEntity<BaseResponse<ScheduleResponseDto>> update(
-            @Parameter(description = "ID del horario", required = true) @PathVariable Long id,
-            @Valid @RequestBody UpdateScheduleDto updateScheduleDto) {
-        ScheduleResponseDto updated = scheduleService.update(id, updateScheduleDto);
-        BaseResponse<ScheduleResponseDto> response = new BaseResponse<>(
-                true, updated, "Horario actualizado exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
-    }
-    
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar horario", description = "Elimina un horario del sistema")
-    public ResponseEntity<BaseResponse<Void>> delete(
-            @Parameter(description = "ID del horario", required = true) @PathVariable Long id) {
-        scheduleService.delete(id);
-        BaseResponse<Void> response = new BaseResponse<>(
-                true, null, "Horario eliminado exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
     }
 }
 
