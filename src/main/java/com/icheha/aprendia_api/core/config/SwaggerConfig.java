@@ -19,6 +19,9 @@ public class SwaggerConfig {
     @Value("${swagger.server.url:http://localhost:8080}")
     private String swaggerServerUrl;
 
+    @Value("${swagger.server.production.url:}")
+    private String swaggerProductionUrl;
+
     @Value("${server.servlet.context-path:/api}")
     private String contextPath;
 
@@ -26,6 +29,24 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         // Construir la URL base usando la configuración de Swagger o el puerto del servidor
         String baseUrl = swaggerServerUrl + contextPath;
+        
+        // Construir lista de servidores
+        List<Server> servers = new java.util.ArrayList<>();
+        
+        // Servidor de desarrollo/actual (siempre presente)
+        servers.add(new Server()
+                .url(baseUrl)
+                .description("Servidor actual"));
+        
+        // Servidor de producción (solo si está configurado)
+        if (swaggerProductionUrl != null && !swaggerProductionUrl.trim().isEmpty()) {
+            String productionUrl = swaggerProductionUrl.endsWith(contextPath) 
+                    ? swaggerProductionUrl 
+                    : swaggerProductionUrl + contextPath;
+            servers.add(new Server()
+                    .url(productionUrl)
+                    .description("Servidor de producción"));
+        }
         
         return new OpenAPI()
                 .info(new Info()
@@ -42,14 +63,7 @@ public class SwaggerConfig {
                         .license(new License()
                                 .name("MIT License")
                                 .url("https://opensource.org/licenses/MIT")))
-                .servers(List.of(
-                        new Server()
-                                .url(baseUrl)
-                                .description("Servidor de desarrollo"),
-                        new Server()
-                                .url("https://api.aprendia.com/api")
-                                .description("Servidor de producción")
-                ))
+                .servers(servers)
                 .tags(getOrderedTags());
     }
     
