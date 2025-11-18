@@ -3,7 +3,6 @@ package com.icheha.aprendia_api.users.student.data.mappers;
 import com.icheha.aprendia_api.auth.domain.entities.Persona;
 import com.icheha.aprendia_api.users.person.data.mappers.PersonaMapper;
 import com.icheha.aprendia_api.users.student.data.entities.StudentEntity;
-import com.icheha.aprendia_api.users.student.domain.entities.Progenitor;
 import com.icheha.aprendia_api.users.student.domain.entities.Student;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -12,11 +11,9 @@ import org.springframework.stereotype.Component;
 public class StudentMapper {
     
     private final PersonaMapper personaMapper;
-    private final ProgenitorMapper progenitorMapper;
     
-    public StudentMapper(@Qualifier("userPersonaMapper") PersonaMapper personaMapper, ProgenitorMapper progenitorMapper) {
+    public StudentMapper(@Qualifier("userPersonaMapper") PersonaMapper personaMapper) {
         this.personaMapper = personaMapper;
-        this.progenitorMapper = progenitorMapper;
     }
     
     public Student toDomain(StudentEntity entity) {
@@ -24,16 +21,12 @@ public class StudentMapper {
         
         Persona persona = personaMapper.toDomain(entity.getPersona());
         Persona teacher = entity.getTeacher() != null ? personaMapper.toDomain(entity.getTeacher()) : null;
-        Progenitor father = progenitorMapper.toDomain(entity.getFather());
-        Progenitor mother = progenitorMapper.toDomain(entity.getMother());
         
         return new Student.Builder()
                 .id(entity.getId())
                 .persona(persona)
                 .teacher(teacher)
                 .qrPath(entity.getQrPath())
-                .father(father)
-                .mother(mother)
                 .build();
     }
     

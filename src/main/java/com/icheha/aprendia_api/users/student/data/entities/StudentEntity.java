@@ -30,11 +30,7 @@ public class StudentEntity {
     private String qrPath;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_padre", nullable = false)
-    private ProgenitorEntity father;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_madre", nullable = false)
-    private ProgenitorEntity mother;
+    @JoinColumn(name = "created_by", nullable = true)
+    private PersonaEntity createdBy;
 }
 

@@ -30,7 +30,7 @@ public class RolePersonServiceImpl implements IRolePersonService {
     @Transactional
     public RolePersonResponseDto create(CreateRolePersonDto createRolePersonDto) {
         PersonaRol personaRol = new PersonaRol.Builder()
-                .idPersona(createRolePersonDto.getPersonId())
+                .idPersona(createRolePersonDto.getUserId()) // TODO: Cambiar a idUser cuando se actualice PersonaRol
                 .idRol(createRolePersonDto.getRoleId())
                 .build();
         
@@ -43,7 +43,7 @@ public class RolePersonServiceImpl implements IRolePersonService {
     public List<RolePersonResponseDto> createMany(CreateManyRolePersonDto createManyRolePersonDto) {
         List<PersonaRol> personaRoles = createManyRolePersonDto.getRoleIds().stream()
                 .map(roleId -> new PersonaRol.Builder()
-                        .idPersona(createManyRolePersonDto.getPersonId())
+                        .idPersona(createManyRolePersonDto.getUserId()) // TODO: Cambiar a idUser cuando se actualice PersonaRol
                         .idRol(roleId)
                         .build())
                 .collect(Collectors.toList());
@@ -61,8 +61,8 @@ public class RolePersonServiceImpl implements IRolePersonService {
     }
     
     @Override
-    public List<RolePersonResponseDto> findByPersonId(Long personId) {
-        return rolePersonRepository.findByPersonId(personId).stream()
+    public List<RolePersonResponseDto> findByUserId(Long userId) {
+        return rolePersonRepository.findByPersonId(userId).stream() // TODO: Cambiar a findByUserId cuando se actualice el repositorio
                 .map(rolePersonMapper::toResponseDto)
                 .collect(Collectors.toList());
     }

@@ -12,4 +12,6 @@ public class UnitResponseDto {
     private Long id;
     private String name;
     private String description;
+    private Long cuadernilloId;
+    private String cuadernilloNombre;
 }

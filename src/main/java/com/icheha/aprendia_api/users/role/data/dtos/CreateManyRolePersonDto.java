@@ -12,12 +12,12 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "DTO para asignar múltiples roles a una persona")
+@Schema(description = "DTO para asignar múltiples roles a un usuario")
 public class CreateManyRolePersonDto {
     
-    @NotNull(message = "El ID de la persona es obligatorio")
-    @Schema(description = "ID de la persona", example = "1")
-    private Long personId;
+    @NotNull(message = "El ID del usuario es obligatorio")
+    @Schema(description = "ID del usuario", example = "1")
+    private Long userId;
     
     @NotEmpty(message = "La lista de IDs de roles no puede estar vacía")
     @Schema(description = "Lista de IDs de roles", example = "[1, 2]")

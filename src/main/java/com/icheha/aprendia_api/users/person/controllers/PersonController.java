@@ -30,7 +30,7 @@ public class PersonController {
     }
     
     @PostMapping
-    @Operation(summary = "Crear persona", description = "Crea una nueva persona en el sistema")
+    @Operation(summary = "Crear persona", description = "Crea una nueva persona en el sistema. Si se proporciona contraseña, se creará automáticamente un usuario asociado.")
     public ResponseEntity<BaseResponse<PersonResponseDto>> create(
             @Valid @RequestBody CreatePersonDto createPersonDto) {
         PersonResponseDto person = personService.create(createPersonDto);

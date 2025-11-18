@@ -6,7 +6,7 @@ import com.icheha.aprendia_api.exercises.topics.data.dtos.response.TopicResponse
 import com.icheha.aprendia_api.exercises.topics.data.dtos.response.LearningPathResponseDto;
 import com.icheha.aprendia_api.exercises.topics.data.entities.TopicEntity;
 import com.icheha.aprendia_api.exercises.topics.data.repositories.TopicRepository;
-import com.icheha.aprendia_api.exercises.topics.data.repositories.CuadernilloRepository;
+import com.icheha.aprendia_api.exercises.topics.data.repositories.UnitRepository;
 import com.icheha.aprendia_api.exercises.topics.services.ITopicService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,18 +24,18 @@ public class TopicServiceImpl implements ITopicService {
     private TopicRepository topicRepository;
     
     @Autowired
-    private CuadernilloRepository cuadernilloRepository;
+    private UnitRepository unitRepository;
     
     @Override
     @Transactional
     public TopicResponseDto createTopic(CreateTopicDto createTopicDto) {
-        // Validar que el cuadernillo existe
-        cuadernilloRepository.findById(createTopicDto.getUnitId())
-                .orElseThrow(() -> new EntityNotFoundException("Cuadernillo no encontrado con ID: " + createTopicDto.getUnitId()));
+        // Validar que la unidad existe
+        unitRepository.findById(createTopicDto.getUnitId())
+                .orElseThrow(() -> new EntityNotFoundException("Unidad no encontrada con ID: " + createTopicDto.getUnitId()));
         
         TopicEntity entity = new TopicEntity();
         entity.setNombre(createTopicDto.getName());
-        entity.setIdCuadernillo(createTopicDto.getUnitId());
+        entity.setIdUnidad(createTopicDto.getUnitId());
         
         TopicEntity savedEntity = topicRepository.save(entity);
         
@@ -45,7 +45,7 @@ public class TopicServiceImpl implements ITopicService {
     @Override
     @Transactional(readOnly = true)
     public List<TopicResponseDto> getAllTopics() {
-        List<TopicEntity> entities = topicRepository.findAll();
+        List<TopicEntity> entities = topicRepository.findAllWithRelations();
         return entities.stream()
                 .map(entity -> toResponseDto(entity, null))
                 .collect(Collectors.toList());
@@ -54,7 +54,7 @@ public class TopicServiceImpl implements ITopicService {
     @Override
     @Transactional(readOnly = true)
     public Optional<TopicResponseDto> findById(Long id) {
-        return topicRepository.findById(id)
+        return topicRepository.findByIdWithRelations(id)
                 .map(entity -> toResponseDto(entity, null));
     }
     
@@ -68,10 +68,10 @@ public class TopicServiceImpl implements ITopicService {
             entity.setNombre(updateTopicDto.getName());
         }
         
-        if (updateTopicDto.getCuadernilloId() != null) {
-            cuadernilloRepository.findById(updateTopicDto.getCuadernilloId())
-                    .orElseThrow(() -> new EntityNotFoundException("Cuadernillo no encontrado con ID: " + updateTopicDto.getCuadernilloId()));
-            entity.setIdCuadernillo(updateTopicDto.getCuadernilloId());
+        if (updateTopicDto.getUnitId() != null) {
+            unitRepository.findById(updateTopicDto.getUnitId())
+                    .orElseThrow(() -> new EntityNotFoundException("Unidad no encontrada con ID: " + updateTopicDto.getUnitId()));
+            entity.setIdUnidad(updateTopicDto.getUnitId());
         }
         
         if (updateTopicDto.getDescripcion() != null) {
@@ -109,6 +109,15 @@ public class TopicServiceImpl implements ITopicService {
     }
     
     @Override
+    @Transactional(readOnly = true)
+    public List<TopicResponseDto> getTopicsByUnit(Long unitId) {
+        List<TopicEntity> entities = topicRepository.findByUnidadId(unitId);
+        return entities.stream()
+                .map(entity -> toResponseDto(entity, null))
+                .collect(Collectors.toList());
+    }
+    
+    @Override
     public List<LearningPathResponseDto> getLearningPathsByTopicId(Integer id) {
         // TODO: Implementar lógica para obtener rutas de aprendizaje por tema
         // Por ahora, retornamos datos mock
@@ -125,19 +134,19 @@ public class TopicServiceImpl implements ITopicService {
     }
     
     // Método helper para convertir entidad a DTO
-    private TopicResponseDto toResponseDto(TopicEntity entity, Long cuadernilloId) {
+    private TopicResponseDto toResponseDto(TopicEntity entity, Long unitId) {
         TopicResponseDto dto = new TopicResponseDto();
         dto.setId(entity.getIdTema());
         dto.setName(entity.getNombre());
-        dto.setUnitId(cuadernilloId != null ? cuadernilloId : entity.getIdCuadernillo()); // Usar cuadernilloId como unitId temporalmente
+        dto.setUnitId(unitId != null ? unitId : entity.getIdUnidad());
         
-        // Obtener el nombre del cuadernillo si está disponible
-        if (entity.getCuadernillo() != null) {
-            dto.setUnitName(entity.getCuadernillo().getNombre());
-        } else if (cuadernilloId != null) {
-            dto.setUnitName("Cuadernillo " + cuadernilloId);
+        // Obtener el nombre de la unidad si está disponible
+        if (entity.getUnidad() != null) {
+            dto.setUnitName(entity.getUnidad().getNombre());
+        } else if (unitId != null) {
+            dto.setUnitName("Unidad " + unitId);
         } else {
-            dto.setUnitName("Cuadernillo " + entity.getIdCuadernillo());
+            dto.setUnitName("Unidad " + entity.getIdUnidad());
         }
         
         return dto;

@@ -49,4 +49,28 @@ public class AssetRepositoryAdapter implements IAssetRepository {
                 .map(assetTagsMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public java.util.Optional<Asset> findById(Long id) {
+        return assetRepository.findById(id)
+                .map(assetMapper::toDomain);
+    }
+
+    @Override
+    public java.util.Optional<AssetTags> findByIdWithTags(Long id) {
+        try {
+            com.icheha.aprendia_api.assets.assets.data.dtos.response.FindAssetDB result = assetRepository.getAssetById(id);
+            if (result == null) {
+                return java.util.Optional.empty();
+            }
+            return java.util.Optional.of(assetTagsMapper.toDomain(result));
+        } catch (Exception e) {
+            return java.util.Optional.empty();
+        }
+    }
+
+    @Override
+    public void delete(Long id) {
+        assetRepository.deleteById(id);
+    }
 }

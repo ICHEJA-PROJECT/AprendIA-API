@@ -14,7 +14,7 @@ public interface SchedulePersonRepository extends JpaRepository<SchedulePersonEn
     
     @Query("SELECT sp FROM SchedulePersonEntity sp " +
            "WHERE sp.scheduleId = :scheduleId " +
-           "AND sp.rolePerson.persona.idPersona = :personId")
+           "AND sp.rolePerson.user.persona.idPersona = :personId")
     Optional<SchedulePersonEntity> findByScheduleIdAndPersonId(@Param("scheduleId") Long scheduleId, 
                                                                  @Param("personId") Long personId);
     
@@ -22,7 +22,9 @@ public interface SchedulePersonRepository extends JpaRepository<SchedulePersonEn
            "JOIN FETCH sp.schedule " +
            "JOIN FETCH sp.rolePerson rp " +
            "JOIN FETCH rp.rol " +
-           "WHERE sp.rolePerson.persona.idPersona = :personId")
+           "JOIN FETCH rp.user u " +
+           "JOIN FETCH u.persona " +
+           "WHERE rp.user.persona.idPersona = :personId")
     List<SchedulePersonEntity> findByPersonIdWithRelations(@Param("personId") Long personId);
 }
 

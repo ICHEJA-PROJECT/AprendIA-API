@@ -14,16 +14,12 @@ public class Student {
     private final Persona persona;
     private final Persona teacher; // Educador (puede ser null)
     private final String qrPath;
-    private final Progenitor father;
-    private final Progenitor mother;
     
     private Student(Builder builder) {
         this.id = builder.id;
         this.persona = builder.persona;
         this.teacher = builder.teacher;
         this.qrPath = builder.qrPath;
-        this.father = builder.father;
-        this.mother = builder.mother;
     }
     
     // Getters
@@ -41,14 +37,6 @@ public class Student {
     
     public String getQrPath() {
         return qrPath;
-    }
-    
-    public Progenitor getFather() {
-        return father;
-    }
-    
-    public Progenitor getMother() {
-        return mother;
     }
     
     public boolean hasTeacher() {
@@ -84,8 +72,6 @@ public class Student {
         private Persona persona;
         private Persona teacher;
         private String qrPath;
-        private Progenitor father;
-        private Progenitor mother;
         
         public Builder id(Long id) {
             this.id = id;
@@ -104,16 +90,6 @@ public class Student {
         
         public Builder qrPath(String qrPath) {
             this.qrPath = qrPath;
-            return this;
-        }
-        
-        public Builder father(Progenitor father) {
-            this.father = father;
-            return this;
-        }
-        
-        public Builder mother(Progenitor mother) {
-            this.mother = mother;
             return this;
         }
         

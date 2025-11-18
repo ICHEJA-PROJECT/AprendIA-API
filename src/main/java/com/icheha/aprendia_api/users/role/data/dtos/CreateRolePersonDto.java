@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "DTO para asignar un rol a una persona")
+@Schema(description = "DTO para asignar un rol a un usuario")
 public class CreateRolePersonDto {
     
-    @NotNull(message = "El ID de la persona es obligatorio")
-    @Schema(description = "ID de la persona", example = "1")
-    private Long personId;
+    @NotNull(message = "El ID del usuario es obligatorio")
+    @Schema(description = "ID del usuario", example = "1")
+    private Long userId;
     
     @NotNull(message = "El ID del rol es obligatorio")
     @Schema(description = "ID del rol", example = "1")

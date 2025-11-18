@@ -15,7 +15,7 @@ public class UpdateEjercicioPuntajeDto {
     
     private Long idEjercicio;
     
-    private Long idUser;
+    private Long idPersona;
     
     @DecimalMin(value = "0.0", message = "El puntaje debe ser mayor o igual a 0")
     private BigDecimal puntaje;

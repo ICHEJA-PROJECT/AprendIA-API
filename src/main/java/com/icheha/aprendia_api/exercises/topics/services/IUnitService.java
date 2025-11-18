@@ -18,4 +18,6 @@ public interface IUnitService {
     UnitResponseDto update(Long id, UpdateUnitDto updateUnitDto);
     
     void delete(Long id);
+    
+    List<UnitResponseDto> getUnitsByCuadernillo(Long cuadernilloId);
 }

@@ -118,12 +118,12 @@ public class HabilidadPuntajeController {
         return response.buildResponseEntity();
     }
     
-    @GetMapping("/usuario/{idUser}")
-    @Operation(summary = "Obtener habilidad puntajes por usuario", description = "Obtener todos los registros de puntajes de habilidades para un usuario específico")
+    @GetMapping("/persona/{idPersona}")
+    @Operation(summary = "Obtener habilidad puntajes por persona", description = "Obtener todos los registros de puntajes de habilidades para una persona específica")
     @ApiResponse(responseCode = "200", description = "Habilidad puntajes obtenidos exitosamente")
-    public ResponseEntity<BaseResponse<List<HabilidadPuntajeResponseDto>>> findByUserId(
-            @Parameter(description = "ID del usuario") @PathVariable Long idUser) {
-        List<HabilidadPuntajeResponseDto> habilidadPuntajes = habilidadPuntajeService.findByUserId(idUser);
+    public ResponseEntity<BaseResponse<List<HabilidadPuntajeResponseDto>>> findByPersonaId(
+            @Parameter(description = "ID de la persona") @PathVariable Long idPersona) {
+        List<HabilidadPuntajeResponseDto> habilidadPuntajes = habilidadPuntajeService.findByPersonaId(idPersona);
         BaseResponse<List<HabilidadPuntajeResponseDto>> response = new BaseResponse<>(
                 true, habilidadPuntajes, "Habilidad puntajes obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();

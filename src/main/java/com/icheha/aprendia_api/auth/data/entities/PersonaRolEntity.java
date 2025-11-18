@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import com.icheha.aprendia_api.users.person.data.entities.PersonaEntity;
 @Entity
 @Table(name = "persona_rol")
 @Data
@@ -26,7 +26,7 @@ public class PersonaRolEntity {
     @JoinColumn(name = "id_rol", insertable = false, updatable = false)
     private RolEntity rol;
 
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = com.icheha.aprendia_api.users.person.data.entities.PersonaEntity.class)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity = PersonaEntity.class)
     @JoinColumn(name = "id_persona", insertable = false, updatable = false)
-    private com.icheha.aprendia_api.users.person.data.entities.PersonaEntity persona;
+    private PersonaEntity persona;
 }

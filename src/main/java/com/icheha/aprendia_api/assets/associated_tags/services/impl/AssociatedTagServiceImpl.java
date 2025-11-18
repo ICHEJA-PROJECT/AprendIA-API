@@ -25,4 +25,9 @@ public class AssociatedTagServiceImpl implements IAssociatedTagService {
             associatedTagRepository.save(associatedTagEntity);
         }
     }
+
+    @Override
+    public void removeAllTagsFromAsset(Long assetId) {
+        associatedTagRepository.deleteByAssetId(assetId);
+    }
 }

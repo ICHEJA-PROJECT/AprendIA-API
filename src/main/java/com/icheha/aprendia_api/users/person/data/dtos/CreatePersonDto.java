@@ -57,8 +57,7 @@ public class CreatePersonDto {
     @Schema(description = "ID del asentamiento", example = "416")
     private Long settlementId;
     
-    @NotBlank(message = "La contraseña es obligatoria")
-    @Schema(description = "Contraseña de la persona", example = "12345678")
+    @Schema(description = "Contraseña de la persona (opcional, si se proporciona se creará un usuario automáticamente)", example = "12345678")
     private String password;
     
     @NotBlank(message = "La imagen de perfil es obligatoria")

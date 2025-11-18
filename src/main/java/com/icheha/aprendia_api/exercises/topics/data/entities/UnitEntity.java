@@ -5,9 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * Entidad JPA para Unit
  * Mapea a la tabla 'unidad'
+ * Una unidad pertenece a un cuadernillo y puede tener varios temas
  */
 @Entity
 @Table(name = "unidad")
@@ -27,9 +30,14 @@ public class UnitEntity {
     @Column(name = "descripcion", columnDefinition = "TEXT", nullable = false)
     private String descripcion;
 
+    @Column(name = "id_cuadernillo", nullable = false)
+    private Long idCuadernillo;
+
     // Relaciones
-    // Nota: La relación con TopicEntity se eliminó porque la tabla 'tema' no tiene columna 'id_unidad'
-    // Si se necesita esta relación en el futuro, agregar la columna 'id_unidad' a la tabla 'tema'
-    // @OneToMany(mappedBy = "unidad", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    // private List<TopicEntity> temas;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_cuadernillo", insertable = false, updatable = false)
+    private CuadernilloEntity cuadernillo;
+
+    @OneToMany(mappedBy = "unidad", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TopicEntity> temas;
 }

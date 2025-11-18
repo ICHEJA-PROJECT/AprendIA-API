@@ -14,8 +14,8 @@ public class UpdateTopicDto {
     @Schema(description = "Nombre del tema (opcional)", example = "Caligrafía Avanzada")
     private String name;
 
-    @Schema(description = "ID del cuadernillo (opcional)", example = "1")
-    private Long cuadernilloId;
+    @Schema(description = "ID de la unidad (opcional)", example = "1")
+    private Long unitId;
 
     @Schema(description = "Descripción del tema (opcional)", example = "Ejercicios avanzados de caligrafía")
     private String descripcion;

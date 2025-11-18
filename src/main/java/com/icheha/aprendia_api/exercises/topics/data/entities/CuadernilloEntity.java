@@ -46,7 +46,7 @@ public class CuadernilloEntity {
     private LocalDateTime updateAt;
     
     @OneToMany(mappedBy = "cuadernillo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TopicEntity> temas;
+    private List<UnitEntity> unidades;
     
     @PrePersist
     protected void onCreate() {

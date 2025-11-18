@@ -28,8 +28,6 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long> {
     @Query("SELECT s FROM StudentEntity s " +
            "LEFT JOIN FETCH s.persona p " +
            "LEFT JOIN FETCH s.teacher " +
-           "LEFT JOIN FETCH s.father " +
-           "LEFT JOIN FETCH s.mother " +
            "WHERE s.id = :id")
     Optional<StudentEntity> findByIdWithRelations(@Param("id") Long id);
     
@@ -40,9 +38,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long> {
     
     @Query("SELECT s FROM StudentEntity s " +
            "LEFT JOIN FETCH s.persona p " +
-           "LEFT JOIN FETCH s.teacher " +
-           "LEFT JOIN FETCH s.father " +
-           "LEFT JOIN FETCH s.mother")
+           "LEFT JOIN FETCH s.teacher")
     List<StudentEntity> findAllWithRelations();
 }
 

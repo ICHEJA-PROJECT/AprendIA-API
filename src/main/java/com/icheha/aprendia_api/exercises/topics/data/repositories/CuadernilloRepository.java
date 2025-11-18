@@ -12,18 +12,21 @@ import java.util.Optional;
 @Repository
 public interface CuadernilloRepository extends JpaRepository<CuadernilloEntity, Long> {
     
-    @Query("SELECT c FROM CuadernilloEntity c " +
+    @Query("SELECT DISTINCT c FROM CuadernilloEntity c " +
            "LEFT JOIN FETCH c.rutaAprendizaje " +
+           "LEFT JOIN FETCH c.unidades " +
            "WHERE c.idCuadernillo = :id")
     Optional<CuadernilloEntity> findByIdWithRelations(@Param("id") Long id);
     
-    @Query("SELECT c FROM CuadernilloEntity c " +
+    @Query("SELECT DISTINCT c FROM CuadernilloEntity c " +
            "LEFT JOIN FETCH c.rutaAprendizaje " +
+           "LEFT JOIN FETCH c.unidades " +
            "WHERE c.idRutaAprendizaje = :idRutaAprendizaje")
     List<CuadernilloEntity> findByRutaAprendizaje(@Param("idRutaAprendizaje") Long idRutaAprendizaje);
     
-    @Query("SELECT c FROM CuadernilloEntity c " +
-           "LEFT JOIN FETCH c.rutaAprendizaje")
+    @Query("SELECT DISTINCT c FROM CuadernilloEntity c " +
+           "LEFT JOIN FETCH c.rutaAprendizaje " +
+           "LEFT JOIN FETCH c.unidades")
     List<CuadernilloEntity> findAllWithRelations();
     
     @Query("SELECT c FROM CuadernilloEntity c " +

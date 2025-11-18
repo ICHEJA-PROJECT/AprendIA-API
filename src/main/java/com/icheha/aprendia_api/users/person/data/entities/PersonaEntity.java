@@ -66,9 +66,6 @@ public class PersonaEntity {
     @Column(name = "profile_image_path", length = 500)
     private String profileImagePath;
     
-    @Column(name = "password", length = 255)
-    private String password;
-    
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
@@ -82,17 +79,11 @@ public class PersonaEntity {
     @JsonIgnore
     private DomicilioEntity domicilio;
     
-    @OneToOne(mappedBy = "persona", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "persona", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, fetch = FetchType.LAZY, orphanRemoval = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonIgnore
-    private PersonaPacienteEntity personaPaciente;
-    
-    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @JsonIgnore
-    private List<com.icheha.aprendia_api.auth.data.entities.PersonaRolEntity> personaRoles;
+    private com.icheha.aprendia_api.auth.data.entities.UserEntity user;
     
     @PrePersist
     protected void onCreate() {

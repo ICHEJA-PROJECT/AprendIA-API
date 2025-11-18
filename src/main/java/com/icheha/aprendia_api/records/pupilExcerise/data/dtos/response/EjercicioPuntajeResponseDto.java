@@ -14,7 +14,7 @@ public class EjercicioPuntajeResponseDto {
     
     private Long idEjercicioPuntaje;
     private Long idEjercicio;
-    private Long idUser;
+    private Long idPersona;
     private BigDecimal puntaje;
     private LocalDateTime fechaCompletado;
     private LocalDateTime createdAt;

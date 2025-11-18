@@ -7,6 +7,7 @@ import com.icheha.aprendia_api.users.cell.domain.entities.Cell;
 import com.icheha.aprendia_api.users.cell.domain.repositories.ICellRepository;
 import com.icheha.aprendia_api.users.cell.domain.repositories.IInstitutionRepository;
 import com.icheha.aprendia_api.users.cell.services.ICellService;
+import com.icheha.aprendia_api.auth.data.repositories.UserRepository;
 import com.icheha.aprendia_api.users.person.domain.repositories.IPersonaRepository;
 import com.icheha.aprendia_api.users.role.services.IRolePersonService;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,15 +28,18 @@ public class CellServiceImpl implements ICellService {
     private final IInstitutionRepository institutionRepository;
     private final IPersonaRepository personaRepository;
     private final IRolePersonService rolePersonService;
+    private final UserRepository userRepository;
     
     public CellServiceImpl(ICellRepository cellRepository,
                          IInstitutionRepository institutionRepository,
                          @Qualifier("userPersonaRepositoryImpl") IPersonaRepository personaRepository,
-                         IRolePersonService rolePersonService) {
+                         IRolePersonService rolePersonService,
+                         UserRepository userRepository) {
         this.cellRepository = cellRepository;
         this.institutionRepository = institutionRepository;
         this.personaRepository = personaRepository;
         this.rolePersonService = rolePersonService;
+        this.userRepository = userRepository;
     }
     
     @Override
@@ -47,7 +51,11 @@ public class CellServiceImpl implements ICellService {
                         "Coordinador no encontrado con ID: " + createCellDto.getCoordinatorId()));
         
         // Validar que el coordinador tiene el rol de coordinador (rol ID 3)
-        var coordinatorRoles = rolePersonService.findByPersonId(createCellDto.getCoordinatorId());
+        Long userId = userRepository.findByIdPersona(createCellDto.getCoordinatorId())
+                .map(u -> u.getIdUser())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                        "Usuario no encontrado para la persona con ID: " + createCellDto.getCoordinatorId()));
+        var coordinatorRoles = rolePersonService.findByUserId(userId);
         boolean hasCoordinatorRole = coordinatorRoles.stream()
                 .anyMatch(role -> role.getRoleId() != null && role.getRoleId() == 3L);
         
@@ -110,7 +118,11 @@ public class CellServiceImpl implements ICellService {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
                             "Coordinador no encontrado con ID: " + updateCellDto.getCoordinatorId()));
             
-            var coordinatorRoles = rolePersonService.findByPersonId(updateCellDto.getCoordinatorId());
+            Long userId = userRepository.findByIdPersona(updateCellDto.getCoordinatorId())
+                    .map(u -> u.getIdUser())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                            "Usuario no encontrado para la persona con ID: " + updateCellDto.getCoordinatorId()));
+            var coordinatorRoles = rolePersonService.findByUserId(userId);
             boolean hasCoordinatorRole = coordinatorRoles.stream()
                     .anyMatch(role -> role.getRoleId() != null && role.getRoleId() == 3L);
             

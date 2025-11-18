@@ -1,7 +1,6 @@
 package com.icheha.aprendia_api.users.student.data.dtos;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,13 +19,11 @@ public class UpdateStudentDto {
     @Schema(description = "Ruta del código QR (opcional)")
     private String qrPath;
     
-    @Valid
-    @Schema(description = "Datos del padre (opcional)")
-    private CreateProgenitorDto father;
+    @Schema(description = "ID de la persona que es el padre (opcional)", example = "2")
+    private Long fatherPersonId;
     
-    @Valid
-    @Schema(description = "Datos de la madre (opcional)")
-    private CreateProgenitorDto mother;
+    @Schema(description = "ID de la persona que es la madre (opcional)", example = "3")
+    private Long motherPersonId;
     
     @Schema(description = "IDs de discapacidades del estudiante (opcional)")
     private List<Long> impairments;

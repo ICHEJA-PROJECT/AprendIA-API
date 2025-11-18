@@ -48,7 +48,9 @@ services:
       SERVER_SERVLET_CONTEXT_PATH: ${SERVER_CONTEXT_PATH}
       
       # Configuración de Swagger (formato con doble guion bajo para propiedades anidadas)
-      SWAGGER__SERVER__URL: http://localhost:${APP_PORT}
+      # Nota: Si SWAGGER_SERVER_URL no está definida, se construye usando APP_PORT
+      SWAGGER__SERVER__URL: ${SWAGGER_SERVER_URL:-http://localhost:8080}
+      SWAGGER_PRODUCTION_URL: ${SWAGGER_PRODUCTION_URL:-}
       
       # Configuración de logging
       LOGGING_LEVEL_COM_ICHEHA_APRENDIA_API: ${LOGGING_LEVEL_APP}

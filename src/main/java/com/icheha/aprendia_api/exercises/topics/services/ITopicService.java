@@ -24,6 +24,8 @@ public interface ITopicService {
     
     List<TopicResponseDto> getTopicsByPupil(Integer id);
     
+    List<TopicResponseDto> getTopicsByUnit(Long unitId);
+    
     List<LearningPathResponseDto> getLearningPathsByTopicId(Integer id);
     
     List<LearningPathResponseDto> getLearningPathByTopic(Integer id);

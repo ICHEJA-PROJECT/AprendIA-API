@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/role-persons")
-@Tag(name = "2.03. Role Persons", description = "API para gestión de relaciones persona-rol")
+@RequestMapping("/role-users")
+@Tag(name = "2.03. Role Users", description = "API para gestión de relaciones usuario-rol")
 public class RolePersonController {
     
     private final IRolePersonService rolePersonService;
@@ -30,7 +30,7 @@ public class RolePersonController {
     }
     
     @PostMapping
-    @Operation(summary = "Asignar rol a persona", description = "Asigna un rol a una persona")
+    @Operation(summary = "Asignar rol a usuario", description = "Asigna un rol a un usuario")
     public ResponseEntity<BaseResponse<RolePersonResponseDto>> create(@Valid @RequestBody CreateRolePersonDto createRolePersonDto) {
         RolePersonResponseDto response = rolePersonService.create(createRolePersonDto);
         BaseResponse<RolePersonResponseDto> baseResponse = new BaseResponse<>(
@@ -39,7 +39,7 @@ public class RolePersonController {
     }
     
     @PostMapping("/many")
-    @Operation(summary = "Asignar múltiples roles a persona", description = "Asigna múltiples roles a una persona")
+    @Operation(summary = "Asignar múltiples roles a usuario", description = "Asigna múltiples roles a un usuario")
     public ResponseEntity<BaseResponse<List<RolePersonResponseDto>>> createMany(@Valid @RequestBody CreateManyRolePersonDto createManyRolePersonDto) {
         List<RolePersonResponseDto> response = rolePersonService.createMany(createManyRolePersonDto);
         BaseResponse<List<RolePersonResponseDto>> baseResponse = new BaseResponse<>(
@@ -48,7 +48,7 @@ public class RolePersonController {
     }
     
     @GetMapping("/{id}")
-    @Operation(summary = "Obtener relación persona-rol por ID", description = "Obtiene una relación persona-rol por su ID")
+    @Operation(summary = "Obtener relación usuario-rol por ID", description = "Obtiene una relación usuario-rol por su ID")
     public ResponseEntity<BaseResponse<RolePersonResponseDto>> findById(
             @Parameter(description = "ID de la relación", required = true) @PathVariable Long id) {
         Optional<RolePersonResponseDto> rolePerson = rolePersonService.findById(id);
@@ -63,11 +63,11 @@ public class RolePersonController {
         }
     }
     
-    @GetMapping("/person/{personId}")
-    @Operation(summary = "Obtener roles de una persona", description = "Obtiene todos los roles asignados a una persona")
-    public ResponseEntity<BaseResponse<List<RolePersonResponseDto>>> findByPersonId(
-            @Parameter(description = "ID de la persona", required = true) @PathVariable Long personId) {
-        List<RolePersonResponseDto> roles = rolePersonService.findByPersonId(personId);
+    @GetMapping("/user/{userId}")
+    @Operation(summary = "Obtener roles de un usuario", description = "Obtiene todos los roles asignados a un usuario")
+    public ResponseEntity<BaseResponse<List<RolePersonResponseDto>>> findByUserId(
+            @Parameter(description = "ID del usuario", required = true) @PathVariable Long userId) {
+        List<RolePersonResponseDto> roles = rolePersonService.findByUserId(userId);
         BaseResponse<List<RolePersonResponseDto>> response = new BaseResponse<>(
                 true, roles, "Roles obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();

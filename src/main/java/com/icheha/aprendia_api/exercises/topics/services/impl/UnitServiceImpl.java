@@ -5,6 +5,7 @@ import com.icheha.aprendia_api.exercises.topics.data.dtos.request.UpdateUnitDto;
 import com.icheha.aprendia_api.exercises.topics.data.dtos.response.UnitResponseDto;
 import com.icheha.aprendia_api.exercises.topics.data.entities.UnitEntity;
 import com.icheha.aprendia_api.exercises.topics.data.repositories.UnitRepository;
+import com.icheha.aprendia_api.exercises.topics.data.repositories.CuadernilloRepository;
 import com.icheha.aprendia_api.exercises.topics.services.IUnitService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,17 +22,21 @@ public class UnitServiceImpl implements IUnitService {
     @Autowired
     private UnitRepository unitRepository;
     
+    @Autowired
+    private CuadernilloRepository cuadernilloRepository;
+    
     @Override
+    @Transactional
     public UnitResponseDto createUnit(CreateUnitDto createUnitDto) {
-        // Verificar si ya existe una unidad con ese nombre
-        if (unitRepository.existsByNombre(createUnitDto.getName())) {
-            throw new RuntimeException("Ya existe una unidad con el nombre: " + createUnitDto.getName());
-        }
+        // Validar que el cuadernillo existe
+        cuadernilloRepository.findById(createUnitDto.getCuadernilloId())
+                .orElseThrow(() -> new EntityNotFoundException("Cuadernillo no encontrado con ID: " + createUnitDto.getCuadernilloId()));
         
         // Crear nueva entidad
         UnitEntity entity = new UnitEntity();
         entity.setNombre(createUnitDto.getName());
         entity.setDescripcion(createUnitDto.getDescription());
+        entity.setIdCuadernillo(createUnitDto.getCuadernilloId());
         
         // Guardar en la base de datos
         UnitEntity savedEntity = unitRepository.save(entity);
@@ -43,7 +48,7 @@ public class UnitServiceImpl implements IUnitService {
     @Override
     @Transactional(readOnly = true)
     public List<UnitResponseDto> getAllUnits() {
-        List<UnitEntity> entities = unitRepository.findAll();
+        List<UnitEntity> entities = unitRepository.findAllWithRelations();
         return entities.stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
@@ -52,7 +57,7 @@ public class UnitServiceImpl implements IUnitService {
     @Override
     @Transactional(readOnly = true)
     public Optional<UnitResponseDto> findById(Long id) {
-        return unitRepository.findById(id)
+        return unitRepository.findByIdWithRelations(id)
                 .map(this::toResponseDto);
     }
     
@@ -70,6 +75,12 @@ public class UnitServiceImpl implements IUnitService {
             entity.setDescripcion(updateUnitDto.getDescription());
         }
         
+        if (updateUnitDto.getCuadernilloId() != null) {
+            cuadernilloRepository.findById(updateUnitDto.getCuadernilloId())
+                    .orElseThrow(() -> new EntityNotFoundException("Cuadernillo no encontrado con ID: " + updateUnitDto.getCuadernilloId()));
+            entity.setIdCuadernillo(updateUnitDto.getCuadernilloId());
+        }
+        
         UnitEntity updatedEntity = unitRepository.save(entity);
         return toResponseDto(updatedEntity);
     }
@@ -82,12 +93,30 @@ public class UnitServiceImpl implements IUnitService {
         unitRepository.delete(entity);
     }
     
+    @Override
+    @Transactional(readOnly = true)
+    public List<UnitResponseDto> getUnitsByCuadernillo(Long cuadernilloId) {
+        List<UnitEntity> entities = unitRepository.findByCuadernilloId(cuadernilloId);
+        return entities.stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
+    }
+    
     // Método helper para convertir entidad a DTO
     private UnitResponseDto toResponseDto(UnitEntity entity) {
         UnitResponseDto dto = new UnitResponseDto();
         dto.setId(entity.getIdUnidad());
         dto.setName(entity.getNombre());
         dto.setDescription(entity.getDescripcion());
+        dto.setCuadernilloId(entity.getIdCuadernillo());
+        
+        // Obtener el nombre del cuadernillo si está disponible
+        if (entity.getCuadernillo() != null) {
+            dto.setCuadernilloNombre(entity.getCuadernillo().getNombre());
+        } else {
+            dto.setCuadernilloNombre("Cuadernillo " + entity.getIdCuadernillo());
+        }
+        
         return dto;
     }
 }
