@@ -21,6 +21,6 @@ public interface IEjercicioPuntajeService {
     
     List<EjercicioPuntajeResponseDto> findByEjercicioId(Long idEjercicio);
     
-    List<EjercicioPuntajeResponseDto> findByUserId(Long idUser);
+    List<EjercicioPuntajeResponseDto> findByPersonaId(Long idPersona);
 }
 

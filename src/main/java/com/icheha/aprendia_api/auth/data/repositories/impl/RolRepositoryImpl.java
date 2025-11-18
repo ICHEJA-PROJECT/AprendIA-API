@@ -1,8 +1,9 @@
 package com.icheha.aprendia_api.auth.data.repositories.impl;
 
-import com.icheha.aprendia_api.auth.data.entities.PersonaRolEntity;
-import com.icheha.aprendia_api.auth.data.mappers.PersonaRolMapper;
-import com.icheha.aprendia_api.auth.data.repositories.PersonaRolRepository;
+import com.icheha.aprendia_api.auth.data.entities.UserRolEntity;
+import com.icheha.aprendia_api.auth.data.mappers.UserRolMapper;
+import com.icheha.aprendia_api.auth.data.repositories.UserRolRepository;
+import com.icheha.aprendia_api.auth.data.repositories.UserRepository;
 import com.icheha.aprendia_api.auth.domain.entities.PersonaRol;
 import com.icheha.aprendia_api.auth.domain.repositories.IRolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,38 +16,51 @@ import java.util.Optional;
 public class RolRepositoryImpl implements IRolRepository {
     
     @Autowired
-    private PersonaRolRepository personaRolRepository;
+    private UserRolRepository userRolRepository;
     
     @Autowired
-    private PersonaRolMapper personaRolMapper;
+    private UserRepository userRepository;
+    
+    @Autowired
+    private UserRolMapper userRolMapper;
     
     @Override
     @Transactional(readOnly = true)
     public Optional<PersonaRol> findByPersonaId(Long personaId) {
-        return personaRolRepository.findByPersonaId(personaId)
-                .map(personaRolMapper::toDomain);
+        // Buscar el usuario por idPersona y luego obtener sus roles
+        return userRepository.findByIdPersona(personaId)
+                .flatMap(user -> userRolRepository.findAllByUserId(user.getIdUser()).stream()
+                        .map(userRolMapper::toDomain)
+                        .findFirst());
     }
     
     @Override
     public Optional<PersonaRol> findById(Long id) {
-        return personaRolRepository.findById(id)
-                .map(personaRolMapper::toDomain);
+        return userRolRepository.findById(id)
+                .map(userRolMapper::toDomain);
     }
     
     @Override
     public PersonaRol save(PersonaRol personaRol) {
-        PersonaRolEntity entity = personaRolMapper.toEntity(personaRol);
-        PersonaRolEntity savedEntity = personaRolRepository.save(entity);
-        return personaRolMapper.toDomain(savedEntity);
+        UserRolEntity entity = userRolMapper.toEntity(personaRol);
+        // Necesitamos establecer la relación con UserEntity
+        if (personaRol.getIdPersona() != null) {
+            userRepository.findById(personaRol.getIdPersona())
+                    .ifPresent(entity::setUser);
+        }
+        UserRolEntity savedEntity = userRolRepository.save(entity);
+        return userRolMapper.toDomain(savedEntity);
     }
     
     @Override
     public void deleteById(Long id) {
-        personaRolRepository.deleteById(id);
+        userRolRepository.deleteById(id);
     }
     
     @Override
     public void deleteByPersonaId(Long personaId) {
-        personaRolRepository.deleteByPersonaId(personaId);
+        // Buscar el usuario por idPersona y eliminar sus roles
+        userRepository.findByIdPersona(personaId)
+                .ifPresent(user -> userRolRepository.deleteByUserId(user.getIdUser()));
     }
 }

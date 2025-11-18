@@ -18,18 +18,18 @@ public interface HabilidadPuntajeRepository extends JpaRepository<HabilidadPunta
     @Query("SELECT hp FROM HabilidadPuntajeEntity hp WHERE hp.idHabilidad = :idHabilidad")
     List<HabilidadPuntajeEntity> findByHabilidadId(@Param("idHabilidad") Long idHabilidad);
     
-    @Query("SELECT hp FROM HabilidadPuntajeEntity hp WHERE hp.idUser = :idUser")
-    List<HabilidadPuntajeEntity> findByUserId(@Param("idUser") Long idUser);
+    @Query("SELECT hp FROM HabilidadPuntajeEntity hp WHERE hp.idPersona = :idPersona")
+    List<HabilidadPuntajeEntity> findByPersonaId(@Param("idPersona") Long idPersona);
     
-    @Query("SELECT hp FROM HabilidadPuntajeEntity hp WHERE hp.idEjercicio = :idEjercicio AND hp.idHabilidad = :idHabilidad AND hp.idUser = :idUser")
-    Optional<HabilidadPuntajeEntity> findByEjercicioAndHabilidadAndUser(
+    @Query("SELECT hp FROM HabilidadPuntajeEntity hp WHERE hp.idEjercicio = :idEjercicio AND hp.idHabilidad = :idHabilidad AND hp.idPersona = :idPersona")
+    Optional<HabilidadPuntajeEntity> findByEjercicioAndHabilidadAndPersona(
             @Param("idEjercicio") Long idEjercicio,
             @Param("idHabilidad") Long idHabilidad,
-            @Param("idUser") Long idUser);
+            @Param("idPersona") Long idPersona);
     
-    @Query("SELECT hp FROM HabilidadPuntajeEntity hp WHERE hp.idEjercicio = :idEjercicio AND hp.idUser = :idUser")
-    List<HabilidadPuntajeEntity> findByEjercicioAndUser(
+    @Query("SELECT hp FROM HabilidadPuntajeEntity hp WHERE hp.idEjercicio = :idEjercicio AND hp.idPersona = :idPersona")
+    List<HabilidadPuntajeEntity> findByEjercicioAndPersona(
             @Param("idEjercicio") Long idEjercicio,
-            @Param("idUser") Long idUser);
+            @Param("idPersona") Long idPersona);
 }
 

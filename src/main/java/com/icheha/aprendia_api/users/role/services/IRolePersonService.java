@@ -15,6 +15,6 @@ public interface IRolePersonService {
     
     Optional<RolePersonResponseDto> findById(Long id);
     
-    List<RolePersonResponseDto> findByPersonId(Long personId);
+    List<RolePersonResponseDto> findByUserId(Long userId);
 }
 

@@ -1,6 +1,7 @@
 package com.icheha.aprendia_api.users.student.controllers;
 
 import com.icheha.aprendia_api.core.dtos.response.BaseResponse;
+import com.icheha.aprendia_api.core.utils.SecurityUtils;
 import com.icheha.aprendia_api.users.student.data.dtos.CreateStudentDto;
 import com.icheha.aprendia_api.users.student.data.dtos.RegisterStudentResponseDto;
 import com.icheha.aprendia_api.users.student.data.dtos.StudentResponseDto;
@@ -9,6 +10,7 @@ import com.icheha.aprendia_api.users.student.services.IStudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,17 +26,38 @@ import java.util.Optional;
 public class StudentController {
     
     private final IStudentService studentService;
+    private final SecurityUtils securityUtils;
     
     @Autowired
-    public StudentController(IStudentService studentService) {
+    public StudentController(IStudentService studentService, SecurityUtils securityUtils) {
         this.studentService = studentService;
+        this.securityUtils = securityUtils;
     }
     
     @PostMapping
-    @Operation(summary = "Crear estudiante", description = "Crea un nuevo estudiante en el sistema y genera su código QR")
+    @Operation(
+        summary = "Crear estudiante", 
+        description = "Crea un nuevo estudiante en el sistema y genera su código QR. " +
+                     "Si se proporciona un token JWT válido, se registra el usuario que creó el estudiante. " +
+                     "Si no hay token, el campo created_by será null."
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "201", 
+        description = "Estudiante creado exitosamente"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "400", 
+        description = "Datos inválidos o errores de validación"
+    )
     public ResponseEntity<BaseResponse<RegisterStudentResponseDto>> create(
-            @Valid @RequestBody CreateStudentDto createStudentDto) {
-        RegisterStudentResponseDto response = studentService.create(createStudentDto);
+            @Valid @RequestBody CreateStudentDto createStudentDto,
+            HttpServletRequest request) {
+        // Obtener el ID del usuario autenticado que crea el estudiante (puede ser null si no hay JWT)
+        Long createdByUserId = securityUtils.getCurrentUserId(request);
+        
+        // Crear el estudiante (createdByUserId puede ser null si no hay token JWT)
+        RegisterStudentResponseDto response = studentService.create(createStudentDto, createdByUserId);
+        
         BaseResponse<RegisterStudentResponseDto> baseResponse = new BaseResponse<>(
                 true, response, "Estudiante creado exitosamente", HttpStatus.CREATED);
         return baseResponse.buildResponseEntity();

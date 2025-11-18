@@ -23,6 +23,6 @@ public interface IHabilidadPuntajeService {
     
     List<HabilidadPuntajeResponseDto> findByHabilidadId(Long idHabilidad);
     
-    List<HabilidadPuntajeResponseDto> findByUserId(Long idUser);
+    List<HabilidadPuntajeResponseDto> findByPersonaId(Long idPersona);
 }
 

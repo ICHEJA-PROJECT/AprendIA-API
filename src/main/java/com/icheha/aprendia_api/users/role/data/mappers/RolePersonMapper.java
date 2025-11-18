@@ -1,7 +1,7 @@
 package com.icheha.aprendia_api.users.role.data.mappers;
 
-import com.icheha.aprendia_api.auth.data.entities.PersonaRolEntity;
-import com.icheha.aprendia_api.auth.data.mappers.PersonaRolMapper;
+import com.icheha.aprendia_api.auth.data.entities.UserRolEntity;
+import com.icheha.aprendia_api.auth.data.mappers.UserRolMapper;
 import com.icheha.aprendia_api.auth.domain.entities.PersonaRol;
 import com.icheha.aprendia_api.users.role.data.dtos.RolePersonResponseDto;
 import org.springframework.stereotype.Component;
@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class RolePersonMapper {
     
-    private final PersonaRolMapper personaRolMapper;
+    private final UserRolMapper userRolMapper;
     
-    public RolePersonMapper(PersonaRolMapper personaRolMapper) {
-        this.personaRolMapper = personaRolMapper;
+    public RolePersonMapper(UserRolMapper userRolMapper) {
+        this.userRolMapper = userRolMapper;
     }
     
     public RolePersonResponseDto toResponseDto(PersonaRol personaRol) {
@@ -20,18 +20,18 @@ public class RolePersonMapper {
         
         RolePersonResponseDto dto = new RolePersonResponseDto();
         dto.setId(personaRol.getIdPersonaRol());
-        dto.setPersonId(personaRol.getIdPersona());
+        dto.setPersonId(personaRol.getIdPersona()); // Este es el userId ahora
         dto.setRoleId(personaRol.getIdRol());
         dto.setRoleName(personaRol.getRol() != null ? personaRol.getRol().getNombre() : null);
         return dto;
     }
     
-    public PersonaRol toDomain(PersonaRolEntity entity) {
-        return personaRolMapper.toDomain(entity);
+    public PersonaRol toDomain(UserRolEntity entity) {
+        return userRolMapper.toDomain(entity);
     }
     
-    public PersonaRolEntity toEntity(PersonaRol domain) {
-        return personaRolMapper.toEntity(domain);
+    public UserRolEntity toEntity(PersonaRol domain) {
+        return userRolMapper.toEntity(domain);
     }
 }
 

@@ -16,5 +16,8 @@ public class UpdateUnitDto {
 
     @Schema(description = "Descripción de la unidad (opcional)", example = "Descripción actualizada")
     private String description;
+
+    @Schema(description = "ID del cuadernillo (opcional)", example = "1")
+    private Long cuadernilloId;
 }
 

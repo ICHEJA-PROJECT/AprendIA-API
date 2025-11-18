@@ -7,7 +7,9 @@ import java.util.Optional;
 
 public interface IStudentRepository {
     
-    Student create(Student student, Long personId, Long teacherId, Long fatherId, Long motherId, String qrPath);
+    Student create(Student student, Long personId, Long teacherId, String qrPath);
+    
+    Student create(Student student, Long personId, Long teacherId, String qrPath, Long createdByUserId);
     
     List<Student> findByTeacher(Long teacherId);
     
@@ -23,7 +25,7 @@ public interface IStudentRepository {
     
     List<String> findUniqueNames();
     
-    Student update(Long studentId, Long teacherId, Long fatherId, Long motherId, String qrPath);
+    Student update(Long studentId, Long teacherId, String qrPath);
     
     void delete(Long studentId);
     

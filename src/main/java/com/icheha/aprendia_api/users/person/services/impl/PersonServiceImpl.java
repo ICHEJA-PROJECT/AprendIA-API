@@ -63,8 +63,11 @@ public class PersonServiceImpl implements IPersonService {
             // Subir imagen a Cloudinary
             String imageUrl = imageUploadService.uploadImage(imageBytes, fileName, "profiles-images");
             
-            // Hashear contraseña
-            String hashedPassword = hashDataRepository.hash(createPersonDto.getPassword());
+            // Hashear contraseña solo si se proporciona
+            String hashedPassword = null;
+            if (createPersonDto.getPassword() != null && !createPersonDto.getPassword().trim().isEmpty()) {
+                hashedPassword = hashDataRepository.hash(createPersonDto.getPassword());
+            }
             
             // Convertir fecha de nacimiento
             LocalDate birthdate = LocalDate.parse(createPersonDto.getBirthdate(), DATE_FORMATTER);
@@ -106,7 +109,7 @@ public class PersonServiceImpl implements IPersonService {
                     .idVialidadTipo(createPersonDto.getRoadTypeId().intValue())
                     .asentamiento(null) // Se establecerá desde el settlement
                     .idAsentamientoTipo(null) // Se establecerá desde el settlement
-                    .password(new Password(hashedPassword))
+                    .password(hashedPassword != null ? new Password(hashedPassword) : null)
                     .build();
             
             // Guardar persona con los IDs de relaciones y la URL de la imagen

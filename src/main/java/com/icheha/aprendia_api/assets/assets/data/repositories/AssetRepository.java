@@ -59,4 +59,24 @@ public interface AssetRepository extends JpaRepository<AssetEntity, Long> {
     """, nativeQuery = true)
     List<FindAssetDB> getAssetByDescription(@Param("description") float[] description);
 
+    @Query(value = """
+    SELECT 
+        a.id_activo AS id,
+        a.name AS name,
+        a.descripcion AS description,
+        a.url AS url,
+        COALESCE(ARRAY_AGG(t.nombre) FILTER (WHERE t.nombre IS NOT NULL), ARRAY[]::text[]) AS tags
+    FROM
+        activo AS a
+    LEFT JOIN
+        tags_asociadas AS ta ON a.id_activo = ta.id_activo
+    LEFT JOIN
+        tag AS t ON ta.id_tag = t.id_tag
+    WHERE 
+        a.id_activo = :id
+    GROUP BY
+        a.id_activo, a.name, a.descripcion, a.url
+    """, nativeQuery = true)
+    FindAssetDB getAssetById(@Param("id") Long id);
+
 }

@@ -7,7 +7,9 @@ import com.icheha.aprendia_api.exercises.topics.data.dtos.response.UnitResponseD
 import com.icheha.aprendia_api.exercises.topics.services.IUnitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +30,22 @@ public class UnitController {
     }
 
     @PostMapping
-    @Operation(summary = "Crear unidad", description = "Crear nueva unidad")
+    @Operation(summary = "Crear unidad", description = "Crear nueva unidad asociada a un cuadernillo")
+    @ApiResponse(responseCode = "201", description = "Unidad creada exitosamente")
+    @ApiResponse(responseCode = "400", description = "Datos inválidos")
+    @ApiResponse(responseCode = "404", description = "Cuadernillo no encontrado")
     public ResponseEntity<BaseResponse<UnitResponseDto>> createUnit(
-            @RequestBody CreateUnitDto createUnitDto) {
-        UnitResponseDto unit = unitService.createUnit(createUnitDto);
-        BaseResponse<UnitResponseDto> response = new BaseResponse<>(
-                true, unit, "Unidad creada exitosamente", HttpStatus.CREATED);
-        return response.buildResponseEntity();
+            @Valid @RequestBody CreateUnitDto createUnitDto) {
+        try {
+            UnitResponseDto unit = unitService.createUnit(createUnitDto);
+            BaseResponse<UnitResponseDto> response = new BaseResponse<>(
+                    true, unit, "Unidad creada exitosamente", HttpStatus.CREATED);
+            return response.buildResponseEntity();
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            BaseResponse<UnitResponseDto> response = new BaseResponse<>(
+                    false, null, e.getMessage(), HttpStatus.NOT_FOUND);
+            return response.buildResponseEntity();
+        }
     }
 
     @GetMapping
@@ -65,22 +76,50 @@ public class UnitController {
     
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar unidad", description = "Actualizar una unidad existente")
+    @ApiResponse(responseCode = "200", description = "Unidad actualizada exitosamente")
+    @ApiResponse(responseCode = "404", description = "Unidad no encontrada")
     public ResponseEntity<BaseResponse<UnitResponseDto>> update(
             @Parameter(description = "ID de la unidad") @PathVariable Long id,
-            @RequestBody UpdateUnitDto updateUnitDto) {
-        UnitResponseDto updated = unitService.update(id, updateUnitDto);
-        BaseResponse<UnitResponseDto> response = new BaseResponse<>(
-                true, updated, "Unidad actualizada exitosamente", HttpStatus.OK);
-        return response.buildResponseEntity();
+            @Valid @RequestBody UpdateUnitDto updateUnitDto) {
+        try {
+            UnitResponseDto updated = unitService.update(id, updateUnitDto);
+            BaseResponse<UnitResponseDto> response = new BaseResponse<>(
+                    true, updated, "Unidad actualizada exitosamente", HttpStatus.OK);
+            return response.buildResponseEntity();
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            BaseResponse<UnitResponseDto> response = new BaseResponse<>(
+                    false, null, e.getMessage(), HttpStatus.NOT_FOUND);
+            return response.buildResponseEntity();
+        }
     }
     
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar unidad", description = "Eliminar una unidad del sistema")
+    @ApiResponse(responseCode = "200", description = "Unidad eliminada exitosamente")
+    @ApiResponse(responseCode = "404", description = "Unidad no encontrada")
     public ResponseEntity<BaseResponse<Void>> delete(
             @Parameter(description = "ID de la unidad") @PathVariable Long id) {
-        unitService.delete(id);
-        BaseResponse<Void> response = new BaseResponse<>(
-                true, null, "Unidad eliminada exitosamente", HttpStatus.OK);
+        try {
+            unitService.delete(id);
+            BaseResponse<Void> response = new BaseResponse<>(
+                    true, null, "Unidad eliminada exitosamente", HttpStatus.OK);
+            return response.buildResponseEntity();
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            BaseResponse<Void> response = new BaseResponse<>(
+                    false, null, e.getMessage(), HttpStatus.NOT_FOUND);
+            return response.buildResponseEntity();
+        }
+    }
+    
+    @GetMapping("/cuadernillo/{cuadernilloId}")
+    @Operation(summary = "Obtener unidades por cuadernillo", description = "Obtiene todas las unidades asociadas a un cuadernillo específico")
+    @ApiResponse(responseCode = "200", description = "Unidades obtenidas exitosamente")
+    public ResponseEntity<BaseResponse<List<UnitResponseDto>>> getUnitsByCuadernillo(
+            @Parameter(description = "ID del cuadernillo", required = true)
+            @PathVariable Long cuadernilloId) {
+        List<UnitResponseDto> units = unitService.getUnitsByCuadernillo(cuadernilloId);
+        BaseResponse<List<UnitResponseDto>> response = new BaseResponse<>(
+                true, units, "Unidades obtenidas exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
 }

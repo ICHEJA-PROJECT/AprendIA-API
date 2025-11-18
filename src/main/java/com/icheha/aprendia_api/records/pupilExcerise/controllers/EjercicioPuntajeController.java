@@ -107,12 +107,12 @@ public class EjercicioPuntajeController {
         return response.buildResponseEntity();
     }
     
-    @GetMapping("/usuario/{idUser}")
-    @Operation(summary = "Obtener ejercicio puntajes por usuario", description = "Obtener todos los registros de puntajes de ejercicios para un usuario específico")
+    @GetMapping("/persona/{idPersona}")
+    @Operation(summary = "Obtener ejercicio puntajes por persona", description = "Obtener todos los registros de puntajes de ejercicios para una persona específica")
     @ApiResponse(responseCode = "200", description = "Ejercicio puntajes obtenidos exitosamente")
-    public ResponseEntity<BaseResponse<List<EjercicioPuntajeResponseDto>>> findByUserId(
-            @Parameter(description = "ID del usuario") @PathVariable Long idUser) {
-        List<EjercicioPuntajeResponseDto> ejercicioPuntajes = ejercicioPuntajeService.findByUserId(idUser);
+    public ResponseEntity<BaseResponse<List<EjercicioPuntajeResponseDto>>> findByPersonaId(
+            @Parameter(description = "ID de la persona") @PathVariable Long idPersona) {
+        List<EjercicioPuntajeResponseDto> ejercicioPuntajes = ejercicioPuntajeService.findByPersonaId(idPersona);
         BaseResponse<List<EjercicioPuntajeResponseDto>> response = new BaseResponse<>(
                 true, ejercicioPuntajes, "Ejercicio puntajes obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();

@@ -31,8 +31,15 @@ VALUES
     (2, 2, 'Cuadernillo Inicial', 'Cuadernillo inicial para alfabetización', 'Iniciar el aprendizaje', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     (3, 3, 'Cuadernillo Inclusivo', 'Cuadernillo inclusivo para diferentes necesidades', 'Aprendizaje inclusivo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- Temas - Requiere cuadernillos
-INSERT INTO tema (id_tema, nombre, id_cuadernillo, created_at, update_at)
+-- Unidades - Requiere cuadernillos
+INSERT INTO unidad (id_unidad, nombre, descripcion, id_cuadernillo)
+VALUES
+    (1, 'Unidad 1', 'Primera unidad del cuadernillo básico', 1),
+    (2, 'Unidad 1', 'Primera unidad del cuadernillo inicial', 2),
+    (3, 'Unidad 1', 'Primera unidad del cuadernillo inclusivo', 3);
+
+-- Temas - Requiere unidades
+INSERT INTO tema (id_tema, nombre, id_unidad, created_at, update_at)
 VALUES 
     (1, 'Introducción', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     (2, 'Caligrafía', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),

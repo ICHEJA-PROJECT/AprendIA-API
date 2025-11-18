@@ -22,11 +22,5 @@ public class StudentResponseDto {
     
     @Schema(description = "Ruta del código QR")
     private String qrPath;
-    
-    @Schema(description = "ID del padre")
-    private Long fatherId;
-    
-    @Schema(description = "ID de la madre")
-    private Long motherId;
 }
 

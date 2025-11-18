@@ -13,8 +13,15 @@ public interface PersonaRepository extends JpaRepository<PersonaEntity, Long> {
     
     Optional<PersonaEntity> findByCurp(String curp);
     
-    @Query("SELECT p FROM UserPersonaEntity p JOIN FETCH p.personaRoles pr JOIN FETCH pr.rol WHERE p.curp = :curp")
-    Optional<PersonaEntity> findByCurpWithRoles(@Param("curp") String curp);
+    @Query("SELECT p FROM UserPersonaEntity p LEFT JOIN FETCH p.user WHERE p.curp = :curp")
+    Optional<PersonaEntity> findByCurpWithUser(@Param("curp") String curp);
+    
+    @Query("SELECT p FROM UserPersonaEntity p " +
+           "LEFT JOIN FETCH p.user u " +
+           "LEFT JOIN FETCH u.userRoles ur " +
+           "LEFT JOIN FETCH ur.rol " +
+           "WHERE p.curp = :curp")
+    Optional<PersonaEntity> findByCurpWithUserAndRoles(@Param("curp") String curp);
     
     boolean existsByCurp(String curp);
 }

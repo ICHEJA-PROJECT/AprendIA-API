@@ -1,7 +1,7 @@
 package com.icheha.aprendia_api.records.pupilExcerise.data.entities;
 
 import com.icheha.aprendia_api.exercises.exercises.data.entities.ExerciseEntity;
-import com.icheha.aprendia_api.users.user.data.entities.UserEntity;
+import com.icheha.aprendia_api.users.person.data.entities.PersonaEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,12 +29,12 @@ public class EjercicioAlumneEntity {
     @JoinColumn(name = "id_ejercicio", insertable = false, updatable = false)
     private ExerciseEntity ejercicio;
     
-    @Column(name = "id_user", nullable = false)
-    private Long idUser;
+    @Column(name = "id_persona", nullable = false)
+    private Long idPersona;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_user", insertable = false, updatable = false)
-    private UserEntity user;
+    @JoinColumn(name = "id_persona", insertable = false, updatable = false)
+    private PersonaEntity persona;
     
     @Column(name = "puntaje", precision = 5, scale = 2)
     private BigDecimal puntaje;
@@ -59,4 +59,6 @@ public class EjercicioAlumneEntity {
         updateAt = LocalDateTime.now();
     }
 }
+
+
 

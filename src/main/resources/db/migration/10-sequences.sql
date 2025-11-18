@@ -22,3 +22,6 @@ SELECT setval(pg_get_serial_sequence('celula', 'id_celula'), COALESCE((SELECT MA
 -- Sincronizar secuencia de discapacidad
 SELECT setval(pg_get_serial_sequence('discapacidad', 'id_discapacidad'), COALESCE((SELECT MAX(id_discapacidad) FROM discapacidad), 1), true);
 
+-- Sincronizar secuencia de user (se agregará en migración 11-user-table.sql)
+-- SELECT setval(pg_get_serial_sequence('"user"', 'id_user'), COALESCE((SELECT MAX(id_user) FROM "user"), 1), true);
+

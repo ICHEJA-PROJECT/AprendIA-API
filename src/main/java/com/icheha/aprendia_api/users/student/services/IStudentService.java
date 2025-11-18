@@ -12,6 +12,8 @@ public interface IStudentService {
     
     RegisterStudentResponseDto create(CreateStudentDto createStudentDto);
     
+    RegisterStudentResponseDto create(CreateStudentDto createStudentDto, Long createdByUserId);
+    
     List<StudentResponseDto> findByTeacher(Long teacherId);
     
     List<StudentResponseDto> findByCurp(String curp);

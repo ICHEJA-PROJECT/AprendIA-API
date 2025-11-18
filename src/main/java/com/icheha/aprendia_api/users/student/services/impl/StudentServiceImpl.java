@@ -1,5 +1,6 @@
 package com.icheha.aprendia_api.users.student.services.impl;
 
+import com.icheha.aprendia_api.auth.data.repositories.UserRepository;
 import com.icheha.aprendia_api.auth.domain.entities.Persona;
 import com.icheha.aprendia_api.core.utils.JwtUtil;
 import com.icheha.aprendia_api.users.person.domain.repositories.IPersonaRepository;
@@ -7,16 +8,17 @@ import com.icheha.aprendia_api.users.person.services.IImageUploadService;
 import com.icheha.aprendia_api.preferences.impairments.data.entities.StudentImpairment;
 import com.icheha.aprendia_api.preferences.impairments.data.repositories.StudentImpairmentRepository;
 import com.icheha.aprendia_api.preferences.impairments.services.IStudentImpairmentService;
+import com.icheha.aprendia_api.users.student.data.dtos.CreateParienteDto;
 import com.icheha.aprendia_api.users.student.data.dtos.CreateStudentDto;
 import com.icheha.aprendia_api.users.student.data.dtos.RegisterStudentResponseDto;
 import com.icheha.aprendia_api.users.student.data.dtos.StudentResponseDto;
 import com.icheha.aprendia_api.users.student.data.dtos.UpdateStudentDto;
-import com.icheha.aprendia_api.users.student.domain.entities.Progenitor;
 import com.icheha.aprendia_api.users.student.domain.entities.Student;
 import com.icheha.aprendia_api.users.student.domain.repositories.IEncryptDataRepository;
 import com.icheha.aprendia_api.users.student.domain.repositories.IQRRepository;
 import com.icheha.aprendia_api.users.student.domain.repositories.IStudentRepository;
-import com.icheha.aprendia_api.users.student.services.IProgenitorService;
+import com.icheha.aprendia_api.users.student.domain.repositories.IRolParienteRepository;
+import com.icheha.aprendia_api.users.student.services.IParienteService;
 import com.icheha.aprendia_api.users.student.services.IStudentService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -35,7 +37,8 @@ import java.util.stream.Collectors;
 public class StudentServiceImpl implements IStudentService {
     
     private final IStudentRepository studentRepository;
-    private final IProgenitorService progenitorService;
+    private final IParienteService parienteService;
+    private final IRolParienteRepository rolParienteRepository;
     private final IPersonaRepository personaRepository;
     private final IQRRepository qrRepository;
     private final IEncryptDataRepository encryptDataRepository;
@@ -44,9 +47,11 @@ public class StudentServiceImpl implements IStudentService {
     private final StudentImpairmentRepository studentImpairmentRepository;
     private final JwtUtil jwtUtil;
     private final com.icheha.aprendia_api.users.role.services.IRolePersonService rolePersonService;
+    private final UserRepository userRepository;
     
     public StudentServiceImpl(IStudentRepository studentRepository,
-                             IProgenitorService progenitorService,
+                             IParienteService parienteService,
+                             IRolParienteRepository rolParienteRepository,
                              @Qualifier("userPersonaRepositoryImpl") IPersonaRepository personaRepository,
                              IQRRepository qrRepository,
                              IEncryptDataRepository encryptDataRepository,
@@ -54,9 +59,11 @@ public class StudentServiceImpl implements IStudentService {
                              IStudentImpairmentService studentImpairmentService,
                              StudentImpairmentRepository studentImpairmentRepository,
                              JwtUtil jwtUtil,
-                             com.icheha.aprendia_api.users.role.services.IRolePersonService rolePersonService) {
+                             com.icheha.aprendia_api.users.role.services.IRolePersonService rolePersonService,
+                             UserRepository userRepository) {
         this.studentRepository = studentRepository;
-        this.progenitorService = progenitorService;
+        this.parienteService = parienteService;
+        this.rolParienteRepository = rolParienteRepository;
         this.personaRepository = personaRepository;
         this.qrRepository = qrRepository;
         this.encryptDataRepository = encryptDataRepository;
@@ -65,11 +72,18 @@ public class StudentServiceImpl implements IStudentService {
         this.studentImpairmentRepository = studentImpairmentRepository;
         this.jwtUtil = jwtUtil;
         this.rolePersonService = rolePersonService;
+        this.userRepository = userRepository;
     }
     
     @Override
     @Transactional
     public RegisterStudentResponseDto create(CreateStudentDto createStudentDto) {
+        return create(createStudentDto, null);
+    }
+    
+    @Override
+    @Transactional
+    public RegisterStudentResponseDto create(CreateStudentDto createStudentDto, Long createdByUserId) {
         try {
             // Validar que la persona existe
             Persona persona = personaRepository.findById(createStudentDto.getPersonId())
@@ -82,7 +96,10 @@ public class StudentServiceImpl implements IStudentService {
                         .orElseThrow(() -> new IllegalArgumentException("Educador no encontrado con ID: " + createStudentDto.getTeacherId()));
                 
                 // Validar que el educador tenga rol de educador (rol ID 1)
-                var teacherRoles = rolePersonService.findByPersonId(createStudentDto.getTeacherId());
+                Long userId = userRepository.findByIdPersona(createStudentDto.getTeacherId())
+                        .map(u -> u.getIdUser())
+                        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado para la persona con ID: " + createStudentDto.getTeacherId()));
+                var teacherRoles = rolePersonService.findByUserId(userId);
                 
                 boolean hasTeacherRole = teacherRoles.stream()
                         .anyMatch(rp -> rp.getRoleId() != null && rp.getRoleId().equals(1L));
@@ -95,21 +112,13 @@ public class StudentServiceImpl implements IStudentService {
                 }
             }
             
-            // Crear o obtener progenitores
-            Optional<Progenitor> fatherOpt = progenitorService.create(createStudentDto.getFather());
-            Optional<Progenitor> motherOpt = progenitorService.create(createStudentDto.getMother());
-            
-            if (fatherOpt.isEmpty() || motherOpt.isEmpty()) {
-                throw new RuntimeException("Error al crear progenitores");
-            }
-            
-            Progenitor father = fatherOpt.get();
-            Progenitor mother = motherOpt.get();
-            
             // Asignar rol de estudiante (rol ID 4) a la persona
+            Long studentUserId = userRepository.findByIdPersona(createStudentDto.getPersonId())
+                    .map(u -> u.getIdUser())
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado para la persona con ID: " + createStudentDto.getPersonId()));
             com.icheha.aprendia_api.users.role.data.dtos.CreateRolePersonDto rolePersonDto = 
                     new com.icheha.aprendia_api.users.role.data.dtos.CreateRolePersonDto();
-            rolePersonDto.setPersonId(createStudentDto.getPersonId());
+            rolePersonDto.setUserId(studentUserId);
             rolePersonDto.setRoleId(4L); // Rol de Estudiante
             rolePersonService.create(rolePersonDto);
             
@@ -117,8 +126,6 @@ public class StudentServiceImpl implements IStudentService {
             Student student = new Student.Builder()
                     .persona(persona)
                     .teacher(teacher)
-                    .father(father)
-                    .mother(mother)
                     .qrPath("pending")
                     .build();
             
@@ -126,10 +133,42 @@ public class StudentServiceImpl implements IStudentService {
                     student,
                     createStudentDto.getPersonId(),
                     createStudentDto.getTeacherId(),
-                    father.getId(),
-                    mother.getId(),
-                    "pending"
+                    "pending",
+                    createdByUserId
             );
+            
+            // Crear relaciones de parientes (padre y madre)
+            // Obtener IDs de roles de pariente dinámicamente
+            Long padreRolId = rolParienteRepository.findByNombre("Padre")
+                    .orElseThrow(() -> new RuntimeException("Rol de pariente 'Padre' no encontrado"))
+                    .getId();
+            Long madreRolId = rolParienteRepository.findByNombre("Madre")
+                    .orElseThrow(() -> new RuntimeException("Rol de pariente 'Madre' no encontrado"))
+                    .getId();
+            
+            // Crear relación padre
+            CreateParienteDto createPadreDto = new CreateParienteDto();
+            createPadreDto.setPersonaId(createStudentDto.getPersonId());
+            createPadreDto.setParienteId(createStudentDto.getFatherPersonId());
+            createPadreDto.setRolParienteId(padreRolId);
+            try {
+                parienteService.create(createPadreDto);
+            } catch (Exception e) {
+                // Si ya existe la relación, continuar
+                System.out.println("Relación padre ya existe o error: " + e.getMessage());
+            }
+            
+            // Crear relación madre
+            CreateParienteDto createMadreDto = new CreateParienteDto();
+            createMadreDto.setPersonaId(createStudentDto.getPersonId());
+            createMadreDto.setParienteId(createStudentDto.getMotherPersonId());
+            createMadreDto.setRolParienteId(madreRolId);
+            try {
+                parienteService.create(createMadreDto);
+            } catch (Exception e) {
+                // Si ya existe la relación, continuar
+                System.out.println("Relación madre ya existe o error: " + e.getMessage());
+            }
             
             // Crear discapacidades si se proporcionan
             if (createStudentDto.getImpairments() != null && !createStudentDto.getImpairments().isEmpty()) {
@@ -278,7 +317,10 @@ public class StudentServiceImpl implements IStudentService {
                         .orElseThrow(() -> new IllegalArgumentException("Educador no encontrado con ID: " + teacherId));
                 
                 // Validar que el educador tenga rol de educador (rol ID 1)
-                var teacherRoles = rolePersonService.findByPersonId(teacherId);
+                Long userId = userRepository.findByIdPersona(teacherId)
+                        .map(u -> u.getIdUser())
+                        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado para la persona con ID: " + teacherId));
+                var teacherRoles = rolePersonService.findByUserId(userId);
                 boolean hasTeacherRole = teacherRoles.stream()
                         .anyMatch(rp -> rp.getRoleId() != null && rp.getRoleId().equals(1L));
                 if (!hasTeacherRole) {
@@ -286,38 +328,67 @@ public class StudentServiceImpl implements IStudentService {
                 }
             }
             
-            // Crear o actualizar progenitores si se proporcionan
-            Long fatherId = null;
-            Long motherId = null;
-            
-            if (updateStudentDto.getFather() != null) {
-                Optional<Progenitor> fatherOpt = progenitorService.create(updateStudentDto.getFather());
-                if (fatherOpt.isEmpty()) {
-                    throw new RuntimeException("Error al crear/actualizar padre");
-                }
-                fatherId = fatherOpt.get().getId();
-            } else {
-                fatherId = existingStudent.getFather() != null ? existingStudent.getFather().getId() : null;
-            }
-            
-            if (updateStudentDto.getMother() != null) {
-                Optional<Progenitor> motherOpt = progenitorService.create(updateStudentDto.getMother());
-                if (motherOpt.isEmpty()) {
-                    throw new RuntimeException("Error al crear/actualizar madre");
-                }
-                motherId = motherOpt.get().getId();
-            } else {
-                motherId = existingStudent.getMother() != null ? existingStudent.getMother().getId() : null;
-            }
-            
             // Actualizar estudiante
             Student updatedStudent = studentRepository.update(
                     id,
                     teacherId,
-                    fatherId,
-                    motherId,
                     updateStudentDto.getQrPath()
             );
+            
+            // Actualizar relaciones de parientes si se proporcionan
+            if (updateStudentDto.getFatherPersonId() != null || updateStudentDto.getMotherPersonId() != null) {
+                Long personaId = existingStudent.getPersona().getIdPersona();
+                
+                // Obtener roles de pariente dinámicamente
+                Long padreRolId = rolParienteRepository.findByNombre("Padre")
+                        .orElseThrow(() -> new RuntimeException("Rol de pariente 'Padre' no encontrado"))
+                        .getId();
+                Long madreRolId = rolParienteRepository.findByNombre("Madre")
+                        .orElseThrow(() -> new RuntimeException("Rol de pariente 'Madre' no encontrado"))
+                        .getId();
+                
+                // Actualizar relación padre si se proporciona
+                if (updateStudentDto.getFatherPersonId() != null) {
+                    // Buscar relación existente de padre
+                    var parientesPadre = parienteService.findByPersonaIdAndRolNombre(personaId, "Padre");
+                    if (!parientesPadre.isEmpty()) {
+                        // Eliminar relación anterior
+                        parienteService.delete(parientesPadre.get(0).getId());
+                    }
+                    
+                    // Crear nueva relación
+                    CreateParienteDto createPadreDto = new CreateParienteDto();
+                    createPadreDto.setPersonaId(personaId);
+                    createPadreDto.setParienteId(updateStudentDto.getFatherPersonId());
+                    createPadreDto.setRolParienteId(padreRolId);
+                    try {
+                        parienteService.create(createPadreDto);
+                    } catch (Exception e) {
+                        System.out.println("Error al actualizar relación padre: " + e.getMessage());
+                    }
+                }
+                
+                // Actualizar relación madre si se proporciona
+                if (updateStudentDto.getMotherPersonId() != null) {
+                    // Buscar relación existente de madre
+                    var parientesMadre = parienteService.findByPersonaIdAndRolNombre(personaId, "Madre");
+                    if (!parientesMadre.isEmpty()) {
+                        // Eliminar relación anterior
+                        parienteService.delete(parientesMadre.get(0).getId());
+                    }
+                    
+                    // Crear nueva relación
+                    CreateParienteDto createMadreDto = new CreateParienteDto();
+                    createMadreDto.setPersonaId(personaId);
+                    createMadreDto.setParienteId(updateStudentDto.getMotherPersonId());
+                    createMadreDto.setRolParienteId(madreRolId);
+                    try {
+                        parienteService.create(createMadreDto);
+                    } catch (Exception e) {
+                        System.out.println("Error al actualizar relación madre: " + e.getMessage());
+                    }
+                }
+            }
             
             // Actualizar discapacidades si se proporcionan
             if (updateStudentDto.getImpairments() != null) {
@@ -372,8 +443,6 @@ public class StudentServiceImpl implements IStudentService {
         dto.setPersonId(student.getPersona() != null ? student.getPersona().getIdPersona() : null);
         dto.setTeacherId(student.getTeacher() != null ? student.getTeacher().getIdPersona() : null);
         dto.setQrPath(student.getQrPath());
-        dto.setFatherId(student.getFather() != null ? student.getFather().getId() : null);
-        dto.setMotherId(student.getMother() != null ? student.getMother().getId() : null);
         return dto;
     }
 }

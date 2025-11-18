@@ -46,13 +46,13 @@ public class TopicEntity {
         updateAt = LocalDateTime.now();
     }
 
-    @Column(name = "id_cuadernillo", nullable = false)
-    private Long idCuadernillo;
+    @Column(name = "id_unidad", nullable = false)
+    private Long idUnidad;
 
     // Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_cuadernillo", insertable = false, updatable = false)
-    private CuadernilloEntity cuadernillo;
+    @JoinColumn(name = "id_unidad", insertable = false, updatable = false)
+    private UnitEntity unidad;
 
     @OneToMany(mappedBy = "tema", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TemplateEntity> templates;

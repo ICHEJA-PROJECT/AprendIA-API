@@ -44,9 +44,12 @@ spring:
         - classpath:db/migration/05-locations.sql
         - classpath:db/migration/06-persons-initial.sql
         - classpath:db/migration/07-persons-additional.sql
+        - classpath:db/migration/14-rol-pariente-data.sql
         - classpath:db/migration/08-students.sql
         - classpath:db/migration/09-institutions.sql
         - classpath:db/migration/10-sequences.sql
+        - classpath:db/migration/11-user-table.sql
+        - classpath:db/migration/13-usuario-rol.sql
       continue-on-error: false
   
   security:

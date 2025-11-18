@@ -29,16 +29,20 @@ public interface UnitRepository extends JpaRepository<UnitEntity, Long> {
     List<UnitEntity> findByNombreContaining(@Param("nombre") String nombre);
     
     /**
-     * Buscar unidad con sus relaciones cargadas
-     * Nota: La relación con temas se eliminó porque la tabla 'tema' no tiene columna 'id_unidad'
+     * Buscar unidad con sus relaciones cargadas (cuadernillo y temas)
      */
-    // @Query("SELECT u FROM UnitEntity u LEFT JOIN FETCH u.temas WHERE u.idUnidad = :id")
-    // Optional<UnitEntity> findByIdWithTopics(@Param("id") Long id);
+    @Query("SELECT u FROM UnitEntity u LEFT JOIN FETCH u.cuadernillo LEFT JOIN FETCH u.temas WHERE u.idUnidad = :id")
+    Optional<UnitEntity> findByIdWithRelations(@Param("id") Long id);
     
     /**
-     * Buscar todas las unidades con sus relaciones cargadas
-     * Nota: La relación con temas se eliminó porque la tabla 'tema' no tiene columna 'id_unidad'
+     * Buscar todas las unidades con sus relaciones cargadas (cuadernillo y temas)
      */
-    // @Query("SELECT u FROM UnitEntity u LEFT JOIN FETCH u.temas")
-    // List<UnitEntity> findAllWithTopics();
+    @Query("SELECT DISTINCT u FROM UnitEntity u LEFT JOIN FETCH u.cuadernillo LEFT JOIN FETCH u.temas")
+    List<UnitEntity> findAllWithRelations();
+    
+    /**
+     * Buscar unidades por cuadernillo
+     */
+    @Query("SELECT u FROM UnitEntity u LEFT JOIN FETCH u.cuadernillo WHERE u.idCuadernillo = :idCuadernillo")
+    List<UnitEntity> findByCuadernilloId(@Param("idCuadernillo") Long idCuadernillo);
 }

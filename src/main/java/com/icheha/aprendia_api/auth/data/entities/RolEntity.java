@@ -25,5 +25,5 @@ public class RolEntity {
     private String descripcion;
 
     @OneToMany(mappedBy = "rol", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<PersonaRolEntity> personaRoles;
+    private List<UserRolEntity> userRoles;
 }

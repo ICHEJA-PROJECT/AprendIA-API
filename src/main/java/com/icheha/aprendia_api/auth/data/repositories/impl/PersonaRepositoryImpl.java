@@ -34,7 +34,8 @@ public class PersonaRepositoryImpl implements IPersonaRepository {
             return Optional.empty();
         }
         
-        return personaRepository.findByCurp(curp.getValue())
+        // Cargar con UserEntity para tener acceso al password
+        return personaRepository.findByCurpWithUser(curp.getValue())
                 .map(personaMapper::toDomain);
     }
     
@@ -45,7 +46,8 @@ public class PersonaRepositoryImpl implements IPersonaRepository {
             return Optional.empty();
         }
         
-        return personaRepository.findByCurpWithRoles(curp.getValue())
+        // Cargar con UserEntity y roles para tener acceso al password y roles
+        return personaRepository.findByCurpWithUserAndRoles(curp.getValue())
                 .map(personaMapper::toDomain);
     }
     

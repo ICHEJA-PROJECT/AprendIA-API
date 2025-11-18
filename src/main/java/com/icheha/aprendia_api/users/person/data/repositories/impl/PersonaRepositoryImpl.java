@@ -2,6 +2,8 @@ package com.icheha.aprendia_api.users.person.data.repositories.impl;
 
 import com.icheha.aprendia_api.auth.domain.entities.Persona;
 import com.icheha.aprendia_api.auth.domain.valueobjects.Curp;
+import com.icheha.aprendia_api.auth.data.entities.UserEntity;
+import com.icheha.aprendia_api.auth.data.repositories.UserRepository;
 import com.icheha.aprendia_api.users.person.data.entities.DomicilioEntity;
 import com.icheha.aprendia_api.users.person.data.entities.PersonaEntity;
 import com.icheha.aprendia_api.users.person.data.entities.RoadTypeEntity;
@@ -31,15 +33,18 @@ public class PersonaRepositoryImpl implements IPersonaRepository {
     private final RoadTypeRepository roadTypeRepository;
     private final SettlementRepository settlementRepository;
     private final PersonaMapper personaMapper;
+    private final UserRepository userRepository;
     
     public PersonaRepositoryImpl(@Lazy @Qualifier("userPersonaRepository") PersonaRepository personaRepository,
                                 @Lazy RoadTypeRepository roadTypeRepository,
                                 @Lazy SettlementRepository settlementRepository,
-                                @Qualifier("userPersonaMapper") PersonaMapper personaMapper) {
+                                @Qualifier("userPersonaMapper") PersonaMapper personaMapper,
+                                @Lazy UserRepository userRepository) {
         this.personaRepository = personaRepository;
         this.roadTypeRepository = roadTypeRepository;
         this.settlementRepository = settlementRepository;
         this.personaMapper = personaMapper;
+        this.userRepository = userRepository;
     }
     
     @Override
@@ -76,6 +81,18 @@ public class PersonaRepositoryImpl implements IPersonaRepository {
             savedEntity.setDomicilio(domicilio);
             // Guardar nuevamente para persistir el domicilio con el idPersona correcto
             savedEntity = personaRepository.save(savedEntity);
+        }
+        
+        // Crear UserEntity si la persona tiene password
+        if (persona.getPassword() != null && persona.getPassword().getHashedValue() != null) {
+            String username = persona.getCurp() != null ? persona.getCurp().getValue() : "user_" + savedEntity.getIdPersona();
+            UserEntity userEntity = new UserEntity();
+            userEntity.setIdPersona(savedEntity.getIdPersona());
+            userEntity.setUsername(username);
+            userEntity.setPassword(persona.getPassword().getHashedValue());
+            userEntity.setIsActive(true);
+            userEntity.setPersona(savedEntity);
+            userRepository.save(userEntity);
         }
         
         return personaMapper.toDomain(savedEntity);
@@ -152,6 +169,27 @@ public class PersonaRepositoryImpl implements IPersonaRepository {
         if (savedEntity.getDomicilio() != null) {
             savedEntity.getDomicilio().setIdPersona(savedEntity.getIdPersona());
             personaRepository.save(savedEntity);
+        }
+        
+        // Crear o actualizar UserEntity si la persona tiene password
+        if (persona.getPassword() != null && persona.getPassword().getHashedValue() != null) {
+            UserEntity userEntity = userRepository.findByIdPersona(savedEntity.getIdPersona()).orElse(null);
+            
+            if (userEntity == null) {
+                // Crear nuevo UserEntity
+                String username = persona.getCurp() != null ? persona.getCurp().getValue() : "user_" + savedEntity.getIdPersona();
+                userEntity = new UserEntity();
+                userEntity.setIdPersona(savedEntity.getIdPersona());
+                userEntity.setUsername(username);
+                userEntity.setPassword(persona.getPassword().getHashedValue());
+                userEntity.setIsActive(true);
+                userEntity.setPersona(savedEntity);
+            } else {
+                // Actualizar password existente
+                userEntity.setPassword(persona.getPassword().getHashedValue());
+            }
+            
+            userRepository.save(userEntity);
         }
         
         return personaMapper.toDomain(savedEntity);

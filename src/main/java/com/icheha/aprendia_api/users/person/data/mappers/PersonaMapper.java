@@ -1,25 +1,37 @@
 package com.icheha.aprendia_api.users.person.data.mappers;
 
 import com.icheha.aprendia_api.auth.domain.entities.Persona;
+import com.icheha.aprendia_api.auth.domain.entities.PersonaRol;
 import com.icheha.aprendia_api.auth.domain.enums.GenderEnum;
 import com.icheha.aprendia_api.auth.domain.valueobjects.Curp;
+import com.icheha.aprendia_api.auth.data.entities.UserEntity;
+import com.icheha.aprendia_api.auth.data.mappers.UserRolMapper;
+import com.icheha.aprendia_api.auth.data.repositories.UserRepository;
 import com.icheha.aprendia_api.users.person.data.entities.DomicilioEntity;
 import com.icheha.aprendia_api.users.person.data.entities.PersonaEntity;
 import com.icheha.aprendia_api.users.person.data.entities.RoadTypeEntity;
 import com.icheha.aprendia_api.users.person.data.entities.SettlementEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component("userPersonaMapper")
 public class PersonaMapper {
     
     private final RoadTypeMapper roadTypeMapper;
     private final SettlementMapper settlementMapper;
+    private final UserRepository userRepository;
+    private final UserRolMapper userRolMapper;
     
-    public PersonaMapper(RoadTypeMapper roadTypeMapper, SettlementMapper settlementMapper) {
+    @Autowired
+    public PersonaMapper(RoadTypeMapper roadTypeMapper, SettlementMapper settlementMapper, UserRepository userRepository, UserRolMapper userRolMapper) {
         this.roadTypeMapper = roadTypeMapper;
         this.settlementMapper = settlementMapper;
+        this.userRepository = userRepository;
+        this.userRolMapper = userRolMapper;
     }
     
     public Persona toDomain(PersonaEntity entity) {
@@ -64,7 +76,20 @@ public class PersonaMapper {
             fechaNacimiento = entity.getFechaNacimiento();
             genero = entity.getGenero();
             curp = entity.getCurp();
-            password = entity.getPassword();
+            
+            // Obtener password desde UserEntity
+            // IMPORTANTE: No acceder a entity.getUser() directamente para evitar StackOverflowError
+            // en relaciones bidireccionales. Usar consulta directa al repositorio.
+            try {
+                if (idPersona != null) {
+                    UserEntity userEntity = userRepository.findByIdPersona(idPersona).orElse(null);
+                    if (userEntity != null) {
+                        password = userEntity.getPassword();
+                    }
+                }
+            } catch (Exception e) {
+                // Si hay error al acceder a UserEntity, dejar password como null
+            }
         } catch (Exception e) {
             // Si hay error al acceder a los campos, usar valores por defecto
         }
@@ -99,13 +124,39 @@ public class PersonaMapper {
             builder.curp(null);
         }
         
-        // Password: obtener desde PersonaEntity si está disponible
+        // Password y Roles: obtener desde UserEntity si está disponible
+        List<PersonaRol> personaRoles = new ArrayList<>();
         if (password != null && !password.trim().isEmpty()) {
             builder.password(new com.icheha.aprendia_api.auth.domain.valueobjects.Password(password));
         } else {
             builder.password(null);
         }
         
+        // Obtener roles desde UserEntity
+        // IMPORTANTE: No acceder a entity.getUser() directamente para evitar StackOverflowError
+        // en relaciones bidireccionales. Usar consulta directa al repositorio.
+        try {
+            if (idPersona != null) {
+                UserEntity userEntity = userRepository.findByIdPersona(idPersona).orElse(null);
+                if (userEntity != null && userEntity.getIdUser() != null) {
+                    try {
+                        var userWithRoles = userRepository.findByIdWithRoles(userEntity.getIdUser());
+                        if (userWithRoles.isPresent() && userWithRoles.get().getUserRoles() != null) {
+                            personaRoles = userWithRoles.get().getUserRoles().stream()
+                                    .map(userRolMapper::toDomain)
+                                    .filter(pr -> pr != null)
+                                    .collect(java.util.stream.Collectors.toList());
+                        }
+                    } catch (Exception e) {
+                        // Si hay error, dejar la lista vacía
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Si hay error al acceder a UserEntity, dejar la lista vacía
+        }
+        
+        builder.personaRoles(personaRoles);
         return builder.build();
     }
     
@@ -130,10 +181,8 @@ public class PersonaMapper {
         entity.setTelefono(null); // TODO: Agregar telefono al dominio si es necesario
         entity.setProfileImagePath(profileImagePath); // Guardar la URL de la imagen de perfil
         
-        // Guardar password si está disponible en el dominio
-        if (domain.getPassword() != null && domain.getPassword().getHashedValue() != null) {
-            entity.setPassword(domain.getPassword().getHashedValue());
-        }
+        // Nota: Password se maneja en UserEntity, no aquí
+        // El UserEntity debe ser creado/actualizado por separado
         
         // Crear DomicilioEntity con los datos de dirección
         // El idPersona se establecerá después de guardar la persona
@@ -156,7 +205,7 @@ public class PersonaMapper {
             domicilio.setPersona(entity);
         }
         
-        // Nota: Password ahora está en UserEntity, no en PersonaEntity
+        // Nota: Password está en UserEntity, debe manejarse por separado
         // Nota: profileImagePath se guardará en otra entidad o se manejará por separado
         // Por ahora, si hay un campo en PersonaEntity para la imagen, se establecería aquí
         

@@ -7,7 +7,7 @@ import com.icheha.aprendia_api.records.pupilExcerise.data.dtos.response.Ejercici
 import com.icheha.aprendia_api.records.pupilExcerise.data.entities.EjercicioPuntajeEntity;
 import com.icheha.aprendia_api.records.pupilExcerise.data.repositories.EjercicioPuntajeRepository;
 import com.icheha.aprendia_api.records.pupilExcerise.services.IEjercicioPuntajeService;
-import com.icheha.aprendia_api.users.user.data.repositories.UserRepository;
+import com.icheha.aprendia_api.auth.data.repositories.PersonaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class EjercicioPuntajeServiceImpl implements IEjercicioPuntajeService {
     private IExerciseRepository exerciseRepository;
     
     @Autowired
-    private UserRepository userRepository;
+    private PersonaRepository personaRepository;
     
     @Override
     @Transactional
@@ -36,14 +36,14 @@ public class EjercicioPuntajeServiceImpl implements IEjercicioPuntajeService {
         exerciseRepository.findById(createDto.getIdEjercicio())
                 .orElseThrow(() -> new EntityNotFoundException("Ejercicio no encontrado con ID: " + createDto.getIdEjercicio()));
         
-        // Validar que el usuario existe
-        userRepository.findById(createDto.getIdUser())
-                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + createDto.getIdUser()));
+        // Validar que la persona existe
+        personaRepository.findById(createDto.getIdPersona())
+                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con ID: " + createDto.getIdPersona()));
         
         // Crear nueva entidad
         EjercicioPuntajeEntity entity = new EjercicioPuntajeEntity();
         entity.setIdEjercicio(createDto.getIdEjercicio());
-        entity.setIdUser(createDto.getIdUser());
+        entity.setIdPersona(createDto.getIdPersona());
         entity.setPuntaje(createDto.getPuntaje());
         entity.setFechaCompletado(createDto.getFechaCompletado());
         
@@ -83,11 +83,11 @@ public class EjercicioPuntajeServiceImpl implements IEjercicioPuntajeService {
             entity.setIdEjercicio(updateDto.getIdEjercicio());
         }
         
-        // Validar y actualizar usuario si se proporciona
-        if (updateDto.getIdUser() != null) {
-            userRepository.findById(updateDto.getIdUser())
-                    .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + updateDto.getIdUser()));
-            entity.setIdUser(updateDto.getIdUser());
+        // Validar y actualizar persona si se proporciona
+        if (updateDto.getIdPersona() != null) {
+            personaRepository.findById(updateDto.getIdPersona())
+                    .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con ID: " + updateDto.getIdPersona()));
+            entity.setIdPersona(updateDto.getIdPersona());
         }
         
         // Actualizar puntaje si se proporciona
@@ -124,8 +124,8 @@ public class EjercicioPuntajeServiceImpl implements IEjercicioPuntajeService {
     
     @Override
     @Transactional(readOnly = true)
-    public List<EjercicioPuntajeResponseDto> findByUserId(Long idUser) {
-        List<EjercicioPuntajeEntity> entities = ejercicioPuntajeRepository.findByUserId(idUser);
+    public List<EjercicioPuntajeResponseDto> findByPersonaId(Long idPersona) {
+        List<EjercicioPuntajeEntity> entities = ejercicioPuntajeRepository.findByPersonaId(idPersona);
         return entities.stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
@@ -136,7 +136,7 @@ public class EjercicioPuntajeServiceImpl implements IEjercicioPuntajeService {
         EjercicioPuntajeResponseDto dto = new EjercicioPuntajeResponseDto();
         dto.setIdEjercicioPuntaje(entity.getIdEjercicioPuntaje());
         dto.setIdEjercicio(entity.getIdEjercicio());
-        dto.setIdUser(entity.getIdUser());
+        dto.setIdPersona(entity.getIdPersona());
         dto.setPuntaje(entity.getPuntaje());
         dto.setFechaCompletado(entity.getFechaCompletado());
         dto.setCreatedAt(entity.getCreatedAt());
@@ -146,8 +146,12 @@ public class EjercicioPuntajeServiceImpl implements IEjercicioPuntajeService {
         if (entity.getEjercicio() != null) {
             dto.setEjercicioNombre("Ejercicio " + entity.getIdEjercicio());
         }
-        if (entity.getUser() != null) {
-            dto.setUsuarioNombre(entity.getUser().getUsername());
+        if (entity.getPersona() != null) {
+            String nombreCompleto = entity.getPersona().getPrimerNombre() + " " + 
+                                   (entity.getPersona().getSegundoNombre() != null ? entity.getPersona().getSegundoNombre() + " " : "") +
+                                   entity.getPersona().getPrimerApellido() + " " +
+                                   (entity.getPersona().getSegundoApellido() != null ? entity.getPersona().getSegundoApellido() : "");
+            dto.setUsuarioNombre(nombreCompleto.trim());
         }
         
         return dto;

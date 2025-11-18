@@ -15,12 +15,12 @@ public interface EjercicioPuntajeRepository extends JpaRepository<EjercicioPunta
     @Query("SELECT ep FROM EjercicioPuntajeEntity ep WHERE ep.idEjercicio = :idEjercicio")
     List<EjercicioPuntajeEntity> findByEjercicioId(@Param("idEjercicio") Long idEjercicio);
     
-    @Query("SELECT ep FROM EjercicioPuntajeEntity ep WHERE ep.idUser = :idUser")
-    List<EjercicioPuntajeEntity> findByUserId(@Param("idUser") Long idUser);
+    @Query("SELECT ep FROM EjercicioPuntajeEntity ep WHERE ep.idPersona = :idPersona")
+    List<EjercicioPuntajeEntity> findByPersonaId(@Param("idPersona") Long idPersona);
     
-    @Query("SELECT ep FROM EjercicioPuntajeEntity ep WHERE ep.idEjercicio = :idEjercicio AND ep.idUser = :idUser")
-    Optional<EjercicioPuntajeEntity> findByEjercicioAndUser(
+    @Query("SELECT ep FROM EjercicioPuntajeEntity ep WHERE ep.idEjercicio = :idEjercicio AND ep.idPersona = :idPersona")
+    Optional<EjercicioPuntajeEntity> findByEjercicioAndPersona(
             @Param("idEjercicio") Long idEjercicio,
-            @Param("idUser") Long idUser);
+            @Param("idPersona") Long idPersona);
 }
 

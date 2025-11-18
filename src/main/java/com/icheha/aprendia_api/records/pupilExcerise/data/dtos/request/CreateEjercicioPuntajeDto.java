@@ -17,8 +17,8 @@ public class CreateEjercicioPuntajeDto {
     @NotNull(message = "El ID del ejercicio es obligatorio")
     private Long idEjercicio;
     
-    @NotNull(message = "El ID del usuario es obligatorio")
-    private Long idUser;
+    @NotNull(message = "El ID de la persona es obligatorio")
+    private Long idPersona;
     
     @DecimalMin(value = "0.0", message = "El puntaje debe ser mayor o igual a 0")
     private BigDecimal puntaje;

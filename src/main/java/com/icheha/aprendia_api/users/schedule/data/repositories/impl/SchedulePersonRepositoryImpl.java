@@ -1,7 +1,7 @@
 package com.icheha.aprendia_api.users.schedule.data.repositories.impl;
 
-import com.icheha.aprendia_api.auth.data.entities.PersonaRolEntity;
-import com.icheha.aprendia_api.auth.data.repositories.PersonaRolRepository;
+import com.icheha.aprendia_api.auth.data.entities.UserRolEntity;
+import com.icheha.aprendia_api.auth.data.repositories.UserRolRepository;
 import com.icheha.aprendia_api.users.schedule.data.entities.ScheduleEntity;
 import com.icheha.aprendia_api.users.schedule.data.entities.SchedulePersonEntity;
 import com.icheha.aprendia_api.users.schedule.data.mappers.SchedulePersonMapper;
@@ -21,16 +21,16 @@ public class SchedulePersonRepositoryImpl implements ISchedulePersonRepository {
     
     private final SchedulePersonRepository schedulePersonRepository;
     private final ScheduleRepository scheduleRepository;
-    private final PersonaRolRepository personaRolRepository;
+    private final UserRolRepository userRolRepository;
     private final SchedulePersonMapper schedulePersonMapper;
     
     public SchedulePersonRepositoryImpl(@Lazy SchedulePersonRepository schedulePersonRepository,
                                         @Lazy ScheduleRepository scheduleRepository,
-                                        @Lazy PersonaRolRepository personaRolRepository,
+                                        @Lazy UserRolRepository userRolRepository,
                                         SchedulePersonMapper schedulePersonMapper) {
         this.schedulePersonRepository = schedulePersonRepository;
         this.scheduleRepository = scheduleRepository;
-        this.personaRolRepository = personaRolRepository;
+        this.userRolRepository = userRolRepository;
         this.schedulePersonMapper = schedulePersonMapper;
     }
     
@@ -46,8 +46,8 @@ public class SchedulePersonRepositoryImpl implements ISchedulePersonRepository {
             throw new IllegalArgumentException("ID de horario no puede ser nulo");
         }
         
-        PersonaRolEntity rolePerson = personaRolRepository.findById(rolePersonId)
-                .orElseThrow(() -> new IllegalArgumentException("PersonaRol no encontrado con ID: " + rolePersonId));
+        UserRolEntity rolePerson = userRolRepository.findById(rolePersonId)
+                .orElseThrow(() -> new IllegalArgumentException("UserRol no encontrado con ID: " + rolePersonId));
         
         ScheduleEntity schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new IllegalArgumentException("Schedule no encontrado con ID: " + scheduleId));

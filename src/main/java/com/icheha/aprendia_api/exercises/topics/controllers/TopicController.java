@@ -130,6 +130,18 @@ public class TopicController {
         return response.buildResponseEntity();
     }
 
+    @GetMapping("/unit/{unitId}")
+    @Operation(summary = "Obtener temas por unidad", description = "Obtiene todos los temas asociados a una unidad específica")
+    @ApiResponse(responseCode = "200", description = "Temas obtenidos exitosamente")
+    public ResponseEntity<BaseResponse<List<TopicResponseDto>>> getTopicsByUnit(
+            @Parameter(description = "ID de la unidad", required = true)
+            @PathVariable Long unitId) {
+        List<TopicResponseDto> topics = topicService.getTopicsByUnit(unitId);
+        BaseResponse<List<TopicResponseDto>> response = new BaseResponse<>(
+                true, topics, "Temas obtenidos exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
+
     @GetMapping("/{id}/learning-path")
     @Operation(summary = "Obtener ruta de aprendizaje por tema", description = "Obtener ruta de aprendizaje por tema")
     public ResponseEntity<BaseResponse<List<LearningPathResponseDto>>> getLearningPathByTopic(

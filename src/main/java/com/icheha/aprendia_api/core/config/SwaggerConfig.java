@@ -6,6 +6,8 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,10 +18,12 @@ import java.util.List;
 @Configuration
 public class SwaggerConfig {
 
+    private static final Logger logger = LoggerFactory.getLogger(SwaggerConfig.class);
+
     @Value("${swagger.server.url:http://localhost:8080}")
     private String swaggerServerUrl;
 
-    @Value("${swagger.server.production.url:}")
+    @Value("${SWAGGER_PRODUCTION_URL:${swagger.server.production.url:}}")
     private String swaggerProductionUrl;
 
     @Value("${server.servlet.context-path:/api}")
@@ -29,6 +33,9 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         // Construir la URL base usando la configuración de Swagger o el puerto del servidor
         String baseUrl = swaggerServerUrl + contextPath;
+        
+        logger.info("Swagger Config - Servidor actual: {}", baseUrl);
+        logger.info("Swagger Config - URL de producción configurada: {}", swaggerProductionUrl);
         
         // Construir lista de servidores
         List<Server> servers = new java.util.ArrayList<>();
@@ -43,9 +50,12 @@ public class SwaggerConfig {
             String productionUrl = swaggerProductionUrl.endsWith(contextPath) 
                     ? swaggerProductionUrl 
                     : swaggerProductionUrl + contextPath;
+            logger.info("Swagger Config - Agregando servidor de producción: {}", productionUrl);
             servers.add(new Server()
                     .url(productionUrl)
                     .description("Servidor de producción"));
+        } else {
+            logger.warn("Swagger Config - No se configuró URL de producción. Variable SWAGGER_PRODUCTION_URL está vacía o no definida.");
         }
         
         return new OpenAPI()

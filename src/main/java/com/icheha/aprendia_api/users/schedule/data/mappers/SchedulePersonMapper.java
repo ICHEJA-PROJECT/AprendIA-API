@@ -1,6 +1,6 @@
 package com.icheha.aprendia_api.users.schedule.data.mappers;
 
-import com.icheha.aprendia_api.auth.data.mappers.PersonaRolMapper;
+import com.icheha.aprendia_api.auth.data.mappers.UserRolMapper;
 import com.icheha.aprendia_api.users.schedule.data.entities.SchedulePersonEntity;
 import com.icheha.aprendia_api.users.schedule.domain.entities.SchedulePerson;
 import org.springframework.context.annotation.Lazy;
@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class SchedulePersonMapper {
     
-    private final PersonaRolMapper personaRolMapper;
+    private final UserRolMapper userRolMapper;
     private final ScheduleMapper scheduleMapper;
     
-    public SchedulePersonMapper(PersonaRolMapper personaRolMapper, @Lazy ScheduleMapper scheduleMapper) {
-        this.personaRolMapper = personaRolMapper;
+    public SchedulePersonMapper(UserRolMapper userRolMapper, @Lazy ScheduleMapper scheduleMapper) {
+        this.userRolMapper = userRolMapper;
         this.scheduleMapper = scheduleMapper;
     }
     
@@ -23,7 +23,7 @@ public class SchedulePersonMapper {
         return new SchedulePerson.Builder()
                 .rolePersonId(entity.getRolePersonId())
                 .scheduleId(entity.getScheduleId())
-                .rolePerson(entity.getRolePerson() != null ? personaRolMapper.toDomain(entity.getRolePerson()) : null)
+                .rolePerson(entity.getRolePerson() != null ? userRolMapper.toDomain(entity.getRolePerson()) : null)
                 .schedule(entity.getSchedule() != null ? scheduleMapper.toDomain(entity.getSchedule()) : null)
                 .build();
     }
