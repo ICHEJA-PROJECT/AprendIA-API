@@ -4,6 +4,7 @@ import com.icheha.aprendia_api.users.person.data.dtos.request.CreateSettlementDt
 import com.icheha.aprendia_api.users.person.data.dtos.request.UpdateSettlementDto;
 import com.icheha.aprendia_api.users.person.data.dtos.response.SettlementResponseDto;
 import com.icheha.aprendia_api.users.person.data.mappers.MunicipalityMapper;
+import com.icheha.aprendia_api.users.person.data.mappers.SettlementMapper;
 import com.icheha.aprendia_api.users.person.data.mappers.SettlementTypeMapper;
 import com.icheha.aprendia_api.users.person.data.mappers.TownMapper;
 import com.icheha.aprendia_api.users.person.data.mappers.ZipcodeMapper;
@@ -18,7 +19,10 @@ import com.icheha.aprendia_api.users.person.domain.entities.Town;
 import com.icheha.aprendia_api.users.person.domain.entities.Zipcode;
 import com.icheha.aprendia_api.users.person.domain.repositories.ISettlementRepository;
 import com.icheha.aprendia_api.users.person.services.ISettlementService;
+import com.icheha.aprendia_api.users.person.data.repositories.SettlementRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +33,8 @@ import java.util.stream.Collectors;
 public class SettlementServiceImpl implements ISettlementService {
     
     private final ISettlementRepository settlementRepository;
+    private final SettlementRepository settlementJpaRepository;
+    private final SettlementMapper settlementMapper;
     private final ZipcodeRepository zipcodeRepository;
     private final SettlementTypeRepository settlementTypeRepository;
     private final MunicipalityRepository municipalityRepository;
@@ -39,6 +45,8 @@ public class SettlementServiceImpl implements ISettlementService {
     private final TownMapper townMapper;
     
     public SettlementServiceImpl(ISettlementRepository settlementRepository,
+                                SettlementRepository settlementJpaRepository,
+                                SettlementMapper settlementMapper,
                                 ZipcodeRepository zipcodeRepository,
                                 SettlementTypeRepository settlementTypeRepository,
                                 MunicipalityRepository municipalityRepository,
@@ -48,6 +56,8 @@ public class SettlementServiceImpl implements ISettlementService {
                                 MunicipalityMapper municipalityMapper,
                                 TownMapper townMapper) {
         this.settlementRepository = settlementRepository;
+        this.settlementJpaRepository = settlementJpaRepository;
+        this.settlementMapper = settlementMapper;
         this.zipcodeRepository = zipcodeRepository;
         this.settlementTypeRepository = settlementTypeRepository;
         this.municipalityRepository = municipalityRepository;
@@ -127,6 +137,33 @@ public class SettlementServiceImpl implements ISettlementService {
         return settlementRepository.findAll().stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SettlementResponseDto> findAll(Pageable pageable) {
+        return settlementJpaRepository.findAll(pageable)
+                .map(entity -> {
+                    Settlement settlement = settlementMapper.toDomain(entity);
+                    return toResponseDto(settlement);
+                });
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SettlementResponseDto> search(String search, Pageable pageable) {
+        if (search == null || search.trim().isEmpty()) {
+            return settlementJpaRepository.findAll(pageable)
+                    .map(entity -> {
+                        Settlement settlement = settlementMapper.toDomain(entity);
+                        return toResponseDto(settlement);
+                    });
+        }
+        return settlementJpaRepository.search(search.trim(), pageable)
+                .map(entity -> {
+                    Settlement settlement = settlementMapper.toDomain(entity);
+                    return toResponseDto(settlement);
+                });
     }
     
     @Override

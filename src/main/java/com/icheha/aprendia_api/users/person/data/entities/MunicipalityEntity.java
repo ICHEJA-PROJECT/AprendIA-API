@@ -1,5 +1,6 @@
 package com.icheha.aprendia_api.users.person.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,8 +15,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"towns", "settlements"})
-@EqualsAndHashCode(exclude = {"towns", "settlements"})
+@ToString
+@EqualsAndHashCode
 public class MunicipalityEntity {
     
     @Id
@@ -31,9 +32,15 @@ public class MunicipalityEntity {
     private StateEntity estado;
     
     @OneToMany(mappedBy = "municipio", fetch = FetchType.LAZY)
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<TownEntity> towns;
     
     @OneToMany(mappedBy = "municipio", fetch = FetchType.LAZY)
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<SettlementEntity> settlements;
 }
 

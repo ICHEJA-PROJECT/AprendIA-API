@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,11 +33,18 @@ public class SettlementController {
     }
     
     @GetMapping
-    @Operation(summary = "Obtener todos los asentamientos", description = "Obtener todos los asentamientos disponibles")
+    @Operation(
+        summary = "Obtener todos los asentamientos", 
+        description = "Obtener todos los asentamientos disponibles con paginación. Parámetros: page (número de página, default: 0), size (tamaño de página, default: 20), sort (campo de ordenamiento, default: nombre)"
+    )
     @ApiResponse(responseCode = "200", description = "Asentamientos obtenidos exitosamente")
-    public ResponseEntity<BaseResponse<List<SettlementResponseDto>>> findAll() {
-        List<SettlementResponseDto> settlements = settlementService.findAll();
-        BaseResponse<List<SettlementResponseDto>> response = new BaseResponse<>(
+    @Parameter(name = "page", description = "Número de página (0-indexed)", example = "0")
+    @Parameter(name = "size", description = "Tamaño de página", example = "20")
+    @Parameter(name = "sort", description = "Campo de ordenamiento (ej: nombre,asc)", example = "nombre")
+    public ResponseEntity<BaseResponse<Page<SettlementResponseDto>>> findAll(
+            @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
+        Page<SettlementResponseDto> settlements = settlementService.findAll(pageable);
+        BaseResponse<Page<SettlementResponseDto>> response = new BaseResponse<>(
                 true, settlements, "Asentamientos obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
@@ -108,13 +118,32 @@ public class SettlementController {
     }
     
     @GetMapping("/zipcode/{zipcode}")
-    @Operation(summary = "Buscar asentamientos por código postal", description = "Obtener todos los asentamientos de un código postal")
+    @Operation(summary = "Buscar asentamientos por código postal", description = "Obtener todos los asentamientos de un código postal para formularios de ingreso")
     @ApiResponse(responseCode = "200", description = "Asentamientos obtenidos exitosamente")
     public ResponseEntity<BaseResponse<List<SettlementResponseDto>>> findByZipcode(
-            @Parameter(description = "Código postal", required = true)
+            @Parameter(description = "Código postal (5 dígitos)", required = true, example = "29000")
             @PathVariable String zipcode) {
         List<SettlementResponseDto> settlements = settlementService.findByZipcode(zipcode);
         BaseResponse<List<SettlementResponseDto>> response = new BaseResponse<>(
+                true, settlements, "Asentamientos obtenidos exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
+    
+    @GetMapping("/search")
+    @Operation(
+        summary = "Buscar asentamientos", 
+        description = "Buscar asentamientos por nombre o código postal con paginación. Parámetros: search (término de búsqueda), page (número de página, default: 0), size (tamaño de página, default: 20), sort (campo de ordenamiento, default: nombre)"
+    )
+    @ApiResponse(responseCode = "200", description = "Asentamientos obtenidos exitosamente")
+    @Parameter(name = "search", description = "Término de búsqueda (nombre o código postal)", example = "centro")
+    @Parameter(name = "page", description = "Número de página (0-indexed)", example = "0")
+    @Parameter(name = "size", description = "Tamaño de página", example = "20")
+    @Parameter(name = "sort", description = "Campo de ordenamiento (ej: nombre,asc)", example = "nombre")
+    public ResponseEntity<BaseResponse<Page<SettlementResponseDto>>> search(
+            @RequestParam(required = false) String search,
+            @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
+        Page<SettlementResponseDto> settlements = settlementService.search(search, pageable);
+        BaseResponse<Page<SettlementResponseDto>> response = new BaseResponse<>(
                 true, settlements, "Asentamientos obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }

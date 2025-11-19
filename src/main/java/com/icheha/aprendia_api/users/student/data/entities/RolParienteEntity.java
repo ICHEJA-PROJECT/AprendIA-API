@@ -1,17 +1,24 @@
 package com.icheha.aprendia_api.users.student.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 
 @Entity
 @Table(name = "rol_pariente")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class RolParienteEntity {
     
     @Id
@@ -23,6 +30,9 @@ public class RolParienteEntity {
     private String nombre;
     
     @OneToMany(mappedBy = "rolPariente", fetch = FetchType.LAZY)
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<ParienteEntity> parientes;
 }
 

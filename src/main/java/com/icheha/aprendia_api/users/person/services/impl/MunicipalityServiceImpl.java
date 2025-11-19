@@ -9,7 +9,11 @@ import com.icheha.aprendia_api.users.person.domain.entities.Municipality;
 import com.icheha.aprendia_api.users.person.domain.entities.State;
 import com.icheha.aprendia_api.users.person.domain.repositories.IMunicipalityRepository;
 import com.icheha.aprendia_api.users.person.services.IMunicipalityService;
+import com.icheha.aprendia_api.users.person.data.repositories.MunicipalityRepository;
+import com.icheha.aprendia_api.users.person.data.mappers.MunicipalityMapper;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +24,19 @@ import java.util.stream.Collectors;
 public class MunicipalityServiceImpl implements IMunicipalityService {
     
     private final IMunicipalityRepository municipalityRepository;
+    private final MunicipalityRepository municipalityJpaRepository;
+    private final MunicipalityMapper municipalityMapper;
     private final StateRepository stateRepository;
     private final StateMapper stateMapper;
     
     public MunicipalityServiceImpl(IMunicipalityRepository municipalityRepository,
+                                  MunicipalityRepository municipalityJpaRepository,
+                                  MunicipalityMapper municipalityMapper,
                                   StateRepository stateRepository,
                                   StateMapper stateMapper) {
         this.municipalityRepository = municipalityRepository;
+        this.municipalityJpaRepository = municipalityJpaRepository;
+        this.municipalityMapper = municipalityMapper;
         this.stateRepository = stateRepository;
         this.stateMapper = stateMapper;
     }
@@ -70,6 +80,33 @@ public class MunicipalityServiceImpl implements IMunicipalityService {
         return municipalityRepository.findAll().stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MunicipalityResponseDto> findAll(Pageable pageable) {
+        return municipalityJpaRepository.findAll(pageable)
+                .map(entity -> {
+                    Municipality municipality = municipalityMapper.toDomain(entity);
+                    return toResponseDto(municipality);
+                });
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MunicipalityResponseDto> search(String search, Pageable pageable) {
+        if (search == null || search.trim().isEmpty()) {
+            return municipalityJpaRepository.findAll(pageable)
+                    .map(entity -> {
+                        Municipality municipality = municipalityMapper.toDomain(entity);
+                        return toResponseDto(municipality);
+                    });
+        }
+        return municipalityJpaRepository.search(search.trim(), pageable)
+                .map(entity -> {
+                    Municipality municipality = municipalityMapper.toDomain(entity);
+                    return toResponseDto(municipality);
+                });
     }
     
     @Override

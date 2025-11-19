@@ -9,7 +9,11 @@ import com.icheha.aprendia_api.users.person.domain.entities.Municipality;
 import com.icheha.aprendia_api.users.person.domain.entities.Town;
 import com.icheha.aprendia_api.users.person.domain.repositories.ITownRepository;
 import com.icheha.aprendia_api.users.person.services.ITownService;
+import com.icheha.aprendia_api.users.person.data.repositories.TownRepository;
+import com.icheha.aprendia_api.users.person.data.mappers.TownMapper;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +24,19 @@ import java.util.stream.Collectors;
 public class TownServiceImpl implements ITownService {
     
     private final ITownRepository townRepository;
+    private final TownRepository townJpaRepository;
+    private final TownMapper townMapper;
     private final MunicipalityRepository municipalityRepository;
     private final MunicipalityMapper municipalityMapper;
     
     public TownServiceImpl(ITownRepository townRepository,
+                           TownRepository townJpaRepository,
+                           TownMapper townMapper,
                            MunicipalityRepository municipalityRepository,
                            MunicipalityMapper municipalityMapper) {
         this.townRepository = townRepository;
+        this.townJpaRepository = townJpaRepository;
+        this.townMapper = townMapper;
         this.municipalityRepository = municipalityRepository;
         this.municipalityMapper = municipalityMapper;
     }
@@ -70,6 +80,33 @@ public class TownServiceImpl implements ITownService {
         return townRepository.findAll().stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TownResponseDto> findAll(Pageable pageable) {
+        return townJpaRepository.findAll(pageable)
+                .map(entity -> {
+                    Town town = townMapper.toDomain(entity);
+                    return toResponseDto(town);
+                });
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TownResponseDto> search(String search, Pageable pageable) {
+        if (search == null || search.trim().isEmpty()) {
+            return townJpaRepository.findAll(pageable)
+                    .map(entity -> {
+                        Town town = townMapper.toDomain(entity);
+                        return toResponseDto(town);
+                    });
+        }
+        return townJpaRepository.search(search.trim(), pageable)
+                .map(entity -> {
+                    Town town = townMapper.toDomain(entity);
+                    return toResponseDto(town);
+                });
     }
     
     @Override

@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,11 +33,18 @@ public class MunicipalityController {
     }
     
     @GetMapping
-    @Operation(summary = "Obtener todos los municipios", description = "Obtener todos los municipios disponibles")
+    @Operation(
+        summary = "Obtener todos los municipios", 
+        description = "Obtener todos los municipios disponibles con paginación. Parámetros: page (número de página, default: 0), size (tamaño de página, default: 20), sort (campo de ordenamiento, default: nombre)"
+    )
     @ApiResponse(responseCode = "200", description = "Municipios obtenidos exitosamente")
-    public ResponseEntity<BaseResponse<List<MunicipalityResponseDto>>> findAll() {
-        List<MunicipalityResponseDto> municipalities = municipalityService.findAll();
-        BaseResponse<List<MunicipalityResponseDto>> response = new BaseResponse<>(
+    @Parameter(name = "page", description = "Número de página (0-indexed)", example = "0")
+    @Parameter(name = "size", description = "Tamaño de página", example = "20")
+    @Parameter(name = "sort", description = "Campo de ordenamiento (ej: nombre,asc)", example = "nombre")
+    public ResponseEntity<BaseResponse<Page<MunicipalityResponseDto>>> findAll(
+            @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
+        Page<MunicipalityResponseDto> municipalities = municipalityService.findAll(pageable);
+        BaseResponse<Page<MunicipalityResponseDto>> response = new BaseResponse<>(
                 true, municipalities, "Municipios obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
@@ -115,6 +125,25 @@ public class MunicipalityController {
             @PathVariable Long stateId) {
         List<MunicipalityResponseDto> municipalities = municipalityService.findByState(stateId);
         BaseResponse<List<MunicipalityResponseDto>> response = new BaseResponse<>(
+                true, municipalities, "Municipios obtenidos exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
+    
+    @GetMapping("/search")
+    @Operation(
+        summary = "Buscar municipios", 
+        description = "Buscar municipios por nombre o estado con paginación. Parámetros: search (término de búsqueda), page (número de página, default: 0), size (tamaño de página, default: 20), sort (campo de ordenamiento, default: nombre)"
+    )
+    @ApiResponse(responseCode = "200", description = "Municipios obtenidos exitosamente")
+    @Parameter(name = "search", description = "Término de búsqueda (nombre o estado)", example = "tuxtla")
+    @Parameter(name = "page", description = "Número de página (0-indexed)", example = "0")
+    @Parameter(name = "size", description = "Tamaño de página", example = "20")
+    @Parameter(name = "sort", description = "Campo de ordenamiento (ej: nombre,asc)", example = "nombre")
+    public ResponseEntity<BaseResponse<Page<MunicipalityResponseDto>>> search(
+            @RequestParam(required = false) String search,
+            @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
+        Page<MunicipalityResponseDto> municipalities = municipalityService.search(search, pageable);
+        BaseResponse<Page<MunicipalityResponseDto>> response = new BaseResponse<>(
                 true, municipalities, "Municipios obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
