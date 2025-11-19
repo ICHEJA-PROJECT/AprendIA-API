@@ -1,26 +1,9 @@
 -- =====================================================
--- EXTENSIÓN VECTOR Y TABLA ACTIVO
--- IMPORTANTE: Esta migración crea la extensión vector de PostgreSQL
--- y la tabla activo con soporte para búsqueda vectorial
+-- ÍNDICES Y DOCUMENTACIÓN PARA TABLA ACTIVO
+-- IMPORTANTE: La extensión vector se crea en 00-vector-extension.sql
+-- La tabla activo se crea automáticamente por Hibernate (ddl-auto: create-drop)
+-- Este script solo crea los índices y comentarios que Hibernate no crea automáticamente
 -- =====================================================
-
--- Crear la extensión vector si no existe
--- Esta extensión permite almacenar y buscar vectores de embeddings
-CREATE EXTENSION IF NOT EXISTS vector;
-
--- =====================================================
--- TABLA: ACTIVO
--- Almacena activos (recursos) con embeddings vectoriales
--- =====================================================
-
--- Crear la tabla activo si no existe
-CREATE TABLE IF NOT EXISTS activo (
-    id_activo SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    url TEXT NOT NULL,
-    descripcion TEXT NOT NULL,
-    vector vector(1536) NOT NULL
-);
 
 -- Crear índices para mejorar el rendimiento de búsquedas vectoriales
 -- Índice HNSW para búsqueda por similitud vectorial (más rápido para búsquedas aproximadas)
