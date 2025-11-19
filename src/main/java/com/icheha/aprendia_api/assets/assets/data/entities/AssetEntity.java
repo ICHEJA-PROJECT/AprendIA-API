@@ -5,9 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
-import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "activo")
@@ -30,6 +28,6 @@ public class AssetEntity {
     private String description;
 
     @Type(FloatArrayType.class)
-    @Column(name = "vector", nullable = false, columnDefinition = "vector(384)")
+    @Column(name = "vector", nullable = false, columnDefinition = "vector(1536)")
     private float[] vector;
 }
