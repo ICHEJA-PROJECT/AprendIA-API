@@ -36,6 +36,8 @@ spring:
   sql:
     init:
       mode: always
+      schema-locations:
+        - classpath:db/migration/00-vector-extension.sql
       data-locations: 
         - classpath:db/migration/01-basic-data.sql
         - classpath:db/migration/02-learning-paths.sql
@@ -50,6 +52,7 @@ spring:
         - classpath:db/migration/10-sequences.sql
         - classpath:db/migration/11-user-table.sql
         - classpath:db/migration/13-usuario-rol.sql
+        - classpath:db/migration/15-vector-extension-and-activo.sql
       continue-on-error: false
   
   security:
