@@ -55,10 +55,11 @@ public class StudentImpairmentMapper {
         // Obtener ruta de aprendizaje de la primera discapacidad
         if (!studentImpairments.isEmpty()) {
             Long firstImpairmentId = studentImpairments.get(0).getImpairmentId();
-            var learningPathOpt = learningPathImpairmentRepository.findFirstByImpairmentIdWithLearningPath(firstImpairmentId);
+            var learningPathList = learningPathImpairmentRepository.findFirstByImpairmentIdWithLearningPath(firstImpairmentId);
             
-            if (learningPathOpt.isPresent()) {
-                var learningPathEntity = learningPathOpt.get();
+            // Tomar el primero de la lista (ya está ordenado por learningPathId DESC)
+            if (learningPathList != null && !learningPathList.isEmpty()) {
+                var learningPathEntity = learningPathList.get(0);
                 StudentImpairmentDetailsResponseDto.LearningPathResponseDto learningPath = 
                         new StudentImpairmentDetailsResponseDto.LearningPathResponseDto();
                 learningPath.setId(learningPathEntity.getLearningPathId());

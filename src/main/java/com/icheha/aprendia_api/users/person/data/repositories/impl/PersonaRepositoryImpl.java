@@ -39,7 +39,7 @@ public class PersonaRepositoryImpl implements IPersonaRepository {
                                 @Lazy RoadTypeRepository roadTypeRepository,
                                 @Lazy SettlementRepository settlementRepository,
                                 @Qualifier("userPersonaMapper") PersonaMapper personaMapper,
-                                @Lazy UserRepository userRepository) {
+                                @Lazy @Qualifier("userJpaRepository") UserRepository userRepository) {
         this.personaRepository = personaRepository;
         this.roadTypeRepository = roadTypeRepository;
         this.settlementRepository = settlementRepository;

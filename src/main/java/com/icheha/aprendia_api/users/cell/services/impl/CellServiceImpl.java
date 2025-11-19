@@ -34,7 +34,7 @@ public class CellServiceImpl implements ICellService {
                          IInstitutionRepository institutionRepository,
                          @Qualifier("userPersonaRepositoryImpl") IPersonaRepository personaRepository,
                          IRolePersonService rolePersonService,
-                         UserRepository userRepository) {
+                         @Qualifier("userJpaRepository") UserRepository userRepository) {
         this.cellRepository = cellRepository;
         this.institutionRepository = institutionRepository;
         this.personaRepository = personaRepository;
