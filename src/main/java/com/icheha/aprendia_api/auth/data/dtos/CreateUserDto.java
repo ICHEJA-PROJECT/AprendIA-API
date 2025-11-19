@@ -23,6 +23,14 @@ public class CreateUserDto {
     @Schema(description = "Nombre de usuario (username)", example = "usuario123", required = true)
     private String username;
     
+    @Size(min = 6, max = 255, message = "La contraseña debe tener entre 6 y 255 caracteres")
+    @Schema(
+        description = "Contraseña del usuario (OPCIONAL). Si no se proporciona, el usuario se creará sin contraseña y deberá establecerla posteriormente.", 
+        example = "password123", 
+        required = false
+    )
+    private String password;
+    
     @Schema(description = "Indica si el usuario está activo", example = "true")
     private Boolean isActive = true;
 }

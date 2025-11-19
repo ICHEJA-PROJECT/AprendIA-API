@@ -6,6 +6,7 @@ import com.icheha.aprendia_api.auth.data.dtos.UserResponseDto;
 import com.icheha.aprendia_api.auth.domain.entities.User;
 import com.icheha.aprendia_api.auth.domain.repositories.IUserRepository;
 import com.icheha.aprendia_api.auth.services.IUserService;
+import com.icheha.aprendia_api.users.person.domain.repositories.IHashDataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +23,12 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements IUserService {
     
     private final IUserRepository userRepository;
+    private final IHashDataRepository hashDataRepository;
     
     @Autowired
-    public UserServiceImpl(IUserRepository userRepository) {
+    public UserServiceImpl(IUserRepository userRepository, IHashDataRepository hashDataRepository) {
         this.userRepository = userRepository;
+        this.hashDataRepository = hashDataRepository;
     }
     
     @Override
@@ -33,6 +36,12 @@ public class UserServiceImpl implements IUserService {
     public UserResponseDto create(CreateUserDto createUserDto) {
         if (createUserDto == null) {
             throw new IllegalArgumentException("CreateUserDto no puede ser nulo");
+        }
+        
+        // Hashear password si se proporciona
+        String hashedPassword = null;
+        if (createUserDto.getPassword() != null && !createUserDto.getPassword().trim().isEmpty()) {
+            hashedPassword = hashDataRepository.hash(createUserDto.getPassword());
         }
         
         User user = new User.Builder()
@@ -43,7 +52,7 @@ public class UserServiceImpl implements IUserService {
                 .updatedAt(LocalDateTime.now())
                 .build();
         
-        User createdUser = userRepository.create(user, createUserDto.getIdPersona());
+        User createdUser = userRepository.create(user, createUserDto.getIdPersona(), hashedPassword);
         return toResponseDto(createdUser);
     }
     
