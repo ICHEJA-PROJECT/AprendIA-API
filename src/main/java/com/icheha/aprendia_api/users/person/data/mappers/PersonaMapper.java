@@ -71,6 +71,8 @@ public class PersonaMapper {
         GenderEnum genero = null;
         String curp = null;
         String password = null;
+        String email = null;
+        String telefono = null;
         
         try {
             idPersona = entity.getIdPersona();
@@ -82,6 +84,8 @@ public class PersonaMapper {
             fechaNacimiento = entity.getFechaNacimiento();
             genero = entity.getGenero();
             curp = entity.getCurp();
+            email = entity.getEmail();
+            telefono = entity.getTelefono();
             
             // Obtener password desde UserEntity usando EntityManager directamente
             // para evitar recursión con el proxy de Spring y relaciones bidireccionales
@@ -125,7 +129,9 @@ public class PersonaMapper {
                 .vialidadNombre(vialidadNombre)
                 .idVialidadTipo(idVialidadTipo)
                 .asentamiento(asentamiento)
-                .idAsentamientoTipo(idAsentamientoTipo);
+                .idAsentamientoTipo(idAsentamientoTipo)
+                .email(email)
+                .telefono(telefono);
         
         // CURP: usar valor real si está disponible
         if (curp != null && !curp.trim().isEmpty()) {
@@ -205,8 +211,8 @@ public class PersonaMapper {
         entity.setNumeroIne(domain.getNumeroIne());
         entity.setFechaNacimiento(domain.getFechaNacimiento());
         entity.setGenero(domain.getGenero());
-        entity.setEmail(null); // TODO: Agregar email al dominio si es necesario
-        entity.setTelefono(null); // TODO: Agregar telefono al dominio si es necesario
+        entity.setEmail(domain.getEmail());
+        entity.setTelefono(domain.getTelefono());
         entity.setProfileImagePath(profileImagePath); // Guardar la URL de la imagen de perfil
         
         // Nota: Password se maneja en UserEntity, no aquí

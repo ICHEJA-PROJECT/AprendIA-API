@@ -32,6 +32,8 @@ public class Persona {
     private final Integer idVialidadTipo;
     private final String asentamiento;
     private final Integer idAsentamientoTipo;
+    private final String email;
+    private final String telefono;
     private final Password password;
     private final List<PersonaRol> personaRoles;
     
@@ -54,6 +56,8 @@ public class Persona {
         this.idVialidadTipo = builder.idVialidadTipo;
         this.asentamiento = builder.asentamiento;
         this.idAsentamientoTipo = builder.idAsentamientoTipo;
+        this.email = builder.email;
+        this.telefono = builder.telefono;
         this.password = builder.password;
         this.personaRoles = builder.personaRoles;
     }
@@ -76,6 +80,8 @@ public class Persona {
     public Integer getIdVialidadTipo() { return idVialidadTipo; }
     public String getAsentamiento() { return asentamiento; }
     public Integer getIdAsentamientoTipo() { return idAsentamientoTipo; }
+    public String getEmail() { return email; }
+    public String getTelefono() { return telefono; }
     public Password getPassword() { return password; }
     public List<PersonaRol> getPersonaRoles() { return personaRoles; }
     
@@ -187,6 +193,8 @@ public class Persona {
         private Integer idVialidadTipo;
         private String asentamiento;
         private Integer idAsentamientoTipo;
+        private String email;
+        private String telefono;
         private Password password;
         private List<PersonaRol> personaRoles;
         
@@ -272,6 +280,16 @@ public class Persona {
         
         public Builder idAsentamientoTipo(Integer idAsentamientoTipo) {
             this.idAsentamientoTipo = idAsentamientoTipo;
+            return this;
+        }
+        
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+        
+        public Builder telefono(String telefono) {
+            this.telefono = telefono;
             return this;
         }
         

@@ -57,6 +57,12 @@ public class CreatePersonDto {
     @Schema(description = "ID del asentamiento", example = "416")
     private Long settlementId;
     
+    @Schema(description = "Email de la persona", example = "fernando.flores@example.com")
+    private String email;
+    
+    @Schema(description = "Teléfono de la persona", example = "5551234567")
+    private String telefono;
+    
     @Schema(description = "Contraseña de la persona (opcional, si se proporciona se creará un usuario automáticamente)", example = "12345678")
     private String password;
     

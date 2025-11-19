@@ -109,6 +109,8 @@ public class PersonServiceImpl implements IPersonService {
                     .idVialidadTipo(createPersonDto.getRoadTypeId().intValue())
                     .asentamiento(null) // Se establecerá desde el settlement
                     .idAsentamientoTipo(null) // Se establecerá desde el settlement
+                    .email(createPersonDto.getEmail())
+                    .telefono(createPersonDto.getTelefono())
                     .password(hashedPassword != null ? new Password(hashedPassword) : null)
                     .build();
             
@@ -233,7 +235,9 @@ public class PersonServiceImpl implements IPersonService {
                     .vialidadNombre(updatePersonDto.getRoadName() != null ? updatePersonDto.getRoadName() : existingPersona.getVialidadNombre())
                     .idVialidadTipo(updatePersonDto.getRoadTypeId() != null ? updatePersonDto.getRoadTypeId().intValue() : existingPersona.getIdVialidadTipo())
                     .asentamiento(existingPersona.getAsentamiento())
-                    .idAsentamientoTipo(existingPersona.getIdAsentamientoTipo());
+                    .idAsentamientoTipo(existingPersona.getIdAsentamientoTipo())
+                    .email(updatePersonDto.getEmail() != null ? updatePersonDto.getEmail() : existingPersona.getEmail())
+                    .telefono(updatePersonDto.getTelefono() != null ? updatePersonDto.getTelefono() : existingPersona.getTelefono());
             
             if (curpValue != null && !curpValue.trim().isEmpty()) {
                 builder.curp(new Curp(curpValue));
@@ -294,6 +298,8 @@ public class PersonServiceImpl implements IPersonService {
         // Manejar null de forma segura para getGenero()
         dto.setGenero(persona.getGenero() != null ? persona.getGenero().getValue() : null);
         dto.setVialidadNombre(persona.getVialidadNombre());
+        dto.setEmail(persona.getEmail());
+        dto.setTelefono(persona.getTelefono());
         dto.setProfileImagePath(imageUrl);
         return dto;
     }
