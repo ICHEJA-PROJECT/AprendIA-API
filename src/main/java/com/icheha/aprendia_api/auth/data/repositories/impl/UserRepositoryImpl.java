@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 /**
  * Implementación del repositorio de dominio para User
  */
-@Repository
+@Repository("userDomainRepository")
 public class UserRepositoryImpl implements IUserRepository {
     
     private final UserRepository userRepository;
@@ -29,7 +29,7 @@ public class UserRepositoryImpl implements IUserRepository {
     @PersistenceContext
     private EntityManager entityManager;
     
-    public UserRepositoryImpl(@Lazy UserRepository userRepository,
+    public UserRepositoryImpl(@Lazy @Qualifier("userJpaRepository") UserRepository userRepository,
                              @Lazy @Qualifier("userPersonaRepository") PersonaRepository personaRepository,
                              UserMapper userMapper) {
         this.userRepository = userRepository;
@@ -109,9 +109,13 @@ public class UserRepositoryImpl implements IUserRepository {
         if (id == null) {
             return Optional.empty();
         }
-        return userRepository.findById(id)
-                .map(this::createCleanEntity)
-                .map(userMapper::toDomain);
+        // Usar EntityManager directamente para evitar recursión con el proxy de Spring
+        UserEntity entity = entityManager.find(UserEntity.class, id);
+        if (entity == null) {
+            return Optional.empty();
+        }
+        UserEntity cleanEntity = createCleanEntity(entity);
+        return Optional.ofNullable(userMapper.toDomain(cleanEntity));
     }
     
     @Override
@@ -119,9 +123,18 @@ public class UserRepositoryImpl implements IUserRepository {
         if (idPersona == null) {
             return Optional.empty();
         }
-        return userRepository.findByIdPersona(idPersona)
-                .map(this::createCleanEntity)
-                .map(userMapper::toDomain);
+        // Usar EntityManager directamente para evitar recursión con el proxy de Spring
+        jakarta.persistence.TypedQuery<UserEntity> query = entityManager.createQuery(
+            "SELECT u FROM UserEntity u WHERE u.idPersona = :idPersona", UserEntity.class);
+        query.setParameter("idPersona", idPersona);
+        query.setMaxResults(1);
+        try {
+            UserEntity entity = query.getSingleResult();
+            UserEntity cleanEntity = createCleanEntity(entity);
+            return Optional.ofNullable(userMapper.toDomain(cleanEntity));
+        } catch (jakarta.persistence.NoResultException e) {
+            return Optional.empty();
+        }
     }
     
     @Override
@@ -129,9 +142,18 @@ public class UserRepositoryImpl implements IUserRepository {
         if (username == null || username.trim().isEmpty()) {
             return Optional.empty();
         }
-        return userRepository.findByUsername(username)
-                .map(this::createCleanEntity)
-                .map(userMapper::toDomain);
+        // Usar EntityManager directamente para evitar recursión con el proxy de Spring
+        jakarta.persistence.TypedQuery<UserEntity> query = entityManager.createQuery(
+            "SELECT u FROM UserEntity u WHERE u.username = :username", UserEntity.class);
+        query.setParameter("username", username);
+        query.setMaxResults(1);
+        try {
+            UserEntity entity = query.getSingleResult();
+            UserEntity cleanEntity = createCleanEntity(entity);
+            return Optional.ofNullable(userMapper.toDomain(cleanEntity));
+        } catch (jakarta.persistence.NoResultException e) {
+            return Optional.empty();
+        }
     }
     
     @Override

@@ -11,7 +11,10 @@ import com.icheha.aprendia_api.users.person.data.entities.DomicilioEntity;
 import com.icheha.aprendia_api.users.person.data.entities.PersonaEntity;
 import com.icheha.aprendia_api.users.person.data.entities.RoadTypeEntity;
 import com.icheha.aprendia_api.users.person.data.entities.SettlementEntity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -26,8 +29,11 @@ public class PersonaMapper {
     private final UserRepository userRepository;
     private final UserRolMapper userRolMapper;
     
+    @PersistenceContext
+    private EntityManager entityManager;
+    
     @Autowired
-    public PersonaMapper(RoadTypeMapper roadTypeMapper, SettlementMapper settlementMapper, UserRepository userRepository, UserRolMapper userRolMapper) {
+    public PersonaMapper(RoadTypeMapper roadTypeMapper, SettlementMapper settlementMapper, @Qualifier("userJpaRepository") UserRepository userRepository, UserRolMapper userRolMapper) {
         this.roadTypeMapper = roadTypeMapper;
         this.settlementMapper = settlementMapper;
         this.userRepository = userRepository;
@@ -77,18 +83,27 @@ public class PersonaMapper {
             genero = entity.getGenero();
             curp = entity.getCurp();
             
-            // Obtener password desde UserEntity
-            // IMPORTANTE: No acceder a entity.getUser() directamente para evitar StackOverflowError
-            // en relaciones bidireccionales. Usar consulta directa al repositorio.
+            // Obtener password desde UserEntity usando EntityManager directamente
+            // para evitar recursión con el proxy de Spring y relaciones bidireccionales
             try {
                 if (idPersona != null) {
-                    UserEntity userEntity = userRepository.findByIdPersona(idPersona).orElse(null);
-                    if (userEntity != null) {
-                        password = userEntity.getPassword();
+                    jakarta.persistence.TypedQuery<UserEntity> query = entityManager.createQuery(
+                        "SELECT u FROM UserEntity u WHERE u.idPersona = :idPersona", UserEntity.class);
+                    query.setParameter("idPersona", idPersona);
+                    query.setMaxResults(1);
+                    try {
+                        UserEntity userEntity = query.getSingleResult();
+                        if (userEntity != null) {
+                            password = userEntity.getPassword();
+                        }
+                    } catch (jakarta.persistence.NoResultException e) {
+                        // No hay usuario para esta persona
+                        password = null;
                     }
                 }
             } catch (Exception e) {
                 // Si hay error al acceder a UserEntity, dejar password como null
+                password = null;
             }
         } catch (Exception e) {
             // Si hay error al acceder a los campos, usar valores por defecto
@@ -132,24 +147,37 @@ public class PersonaMapper {
             builder.password(null);
         }
         
-        // Obtener roles desde UserEntity
-        // IMPORTANTE: No acceder a entity.getUser() directamente para evitar StackOverflowError
-        // en relaciones bidireccionales. Usar consulta directa al repositorio.
+        // Obtener roles desde UserEntity usando EntityManager directamente
+        // para evitar recursión con el proxy de Spring y relaciones bidireccionales
         try {
             if (idPersona != null) {
-                UserEntity userEntity = userRepository.findByIdPersona(idPersona).orElse(null);
-                if (userEntity != null && userEntity.getIdUser() != null) {
-                    try {
-                        var userWithRoles = userRepository.findByIdWithRoles(userEntity.getIdUser());
-                        if (userWithRoles.isPresent() && userWithRoles.get().getUserRoles() != null) {
-                            personaRoles = userWithRoles.get().getUserRoles().stream()
+                // Obtener UserEntity usando EntityManager
+                jakarta.persistence.TypedQuery<UserEntity> userQuery = entityManager.createQuery(
+                    "SELECT u FROM UserEntity u WHERE u.idPersona = :idPersona", UserEntity.class);
+                userQuery.setParameter("idPersona", idPersona);
+                userQuery.setMaxResults(1);
+                try {
+                    UserEntity userEntity = userQuery.getSingleResult();
+                    if (userEntity != null && userEntity.getIdUser() != null) {
+                        // Obtener roles usando consulta directa con EntityManager
+                        jakarta.persistence.TypedQuery<com.icheha.aprendia_api.auth.data.entities.UserRolEntity> rolesQuery = 
+                            entityManager.createQuery(
+                                "SELECT ur FROM UserRolEntity ur " +
+                                "LEFT JOIN FETCH ur.rol " +
+                                "WHERE ur.idUser = :userId", 
+                                com.icheha.aprendia_api.auth.data.entities.UserRolEntity.class);
+                        rolesQuery.setParameter("userId", userEntity.getIdUser());
+                        List<com.icheha.aprendia_api.auth.data.entities.UserRolEntity> userRoles = rolesQuery.getResultList();
+                        
+                        if (userRoles != null && !userRoles.isEmpty()) {
+                            personaRoles = userRoles.stream()
                                     .map(userRolMapper::toDomain)
                                     .filter(pr -> pr != null)
                                     .collect(java.util.stream.Collectors.toList());
                         }
-                    } catch (Exception e) {
-                        // Si hay error, dejar la lista vacía
                     }
+                } catch (jakarta.persistence.NoResultException e) {
+                    // No hay usuario para esta persona, dejar roles vacíos
                 }
             }
         } catch (Exception e) {

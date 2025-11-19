@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface LearningPathImpairmentRepository extends JpaRepository<LearningPathImpairment, LearningPathImpairment.LearningPathImpairmentId> {
@@ -27,7 +26,7 @@ public interface LearningPathImpairmentRepository extends JpaRepository<Learning
            "JOIN FETCH lpi.learningPath " +
            "WHERE lpi.impairmentId = :impairmentId " +
            "ORDER BY lpi.learningPathId DESC")
-    Optional<LearningPathImpairment> findFirstByImpairmentIdWithLearningPath(@Param("impairmentId") Long impairmentId);
+    List<LearningPathImpairment> findFirstByImpairmentIdWithLearningPath(@Param("impairmentId") Long impairmentId);
     
     boolean existsByLearningPathIdAndImpairmentId(Long learningPathId, Long impairmentId);
 }

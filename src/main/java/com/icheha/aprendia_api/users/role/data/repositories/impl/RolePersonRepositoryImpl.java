@@ -9,6 +9,7 @@ import com.icheha.aprendia_api.auth.data.repositories.RolRepository;
 import com.icheha.aprendia_api.auth.data.mappers.UserRolMapper;
 import com.icheha.aprendia_api.auth.domain.entities.PersonaRol;
 import com.icheha.aprendia_api.users.role.domain.repositories.IRolePersonRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
@@ -25,7 +26,7 @@ public class RolePersonRepositoryImpl implements IRolePersonRepository {
     private final UserRolMapper userRolMapper;
     
     public RolePersonRepositoryImpl(@Lazy UserRolRepository userRolRepository,
-                                   @Lazy UserRepository userRepository,
+                                   @Lazy @Qualifier("userJpaRepository") UserRepository userRepository,
                                    @Lazy RolRepository rolRepository,
                                    UserRolMapper userRolMapper) {
         this.userRolRepository = userRolRepository;

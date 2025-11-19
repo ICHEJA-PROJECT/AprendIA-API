@@ -8,7 +8,10 @@ import com.icheha.aprendia_api.auth.data.mappers.UserRolMapper;
 import com.icheha.aprendia_api.auth.domain.entities.Persona;
 import com.icheha.aprendia_api.auth.domain.entities.PersonaRol;
 import com.icheha.aprendia_api.auth.domain.valueobjects.Curp;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -20,8 +23,11 @@ public class PersonaMapper {
     private final UserRepository userRepository;
     private final UserRolMapper userRolMapper;
     
+    @PersistenceContext
+    private EntityManager entityManager;
+    
     @Autowired
-    public PersonaMapper(UserRepository userRepository, UserRolMapper userRolMapper) {
+    public PersonaMapper(@Qualifier("userJpaRepository") UserRepository userRepository, UserRolMapper userRolMapper) {
         this.userRepository = userRepository;
         this.userRolMapper = userRolMapper;
     }
@@ -91,54 +97,54 @@ public class PersonaMapper {
             builder.curp(null);
         }
         
-        // Password y Roles: obtener desde UserEntity si está disponible
+        // Password y Roles: obtener desde UserEntity usando EntityManager directamente
+        // para evitar recursión con el proxy de Spring y relaciones bidireccionales
         List<PersonaRol> personaRoles = new ArrayList<>();
+        String password = null;
         try {
-            UserEntity userEntity = null;
-            if (entity.getUser() != null) {
-                userEntity = entity.getUser();
-            } else if (entity.getIdPersona() != null) {
-                userEntity = userRepository.findByIdPersonaWithPersona(entity.getIdPersona()).orElse(null);
-            }
-            
-            if (userEntity != null) {
-                // Obtener password
-                if (userEntity.getPassword() != null && !userEntity.getPassword().trim().isEmpty()) {
-                    builder.password(new com.icheha.aprendia_api.auth.domain.valueobjects.Password(userEntity.getPassword()));
-                } else {
-                    builder.password(null);
-                }
-                
-                // Obtener roles desde UserEntity.userRoles
+            if (entity.getIdPersona() != null) {
+                // Obtener UserEntity usando EntityManager directamente
+                jakarta.persistence.TypedQuery<UserEntity> userQuery = entityManager.createQuery(
+                    "SELECT u FROM UserEntity u WHERE u.idPersona = :idPersona", UserEntity.class);
+                userQuery.setParameter("idPersona", entity.getIdPersona());
+                userQuery.setMaxResults(1);
                 try {
-                    if (userEntity.getUserRoles() != null && !userEntity.getUserRoles().isEmpty()) {
-                        personaRoles = userEntity.getUserRoles().stream()
-                                .map(userRolMapper::toDomain)
-                                .filter(pr -> pr != null)
-                                .collect(java.util.stream.Collectors.toList());
-                    } else if (userEntity.getIdUser() != null) {
-                        // Si los roles no están cargados, intentar cargarlos desde UserRolRepository
-                        try {
-                            var userWithRoles = userRepository.findByIdWithRoles(userEntity.getIdUser());
-                            if (userWithRoles.isPresent() && userWithRoles.get().getUserRoles() != null) {
-                                personaRoles = userWithRoles.get().getUserRoles().stream()
+                    UserEntity userEntity = userQuery.getSingleResult();
+                    if (userEntity != null) {
+                        // Obtener password
+                        password = userEntity.getPassword();
+                        
+                        // Obtener roles usando consulta directa con EntityManager
+                        if (userEntity.getIdUser() != null) {
+                            jakarta.persistence.TypedQuery<com.icheha.aprendia_api.auth.data.entities.UserRolEntity> rolesQuery = 
+                                entityManager.createQuery(
+                                    "SELECT ur FROM UserRolEntity ur " +
+                                    "LEFT JOIN FETCH ur.rol " +
+                                    "WHERE ur.idUser = :userId", 
+                                    com.icheha.aprendia_api.auth.data.entities.UserRolEntity.class);
+                            rolesQuery.setParameter("userId", userEntity.getIdUser());
+                            List<com.icheha.aprendia_api.auth.data.entities.UserRolEntity> userRoles = rolesQuery.getResultList();
+                            
+                            if (userRoles != null && !userRoles.isEmpty()) {
+                                personaRoles = userRoles.stream()
                                         .map(userRolMapper::toDomain)
                                         .filter(pr -> pr != null)
                                         .collect(java.util.stream.Collectors.toList());
                             }
-                        } catch (Exception e) {
-                            // Si hay error, dejar la lista vacía
                         }
                     }
-                } catch (Exception e) {
-                    // Si hay error al acceder a los roles, dejar la lista vacía
-                    personaRoles = new ArrayList<>();
+                } catch (jakarta.persistence.NoResultException e) {
+                    // No hay usuario para esta persona
                 }
-            } else {
-                builder.password(null);
             }
         } catch (Exception e) {
             // Si hay error al acceder a UserEntity, dejar password como null
+        }
+        
+        // Establecer password en el builder
+        if (password != null && !password.trim().isEmpty()) {
+            builder.password(new com.icheha.aprendia_api.auth.domain.valueobjects.Password(password));
+        } else {
             builder.password(null);
         }
         

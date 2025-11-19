@@ -7,6 +7,7 @@ import com.icheha.aprendia_api.users.cell.domain.repositories.ITeacherCellReposi
 import com.icheha.aprendia_api.auth.data.repositories.UserRepository;
 import com.icheha.aprendia_api.users.cell.services.ITeacherCellService;
 import com.icheha.aprendia_api.users.role.services.IRolePersonService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,7 +22,7 @@ public class TeacherCellServiceImpl implements ITeacherCellService {
     
     public TeacherCellServiceImpl(ITeacherCellRepository teacherCellRepository,
                                  IRolePersonService rolePersonService,
-                                 UserRepository userRepository) {
+                                 @Qualifier("userJpaRepository") UserRepository userRepository) {
         this.teacherCellRepository = teacherCellRepository;
         this.rolePersonService = rolePersonService;
         this.userRepository = userRepository;

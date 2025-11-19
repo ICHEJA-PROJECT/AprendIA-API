@@ -1,6 +1,6 @@
 package com.icheha.aprendia_api.users.student.services.impl;
 
-import com.icheha.aprendia_api.auth.data.repositories.UserRepository;
+import com.icheha.aprendia_api.auth.data.entities.UserEntity;
 import com.icheha.aprendia_api.auth.domain.entities.Persona;
 import com.icheha.aprendia_api.core.utils.JwtUtil;
 import com.icheha.aprendia_api.users.person.domain.repositories.IPersonaRepository;
@@ -20,6 +20,8 @@ import com.icheha.aprendia_api.users.student.domain.repositories.IStudentReposit
 import com.icheha.aprendia_api.users.student.domain.repositories.IRolParienteRepository;
 import com.icheha.aprendia_api.users.student.services.IParienteService;
 import com.icheha.aprendia_api.users.student.services.IStudentService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +49,9 @@ public class StudentServiceImpl implements IStudentService {
     private final StudentImpairmentRepository studentImpairmentRepository;
     private final JwtUtil jwtUtil;
     private final com.icheha.aprendia_api.users.role.services.IRolePersonService rolePersonService;
-    private final UserRepository userRepository;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
     
     public StudentServiceImpl(IStudentRepository studentRepository,
                              IParienteService parienteService,
@@ -59,8 +63,7 @@ public class StudentServiceImpl implements IStudentService {
                              IStudentImpairmentService studentImpairmentService,
                              StudentImpairmentRepository studentImpairmentRepository,
                              JwtUtil jwtUtil,
-                             com.icheha.aprendia_api.users.role.services.IRolePersonService rolePersonService,
-                             UserRepository userRepository) {
+                             com.icheha.aprendia_api.users.role.services.IRolePersonService rolePersonService) {
         this.studentRepository = studentRepository;
         this.parienteService = parienteService;
         this.rolParienteRepository = rolParienteRepository;
@@ -72,7 +75,6 @@ public class StudentServiceImpl implements IStudentService {
         this.studentImpairmentRepository = studentImpairmentRepository;
         this.jwtUtil = jwtUtil;
         this.rolePersonService = rolePersonService;
-        this.userRepository = userRepository;
     }
     
     @Override
@@ -90,15 +92,20 @@ public class StudentServiceImpl implements IStudentService {
                     .orElseThrow(() -> new IllegalArgumentException("Persona no encontrada con ID: " + createStudentDto.getPersonId()));
             
             // Validar educador si se proporciona
+            // IMPORTANTE: Un maestro debe ser un UserEntity con rol de educador, no solo una PersonaEntity
             Persona teacher = null;
             if (createStudentDto.getTeacherId() != null) {
-                teacher = personaRepository.findById(createStudentDto.getTeacherId())
-                        .orElseThrow(() -> new IllegalArgumentException("Educador no encontrado con ID: " + createStudentDto.getTeacherId()));
+                // Primero validar que existe un UserEntity para esta persona (un maestro es un usuario)
+                UserEntity teacherUserEntity = findUserEntityByIdPersona(createStudentDto.getTeacherId());
+                
+                // Validar que el usuario esté activo
+                if (!Boolean.TRUE.equals(teacherUserEntity.getIsActive())) {
+                    throw new IllegalArgumentException("El usuario con ID: " + teacherUserEntity.getIdUser() + 
+                        " no está activo y no puede ser asignado como educador");
+                }
                 
                 // Validar que el educador tenga rol de educador (rol ID 1)
-                Long userId = userRepository.findByIdPersona(createStudentDto.getTeacherId())
-                        .map(u -> u.getIdUser())
-                        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado para la persona con ID: " + createStudentDto.getTeacherId()));
+                Long userId = teacherUserEntity.getIdUser();
                 var teacherRoles = rolePersonService.findByUserId(userId);
                 
                 boolean hasTeacherRole = teacherRoles.stream()
@@ -108,14 +115,19 @@ public class StudentServiceImpl implements IStudentService {
                         teacherRoles.stream()
                             .map(rp -> String.valueOf(rp.getRoleId()))
                             .collect(java.util.stream.Collectors.joining(", "));
-                    throw new IllegalArgumentException("La persona seleccionada como educador no cuenta con ese rol. Roles encontrados: " + rolesFound);
+                    throw new IllegalArgumentException("El usuario con ID: " + userId + 
+                        " no tiene el rol de educador (rol ID 1). Roles encontrados: " + rolesFound);
                 }
+                
+                // Solo después de validar que es un UserEntity con rol de educador, obtener la PersonaEntity
+                teacher = personaRepository.findById(createStudentDto.getTeacherId())
+                        .orElseThrow(() -> new IllegalArgumentException("Persona no encontrada para el educador con ID: " + createStudentDto.getTeacherId()));
             }
             
             // Asignar rol de estudiante (rol ID 4) a la persona
-            Long studentUserId = userRepository.findByIdPersona(createStudentDto.getPersonId())
-                    .map(u -> u.getIdUser())
-                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado para la persona con ID: " + createStudentDto.getPersonId()));
+            // Usar EntityManager directamente para obtener UserEntity y evitar problemas de casting
+            UserEntity studentUserEntity = findUserEntityByIdPersona(createStudentDto.getPersonId());
+            Long studentUserId = studentUserEntity.getIdUser();
             com.icheha.aprendia_api.users.role.data.dtos.CreateRolePersonDto rolePersonDto = 
                     new com.icheha.aprendia_api.users.role.data.dtos.CreateRolePersonDto();
             rolePersonDto.setUserId(studentUserId);
@@ -136,39 +148,6 @@ public class StudentServiceImpl implements IStudentService {
                     "pending",
                     createdByUserId
             );
-            
-            // Crear relaciones de parientes (padre y madre)
-            // Obtener IDs de roles de pariente dinámicamente
-            Long padreRolId = rolParienteRepository.findByNombre("Padre")
-                    .orElseThrow(() -> new RuntimeException("Rol de pariente 'Padre' no encontrado"))
-                    .getId();
-            Long madreRolId = rolParienteRepository.findByNombre("Madre")
-                    .orElseThrow(() -> new RuntimeException("Rol de pariente 'Madre' no encontrado"))
-                    .getId();
-            
-            // Crear relación padre
-            CreateParienteDto createPadreDto = new CreateParienteDto();
-            createPadreDto.setPersonaId(createStudentDto.getPersonId());
-            createPadreDto.setParienteId(createStudentDto.getFatherPersonId());
-            createPadreDto.setRolParienteId(padreRolId);
-            try {
-                parienteService.create(createPadreDto);
-            } catch (Exception e) {
-                // Si ya existe la relación, continuar
-                System.out.println("Relación padre ya existe o error: " + e.getMessage());
-            }
-            
-            // Crear relación madre
-            CreateParienteDto createMadreDto = new CreateParienteDto();
-            createMadreDto.setPersonaId(createStudentDto.getPersonId());
-            createMadreDto.setParienteId(createStudentDto.getMotherPersonId());
-            createMadreDto.setRolParienteId(madreRolId);
-            try {
-                parienteService.create(createMadreDto);
-            } catch (Exception e) {
-                // Si ya existe la relación, continuar
-                System.out.println("Relación madre ya existe o error: " + e.getMessage());
-            }
             
             // Crear discapacidades si se proporcionan
             if (createStudentDto.getImpairments() != null && !createStudentDto.getImpairments().isEmpty()) {
@@ -311,21 +290,34 @@ public class StudentServiceImpl implements IStudentService {
                     .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado con ID: " + id));
             
             // Validar educador si se proporciona
+            // IMPORTANTE: Un maestro debe ser un UserEntity con rol de educador, no solo una PersonaEntity
             Long teacherId = updateStudentDto.getTeacherId();
             if (teacherId != null) {
-                Persona teacher = personaRepository.findById(teacherId)
-                        .orElseThrow(() -> new IllegalArgumentException("Educador no encontrado con ID: " + teacherId));
+                // Primero validar que existe un UserEntity para esta persona (un maestro es un usuario)
+                UserEntity teacherUserEntity = findUserEntityByIdPersona(teacherId);
+                
+                // Validar que el usuario esté activo
+                if (!Boolean.TRUE.equals(teacherUserEntity.getIsActive())) {
+                    throw new IllegalArgumentException("El usuario con ID: " + teacherUserEntity.getIdUser() + 
+                        " no está activo y no puede ser asignado como educador");
+                }
                 
                 // Validar que el educador tenga rol de educador (rol ID 1)
-                Long userId = userRepository.findByIdPersona(teacherId)
-                        .map(u -> u.getIdUser())
-                        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado para la persona con ID: " + teacherId));
+                Long userId = teacherUserEntity.getIdUser();
                 var teacherRoles = rolePersonService.findByUserId(userId);
                 boolean hasTeacherRole = teacherRoles.stream()
                         .anyMatch(rp -> rp.getRoleId() != null && rp.getRoleId().equals(1L));
                 if (!hasTeacherRole) {
-                    throw new IllegalArgumentException("La persona seleccionada como educador no cuenta con ese rol");
+                    String rolesFound = teacherRoles.isEmpty() ? "ninguno" : 
+                        teacherRoles.stream()
+                            .map(rp -> String.valueOf(rp.getRoleId()))
+                            .collect(java.util.stream.Collectors.joining(", "));
+                    throw new IllegalArgumentException("El usuario con ID: " + userId + 
+                        " no tiene el rol de educador (rol ID 1). Roles encontrados: " + rolesFound);
                 }
+                
+                // La PersonaEntity ya está validada implícitamente por findUserEntityByIdPersona
+                // ya que un UserEntity solo puede existir si existe la PersonaEntity asociada
             }
             
             // Actualizar estudiante
@@ -435,6 +427,66 @@ public class StudentServiceImpl implements IStudentService {
         } catch (Exception e) {
             throw new RuntimeException("Error al eliminar estudiante: " + e.getMessage(), e);
         }
+    }
+    
+    /**
+     * Método helper para obtener UserEntity por idPersona usando EntityManager directamente.
+     * Esto evita problemas de casting entre User (dominio) y UserEntity (data).
+     * Si hay múltiples resultados, prioriza el que esté activo y tenga roles asignados.
+     */
+    private UserEntity findUserEntityByIdPersona(Long idPersona) {
+        if (idPersona == null) {
+            throw new IllegalArgumentException("ID de persona no puede ser nulo");
+        }
+        
+        // Buscar todos los usuarios con este idPersona
+        jakarta.persistence.TypedQuery<UserEntity> query = entityManager.createQuery(
+            "SELECT u FROM UserEntity u WHERE u.idPersona = :idPersona", UserEntity.class);
+        query.setParameter("idPersona", idPersona);
+        
+        List<UserEntity> results = query.getResultList();
+        if (results.isEmpty()) {
+            throw new IllegalArgumentException("Usuario no encontrado para la persona con ID: " + idPersona);
+        }
+        
+        // Si hay solo un resultado, devolverlo
+        if (results.size() == 1) {
+            return results.get(0);
+        }
+        
+        // Si hay múltiples resultados, buscar el que tenga roles asignados y esté activo
+        // Esto es útil para identificar correctamente a un maestro (que tiene rol de educador)
+        for (UserEntity userEntity : results) {
+            if (Boolean.TRUE.equals(userEntity.getIsActive())) {
+                // Verificar si tiene roles asignados
+                jakarta.persistence.TypedQuery<Long> rolesQuery = entityManager.createQuery(
+                    "SELECT COUNT(ur) FROM UserRolEntity ur WHERE ur.idUser = :userId", Long.class);
+                rolesQuery.setParameter("userId", userEntity.getIdUser());
+                Long roleCount = rolesQuery.getSingleResult();
+                
+                if (roleCount != null && roleCount > 0) {
+                    // Este usuario está activo y tiene roles, es probablemente el correcto
+                    System.err.println("ADVERTENCIA: Se encontraron " + results.size() + 
+                        " usuarios para la persona con ID: " + idPersona + 
+                        ". Se usará el activo con roles (idUser: " + userEntity.getIdUser() + ")");
+                    return userEntity;
+                }
+            }
+        }
+        
+        // Si ninguno tiene roles, tomar el más reciente (mayor idUser) y activo
+        UserEntity mostRecent = results.stream()
+            .filter(u -> Boolean.TRUE.equals(u.getIsActive()))
+            .max((u1, u2) -> Long.compare(
+                u1.getIdUser() != null ? u1.getIdUser() : 0L,
+                u2.getIdUser() != null ? u2.getIdUser() : 0L))
+            .orElse(results.get(0));
+        
+        System.err.println("ADVERTENCIA: Se encontraron " + results.size() + 
+            " usuarios para la persona con ID: " + idPersona + 
+            ". Se usará el más reciente activo (idUser: " + mostRecent.getIdUser() + ")");
+        
+        return mostRecent;
     }
     
     private StudentResponseDto toResponseDto(Student student) {
