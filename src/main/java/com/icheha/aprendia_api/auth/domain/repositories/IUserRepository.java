@@ -15,9 +15,10 @@ public interface IUserRepository {
      * Crea un nuevo usuario
      * @param user Usuario a crear
      * @param idPersona ID de la persona asociada
+     * @param hashedPassword Password hasheado (opcional, puede ser null)
      * @return Usuario creado
      */
-    User create(User user, Long idPersona);
+    User create(User user, Long idPersona, String hashedPassword);
     
     /**
      * Busca un usuario por su ID

@@ -6,6 +6,8 @@ import com.icheha.aprendia_api.auth.data.repositories.UserRepository;
 import com.icheha.aprendia_api.auth.domain.entities.User;
 import com.icheha.aprendia_api.auth.domain.repositories.IUserRepository;
 import com.icheha.aprendia_api.users.person.data.repositories.PersonaRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
@@ -24,6 +26,9 @@ public class UserRepositoryImpl implements IUserRepository {
     private final PersonaRepository personaRepository;
     private final UserMapper userMapper;
     
+    @PersistenceContext
+    private EntityManager entityManager;
+    
     public UserRepositoryImpl(@Lazy UserRepository userRepository,
                              @Lazy @Qualifier("userPersonaRepository") PersonaRepository personaRepository,
                              UserMapper userMapper) {
@@ -33,7 +38,7 @@ public class UserRepositoryImpl implements IUserRepository {
     }
     
     @Override
-    public User create(User user, Long idPersona) {
+    public User create(User user, Long idPersona, String hashedPassword) {
         if (user == null) {
             throw new IllegalArgumentException("User no puede ser nulo");
         }
@@ -58,8 +63,45 @@ public class UserRepositoryImpl implements IUserRepository {
         UserEntity entity = userMapper.toEntity(user);
         entity.setIdPersona(idPersona);
         
-        UserEntity savedEntity = userRepository.save(entity);
-        return userMapper.toDomain(savedEntity);
+        // Establecer password hasheado si se proporciona
+        if (hashedPassword != null && !hashedPassword.trim().isEmpty()) {
+            entity.setPassword(hashedPassword);
+        }
+        
+        // NO establecer las relaciones para evitar recursión infinita
+        // La relación se manejará automáticamente por JPA cuando sea necesario
+        entity.setPersona(null);
+        entity.setUserRoles(null);
+        
+        // Usar EntityManager directamente para evitar recursión con el proxy de Spring
+        entityManager.persist(entity);
+        entityManager.flush();
+        // No usar refresh() porque puede cargar relaciones y causar recursión
+        
+        // Crear una nueva entidad limpia con solo los datos básicos para evitar StackOverflowError
+        // Esto previene que JPA intente serializar relaciones bidireccionales
+        UserEntity cleanEntity = createCleanEntity(entity);
+        
+        return userMapper.toDomain(cleanEntity);
+    }
+    
+    /**
+     * Crea una entidad limpia sin relaciones para evitar StackOverflowError
+     */
+    private UserEntity createCleanEntity(UserEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        UserEntity cleanEntity = new UserEntity();
+        cleanEntity.setIdUser(entity.getIdUser());
+        cleanEntity.setIdPersona(entity.getIdPersona());
+        cleanEntity.setUsername(entity.getUsername());
+        cleanEntity.setPassword(entity.getPassword());
+        cleanEntity.setIsActive(entity.getIsActive());
+        cleanEntity.setCreatedAt(entity.getCreatedAt());
+        cleanEntity.setUpdatedAt(entity.getUpdatedAt());
+        // NO establecer relaciones para evitar recursión
+        return cleanEntity;
     }
     
     @Override
@@ -68,6 +110,7 @@ public class UserRepositoryImpl implements IUserRepository {
             return Optional.empty();
         }
         return userRepository.findById(id)
+                .map(this::createCleanEntity)
                 .map(userMapper::toDomain);
     }
     
@@ -77,6 +120,7 @@ public class UserRepositoryImpl implements IUserRepository {
             return Optional.empty();
         }
         return userRepository.findByIdPersona(idPersona)
+                .map(this::createCleanEntity)
                 .map(userMapper::toDomain);
     }
     
@@ -86,12 +130,17 @@ public class UserRepositoryImpl implements IUserRepository {
             return Optional.empty();
         }
         return userRepository.findByUsername(username)
+                .map(this::createCleanEntity)
                 .map(userMapper::toDomain);
     }
     
     @Override
     public List<User> findAll() {
-        return userRepository.findAll().stream()
+        // Usar EntityManager directamente para evitar recursión con el proxy de Spring
+        jakarta.persistence.TypedQuery<UserEntity> query = entityManager.createQuery(
+            "SELECT u FROM UserEntity u", UserEntity.class);
+        return query.getResultList().stream()
+                .map(this::createCleanEntity)
                 .map(userMapper::toDomain)
                 .collect(Collectors.toList());
     }
@@ -122,7 +171,9 @@ public class UserRepositoryImpl implements IUserRepository {
         }
         
         UserEntity updatedEntity = userRepository.save(entity);
-        return userMapper.toDomain(updatedEntity);
+        // Crear entidad limpia para evitar recursión
+        UserEntity cleanEntity = createCleanEntity(updatedEntity);
+        return userMapper.toDomain(cleanEntity);
     }
     
     @Override
@@ -143,7 +194,12 @@ public class UserRepositoryImpl implements IUserRepository {
         if (username == null || username.trim().isEmpty()) {
             return false;
         }
-        return userRepository.existsByUsername(username);
+        // Usar EntityManager directamente para evitar recursión con el proxy de Spring
+        jakarta.persistence.TypedQuery<Long> query = entityManager.createQuery(
+            "SELECT COUNT(u) FROM UserEntity u WHERE u.username = :username", Long.class);
+        query.setParameter("username", username);
+        Long count = query.getSingleResult();
+        return count != null && count > 0;
     }
     
     @Override
@@ -151,7 +207,12 @@ public class UserRepositoryImpl implements IUserRepository {
         if (idPersona == null) {
             return false;
         }
-        return userRepository.existsByIdPersona(idPersona);
+        // Usar EntityManager directamente para evitar recursión con el proxy de Spring
+        jakarta.persistence.TypedQuery<Long> query = entityManager.createQuery(
+            "SELECT COUNT(u) FROM UserEntity u WHERE u.idPersona = :idPersona", Long.class);
+        query.setParameter("idPersona", idPersona);
+        Long count = query.getSingleResult();
+        return count != null && count > 0;
     }
 }
 
