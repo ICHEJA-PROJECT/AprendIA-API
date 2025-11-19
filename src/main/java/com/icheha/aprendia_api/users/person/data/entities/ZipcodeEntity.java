@@ -1,5 +1,6 @@
 package com.icheha.aprendia_api.users.person.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,8 +15,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"settlements"})
-@EqualsAndHashCode(exclude = {"settlements"})
+@ToString
+@EqualsAndHashCode
 public class ZipcodeEntity {
     
     @Id
@@ -27,6 +28,9 @@ public class ZipcodeEntity {
     private String codigo;
     
     @OneToMany(mappedBy = "zipcode", fetch = FetchType.LAZY)
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<SettlementEntity> settlements;
 }
 

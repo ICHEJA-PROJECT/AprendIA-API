@@ -11,11 +11,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/road-types")
@@ -30,11 +31,18 @@ public class RoadTypeController {
     }
     
     @GetMapping
-    @Operation(summary = "Obtener todos los tipos de vialidad", description = "Obtener todos los tipos de vialidad disponibles")
+    @Operation(
+        summary = "Obtener todos los tipos de vialidad", 
+        description = "Obtener todos los tipos de vialidad disponibles con paginación. Parámetros: page (número de página, default: 0), size (tamaño de página, default: 20), sort (campo de ordenamiento, default: nombre)"
+    )
     @ApiResponse(responseCode = "200", description = "Tipos de vialidad obtenidos exitosamente")
-    public ResponseEntity<BaseResponse<List<RoadTypeResponseDto>>> findAll() {
-        List<RoadTypeResponseDto> roadTypes = roadTypeService.findAllAsDto();
-        BaseResponse<List<RoadTypeResponseDto>> response = new BaseResponse<>(
+    @Parameter(name = "page", description = "Número de página (0-indexed)", example = "0")
+    @Parameter(name = "size", description = "Tamaño de página", example = "20")
+    @Parameter(name = "sort", description = "Campo de ordenamiento (ej: nombre,asc)", example = "nombre")
+    public ResponseEntity<BaseResponse<Page<RoadTypeResponseDto>>> findAll(
+            @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
+        Page<RoadTypeResponseDto> roadTypes = roadTypeService.findAll(pageable);
+        BaseResponse<Page<RoadTypeResponseDto>> response = new BaseResponse<>(
                 true, roadTypes, "Tipos de vialidad obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
@@ -105,6 +113,25 @@ public class RoadTypeController {
                     false, null, e.getMessage(), HttpStatus.NOT_FOUND);
             return response.buildResponseEntity();
         }
+    }
+    
+    @GetMapping("/search")
+    @Operation(
+        summary = "Buscar tipos de vialidad", 
+        description = "Buscar tipos de vialidad por nombre con paginación. Parámetros: search (término de búsqueda), page (número de página, default: 0), size (tamaño de página, default: 20), sort (campo de ordenamiento, default: nombre)"
+    )
+    @ApiResponse(responseCode = "200", description = "Tipos de vialidad obtenidos exitosamente")
+    @Parameter(name = "search", description = "Término de búsqueda (nombre)", example = "calle")
+    @Parameter(name = "page", description = "Número de página (0-indexed)", example = "0")
+    @Parameter(name = "size", description = "Tamaño de página", example = "20")
+    @Parameter(name = "sort", description = "Campo de ordenamiento (ej: nombre,asc)", example = "nombre")
+    public ResponseEntity<BaseResponse<Page<RoadTypeResponseDto>>> search(
+            @RequestParam(required = false) String search,
+            @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
+        Page<RoadTypeResponseDto> roadTypes = roadTypeService.search(search, pageable);
+        BaseResponse<Page<RoadTypeResponseDto>> response = new BaseResponse<>(
+                true, roadTypes, "Tipos de vialidad obtenidos exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
     }
 }
 

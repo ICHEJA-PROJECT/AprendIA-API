@@ -6,7 +6,11 @@ import com.icheha.aprendia_api.users.person.data.dtos.response.RoadTypeResponseD
 import com.icheha.aprendia_api.users.person.domain.entities.RoadType;
 import com.icheha.aprendia_api.users.person.domain.repositories.IRoadTypeRepository;
 import com.icheha.aprendia_api.users.person.services.IRoadTypeService;
+import com.icheha.aprendia_api.users.person.data.repositories.RoadTypeRepository;
+import com.icheha.aprendia_api.users.person.data.mappers.RoadTypeMapper;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,9 +21,15 @@ import java.util.stream.Collectors;
 public class RoadTypeServiceImpl implements IRoadTypeService {
     
     private final IRoadTypeRepository roadTypeRepository;
+    private final RoadTypeRepository roadTypeJpaRepository;
+    private final RoadTypeMapper roadTypeMapper;
     
-    public RoadTypeServiceImpl(IRoadTypeRepository roadTypeRepository) {
+    public RoadTypeServiceImpl(IRoadTypeRepository roadTypeRepository,
+                              RoadTypeRepository roadTypeJpaRepository,
+                              RoadTypeMapper roadTypeMapper) {
         this.roadTypeRepository = roadTypeRepository;
+        this.roadTypeJpaRepository = roadTypeJpaRepository;
+        this.roadTypeMapper = roadTypeMapper;
     }
     
     @Override
@@ -39,6 +49,16 @@ public class RoadTypeServiceImpl implements IRoadTypeService {
     }
     
     @Override
+    @Transactional(readOnly = true)
+    public Page<RoadTypeResponseDto> findAll(Pageable pageable) {
+        return roadTypeJpaRepository.findAll(pageable)
+                .map(entity -> {
+                    RoadType roadType = roadTypeMapper.toDomain(entity);
+                    return toResponseDto(roadType);
+                });
+    }
+    
+    @Override
     @Transactional
     public RoadTypeResponseDto create(CreateRoadTypeDto createRoadTypeDto) {
         RoadType roadType = new RoadType.Builder()
@@ -55,6 +75,23 @@ public class RoadTypeServiceImpl implements IRoadTypeService {
         RoadType roadType = roadTypeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Tipo de vialidad no encontrado con ID: " + id));
         return toResponseDto(roadType);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<RoadTypeResponseDto> search(String search, Pageable pageable) {
+        if (search == null || search.trim().isEmpty()) {
+            return roadTypeJpaRepository.findAll(pageable)
+                    .map(entity -> {
+                        RoadType roadType = roadTypeMapper.toDomain(entity);
+                        return toResponseDto(roadType);
+                    });
+        }
+        return roadTypeJpaRepository.search(search.trim(), pageable)
+                .map(entity -> {
+                    RoadType roadType = roadTypeMapper.toDomain(entity);
+                    return toResponseDto(roadType);
+                });
     }
     
     @Override

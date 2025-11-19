@@ -1,6 +1,8 @@
 package com.icheha.aprendia_api.users.person.data.repositories;
 
 import com.icheha.aprendia_api.users.person.data.entities.MunicipalityEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,5 +19,11 @@ public interface MunicipalityRepository extends JpaRepository<MunicipalityEntity
     @Query("SELECT DISTINCT m FROM MunicipalityEntity m " +
            "LEFT JOIN FETCH m.estado")
     List<MunicipalityEntity> findAllWithRelations();
+    
+    // Búsqueda con paginación
+    @Query("SELECT m FROM MunicipalityEntity m " +
+           "WHERE LOWER(m.nombre) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "OR LOWER(m.estado.nombre) LIKE LOWER(CONCAT('%', :search, '%'))")
+    Page<MunicipalityEntity> search(@Param("search") String search, Pageable pageable);
 }
 

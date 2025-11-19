@@ -46,7 +46,7 @@ public class MunicipalityRepositoryImpl implements IMunicipalityRepository {
     public List<Municipality> findAll() {
         // Usar consulta con JOIN FETCH para cargar relaciones de forma controlada
         return municipalityRepository.findAllWithRelations().stream()
-                .map(municipalityMapper::toDomainWithoutState)
+                .map(municipalityMapper::toDomain)
                 .collect(Collectors.toList());
     }
     

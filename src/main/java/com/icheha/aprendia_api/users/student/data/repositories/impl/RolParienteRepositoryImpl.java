@@ -55,7 +55,7 @@ public class RolParienteRepositoryImpl implements IRolParienteRepository {
     
     @Override
     public List<RolPariente> findAll() {
-        return rolParienteRepository.findAll().stream()
+        return rolParienteRepository.findAllWithoutRelations().stream()
                 .map(rolParienteMapper::toDomain)
                 .collect(Collectors.toList());
     }
