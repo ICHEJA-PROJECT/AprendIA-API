@@ -27,3 +27,4 @@ public interface UserRolRepository extends JpaRepository<UserRolEntity, Long> {
     List<UserRolEntity> findAllByUserIdWithRelations(@Param("userId") Long userId);
 }
 
+
