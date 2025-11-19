@@ -82,7 +82,9 @@ public class PersonaMapper {
                 .vialidadNombre(vialidadNombre)
                 .idVialidadTipo(idVialidadTipo)
                 .asentamiento(asentamiento)
-                .idAsentamientoTipo(idAsentamientoTipo);
+                .idAsentamientoTipo(idAsentamientoTipo)
+                .email(entity.getEmail())
+                .telefono(entity.getTelefono());
         
         // CURP: usar valor real si está disponible en la entidad
         if (entity.getCurp() != null && !entity.getCurp().trim().isEmpty()) {
@@ -165,8 +167,8 @@ public class PersonaMapper {
         entity.setNumeroIne(domain.getNumeroIne());
         entity.setFechaNacimiento(domain.getFechaNacimiento());
         entity.setGenero(domain.getGenero());
-        entity.setEmail(null); // TODO: Agregar email al dominio si es necesario
-        entity.setTelefono(null); // TODO: Agregar telefono al dominio si es necesario
+        entity.setEmail(domain.getEmail());
+        entity.setTelefono(domain.getTelefono());
         // Nota: Password está en UserEntity, no se maneja aquí
         // Nota: Las relaciones (domicilio, user) deben establecerse en el servicio/repositorio
         return entity;

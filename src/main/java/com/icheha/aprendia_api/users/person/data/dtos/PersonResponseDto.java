@@ -43,6 +43,12 @@ public class PersonResponseDto {
     @Schema(description = "Nombre de la vialidad")
     private String vialidadNombre;
     
+    @Schema(description = "Email de la persona")
+    private String email;
+    
+    @Schema(description = "Teléfono de la persona")
+    private String telefono;
+    
     @Schema(description = "Ruta de la imagen de perfil")
     private String profileImagePath;
 }
