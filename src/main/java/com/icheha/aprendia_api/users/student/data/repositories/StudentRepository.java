@@ -15,9 +15,11 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long> {
     @Query("SELECT s FROM StudentEntity s WHERE s.teacher.idPersona = :teacherId")
     List<StudentEntity> findByTeacherId(@Param("teacherId") Long teacherId);
     
-    // TODO: CURP eliminado de PersonaEntity - implementar búsqueda alternativa si es necesario
-    // @Query("SELECT s FROM StudentEntity s WHERE s.persona.curp LIKE CONCAT('%', :curp, '%')")
-    // List<StudentEntity> findByPersonaCurpContaining(@Param("curp") String curp);
+    @Query("SELECT s FROM StudentEntity s " +
+           "LEFT JOIN FETCH s.persona p " +
+           "LEFT JOIN FETCH s.teacher " +
+           "WHERE UPPER(p.curp) = UPPER(:curp)")
+    List<StudentEntity> findByPersonaCurp(@Param("curp") String curp);
     
     @Query("SELECT s FROM StudentEntity s WHERE s.persona.primerNombre LIKE CONCAT('%', :firstName, '%') AND s.persona.primerApellido LIKE CONCAT('%', :paternalSurname, '%')")
     List<StudentEntity> findByPersonaName(@Param("firstName") String firstName, @Param("paternalSurname") String paternalSurname);
