@@ -96,10 +96,12 @@ public class StudentRepositoryImpl implements IStudentRepository {
     
     @Override
     public List<Student> findByCurp(String curp) {
-        // TODO: CURP eliminado de PersonaEntity - implementar búsqueda alternativa si es necesario
-        // Por ahora retornamos lista vacía ya que CURP ya no está disponible en PersonaEntity
-        // Si se requiere esta funcionalidad, se debe buscar en PersonaEntity por CURP
-        return List.of();
+        if (curp == null || curp.trim().isEmpty()) {
+            return List.of();
+        }
+        return studentRepository.findByPersonaCurp(curp.trim()).stream()
+                .map(studentMapper::toDomain)
+                .collect(Collectors.toList());
     }
     
     @Override
