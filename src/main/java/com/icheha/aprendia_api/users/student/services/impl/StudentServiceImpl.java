@@ -166,14 +166,19 @@ public class StudentServiceImpl implements IStudentService {
             
             // Generar token JWT con la misma estructura que el original
             // El payload debe incluir: studentId, personId, name, y preferencias
+            // NOTA: Si el estudiante tiene múltiples impairments, solo se guarda la primera en el token QR
+            // Al hacer login, se obtendrán TODAS las impairments actuales desde la BD, ignorando las del token
             String disabilityName = "Sin discapacidad";
             Long disabilityId = 0L;
             Long learningPathId = 2L;
             
             if (studentPreferences != null) {
                 if (studentPreferences.getImpairments() != null && !studentPreferences.getImpairments().isEmpty()) {
+                    // Solo se guarda la primera impairment en el token QR para mantener el tamaño del token pequeño
+                    // Si el estudiante tiene múltiples impairments, todas se obtendrán desde la BD al hacer login
                     disabilityName = studentPreferences.getImpairments().get(0).getName();
                     disabilityId = studentPreferences.getImpairments().get(0).getId();
+                    // NOTA: Si hay múltiples impairments, solo se guarda la primera en el token QR
                 }
                 if (studentPreferences.getLearningPath() != null) {
                     learningPathId = studentPreferences.getLearningPath().getId();

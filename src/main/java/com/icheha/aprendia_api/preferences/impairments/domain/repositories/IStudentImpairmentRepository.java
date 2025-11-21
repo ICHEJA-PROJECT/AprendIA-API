@@ -24,4 +24,12 @@ public interface IStudentImpairmentRepository {
     List<com.icheha.aprendia_api.preferences.impairments.data.entities.StudentImpairment> findAllWithImpairment();
     
     List<com.icheha.aprendia_api.preferences.impairments.data.entities.StudentImpairment> findByStudentIdWithImpairmentForList(Long studentId);
+    
+    java.util.Optional<com.icheha.aprendia_api.preferences.impairments.data.entities.StudentImpairment> findByStudentIdAndImpairmentId(Long studentId, Long impairmentId);
+    
+    boolean existsByStudentIdAndImpairmentId(Long studentId, Long impairmentId);
+    
+    void deleteByStudentIdAndImpairmentId(Long studentId, Long impairmentId);
+    
+    void deleteByStudentId(Long studentId);
 }

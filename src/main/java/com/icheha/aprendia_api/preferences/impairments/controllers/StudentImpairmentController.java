@@ -93,5 +93,52 @@ public class StudentImpairmentController {
                 true, relations, "Discapacidades del estudiante obtenidas exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
     }
+    
+    @GetMapping("/student/{studentId}/impairment/{impairmentId}")
+    @Operation(
+        summary = "Obtener relación estudiante-discapacidad por ID",
+        description = "Obtiene una relación específica entre un estudiante y una discapacidad"
+    )
+    @ApiResponse(responseCode = "200", description = "Relación obtenida exitosamente")
+    @ApiResponse(responseCode = "404", description = "Relación no encontrada")
+    public ResponseEntity<BaseResponse<StudentImpairmentResponseDto>> findById(
+            @Parameter(description = "ID del estudiante") @PathVariable Long studentId,
+            @Parameter(description = "ID de la discapacidad") @PathVariable Long impairmentId) {
+        StudentImpairmentResponseDto relation = studentImpairmentService.findById(studentId, impairmentId);
+        BaseResponse<StudentImpairmentResponseDto> response = new BaseResponse<>(
+                true, relation, "Relación obtenida exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
+    
+    @DeleteMapping("/student/{studentId}/impairment/{impairmentId}")
+    @Operation(
+        summary = "Eliminar relación estudiante-discapacidad",
+        description = "Elimina una relación específica entre un estudiante y una discapacidad"
+    )
+    @ApiResponse(responseCode = "200", description = "Relación eliminada exitosamente")
+    @ApiResponse(responseCode = "404", description = "Relación no encontrada")
+    public ResponseEntity<BaseResponse<Void>> delete(
+            @Parameter(description = "ID del estudiante") @PathVariable Long studentId,
+            @Parameter(description = "ID de la discapacidad") @PathVariable Long impairmentId) {
+        studentImpairmentService.delete(studentId, impairmentId);
+        BaseResponse<Void> response = new BaseResponse<>(
+                true, null, "Relación eliminada exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
+    
+    @DeleteMapping("/student/{studentId}")
+    @Operation(
+        summary = "Eliminar todas las discapacidades de un estudiante",
+        description = "Elimina todas las relaciones de discapacidades de un estudiante específico"
+    )
+    @ApiResponse(responseCode = "200", description = "Relaciones eliminadas exitosamente")
+    @ApiResponse(responseCode = "404", description = "Estudiante no encontrado")
+    public ResponseEntity<BaseResponse<Void>> deleteByStudentId(
+            @Parameter(description = "ID del estudiante") @PathVariable Long studentId) {
+        studentImpairmentService.deleteByStudentId(studentId);
+        BaseResponse<Void> response = new BaseResponse<>(
+                true, null, "Todas las discapacidades del estudiante fueron eliminadas exitosamente", HttpStatus.OK);
+        return response.buildResponseEntity();
+    }
 }
 

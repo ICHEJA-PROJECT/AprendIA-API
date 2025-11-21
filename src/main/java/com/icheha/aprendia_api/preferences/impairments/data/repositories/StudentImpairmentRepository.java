@@ -31,4 +31,19 @@ public interface StudentImpairmentRepository extends JpaRepository<StudentImpair
     
     @Query("SELECT si FROM StudentImpairment si JOIN FETCH si.impairment WHERE si.studentId = :studentId")
     List<StudentImpairment> findByStudentIdWithImpairmentForList(@Param("studentId") Long studentId);
+    
+    @Query("SELECT si FROM StudentImpairment si JOIN FETCH si.impairment WHERE si.studentId = :studentId AND si.impairmentId = :impairmentId")
+    java.util.Optional<StudentImpairment> findByStudentIdAndImpairmentId(@Param("studentId") Long studentId, @Param("impairmentId") Long impairmentId);
+    
+    boolean existsByStudentIdAndImpairmentId(Long studentId, Long impairmentId);
+    
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @Query("DELETE FROM StudentImpairment si WHERE si.studentId = :studentId AND si.impairmentId = :impairmentId")
+    void deleteByStudentIdAndImpairmentId(@Param("studentId") Long studentId, @Param("impairmentId") Long impairmentId);
+    
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @Query("DELETE FROM StudentImpairment si WHERE si.studentId = :studentId")
+    void deleteByStudentId(@Param("studentId") Long studentId);
 }

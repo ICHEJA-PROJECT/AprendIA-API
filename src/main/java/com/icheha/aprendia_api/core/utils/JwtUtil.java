@@ -129,10 +129,19 @@ public class JwtUtil {
                 }
             }
             
+            // Intentar obtener nombre, si no existe intentar name (para tokens de estudiantes)
+            String nombre = claims.get("nombre", String.class);
+            if (nombre == null) {
+                Object nameObj = claims.get("name");
+                if (nameObj != null) {
+                    nombre = nameObj.toString();
+                }
+            }
+            
             return TokenPayloadDto.builder()
                     .idPersona(idPersona)
                     .username(claims.get("username", String.class))
-                    .nombre(claims.get("nombre", String.class))
+                    .nombre(nombre)
                     .roleName(claims.get("roleName", String.class))
                     .disabilityName(claims.get("disabilityName", String.class))
                     .disabilityId(claims.get("disabilityId", Long.class))
