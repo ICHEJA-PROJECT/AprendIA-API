@@ -52,6 +52,9 @@ public class AuthServiceImpl implements IAuthService {
     private EncryptionUtil encryptionUtil;
     
     @Autowired
+    private com.icheha.aprendia_api.users.student.domain.repositories.IEncryptDataRepository encryptDataRepository;
+    
+    @Autowired
     private TokenPayloadMapper tokenPayloadMapper;
     
     @Autowired
@@ -102,33 +105,82 @@ public class AuthServiceImpl implements IAuthService {
             logger.debug("Attempting login with QR token");
             
             String token = loginDto.getToken();
-            String jwtToken = null;
             
-            // Detectar si el token es un JWT directo (tiene puntos) o está encriptado
-            if (token.contains(".") && token.split("\\.").length == 3) {
-                // Es un JWT directo, usarlo sin desencriptar
-                logger.debug("Token appears to be a JWT, using directly");
-                jwtToken = token;
-            } else {
-                // Intentar desencriptar el token
-                try {
-                    jwtToken = encryptionUtil.decrypt(token);
-                    logger.debug("QR token decrypted successfully");
-                } catch (Exception decryptException) {
-                    logger.warn("Failed to decrypt token, trying as JWT directly: {}", decryptException.getMessage());
-                    // Si falla la desencriptación, intentar usar el token como JWT directo
-                    jwtToken = token;
-                }
-            }
-            
-            if (!jwtUtil.validateToken(jwtToken)) {
-                logger.warn("JWT token validation failed");
+            // Validar que el token no esté vacío o nulo
+            if (token == null || token.trim().isEmpty()) {
+                logger.warn("QR token is null or empty");
                 throw InvalidTokenException.qrToken();
             }
             
+            logger.debug("Token length: {}, starts with: {}", token.length(), token.length() > 10 ? token.substring(0, 10) : token);
+            
+            String jwtToken = null;
+            boolean isEncrypted = false;
+            
+            // Detectar si el token es un JWT directo (tiene puntos y 3 partes)
+            String[] tokenParts = token.split("\\.");
+            if (tokenParts.length == 3) {
+                // Es un JWT directo, usarlo sin desencriptar
+                logger.debug("Token appears to be a JWT (has 3 parts), using directly");
+                jwtToken = token;
+            } else {
+                // Intentar desencriptar el token usando el mismo método que se usó para encriptar (EncryptDataRepository)
+                logger.debug("Token does not appear to be a JWT, attempting decryption with EncryptDataRepository");
+                try {
+                    jwtToken = encryptDataRepository.decrypt(token);
+                    isEncrypted = true;
+                    logger.debug("QR token decrypted successfully, length: {}", jwtToken.length());
+                    
+                    // Verificar que el token desencriptado tenga formato JWT
+                    String[] decryptedParts = jwtToken.split("\\.");
+                    if (decryptedParts.length != 3) {
+                        logger.warn("Decrypted token does not have JWT format (expected 3 parts, got {})", decryptedParts.length);
+                        throw InvalidTokenException.qrToken();
+                    }
+                } catch (Exception decryptException) {
+                    logger.warn("Failed to decrypt token with EncryptDataRepository: {}", decryptException.getMessage());
+                    logger.debug("Decryption exception type: {}", decryptException.getClass().getSimpleName());
+                    
+                    // Si falla con EncryptDataRepository, intentar con EncryptionUtil (por compatibilidad)
+                    try {
+                        logger.debug("Attempting decryption with EncryptionUtil as fallback");
+                        jwtToken = encryptionUtil.decrypt(token);
+                        isEncrypted = true;
+                        logger.debug("QR token decrypted successfully with EncryptionUtil, length: {}", jwtToken.length());
+                        
+                        // Verificar que el token desencriptado tenga formato JWT
+                        String[] decryptedParts = jwtToken.split("\\.");
+                        if (decryptedParts.length != 3) {
+                            logger.warn("Decrypted token does not have JWT format (expected 3 parts, got {})", decryptedParts.length);
+                            throw InvalidTokenException.qrToken();
+                        }
+                    } catch (Exception fallbackException) {
+                        logger.warn("Failed to decrypt token with EncryptionUtil fallback: {}", fallbackException.getMessage());
+                        // Si falla la desencriptación, intentar usar el token como JWT directo
+                        logger.debug("Attempting to use token as JWT directly");
+                        jwtToken = token;
+                    }
+                }
+            }
+            
+            // Intentar extraer el payload primero para verificar el formato
             TokenPayloadDto payload = jwtUtil.extractPayload(jwtToken);
             if (payload == null) {
-                logger.warn("Failed to extract payload from JWT token");
+                logger.warn("Failed to extract payload from JWT token - invalid format or signature");
+                // Intentar validar el token para obtener más información del error
+                boolean isValid = jwtUtil.validateToken(jwtToken);
+                logger.warn("JWT token validation result: {}", isValid);
+                throw InvalidTokenException.qrToken();
+            }
+            
+            // Validar el token (firma y expiración)
+            if (!jwtUtil.validateToken(jwtToken)) {
+                logger.warn("JWT token validation failed - invalid signature or expired");
+                // Verificar si está expirado
+                boolean isExpired = jwtUtil.isTokenExpired(jwtToken);
+                if (isExpired) {
+                    logger.warn("JWT token is expired");
+                }
                 throw InvalidTokenException.qrToken();
             }
             
@@ -144,6 +196,7 @@ public class AuthServiceImpl implements IAuthService {
                         Object personIdObj = claims.get("personId");
                         if (personIdObj != null) {
                             personId = personIdObj instanceof Long ? (Long) personIdObj : Long.valueOf(personIdObj.toString());
+                            logger.debug("Extracted personId from claims: {}", personId);
                         }
                     }
                 } catch (Exception e) {
@@ -165,7 +218,8 @@ public class AuthServiceImpl implements IAuthService {
             
             LoginResponseDto loginResponse = generateLoginResponse(persona, studentId);
             
-            logger.info("User {} logged in successfully with QR.", persona.getCurp().getValue());
+            logger.info("User {} logged in successfully with QR (token was {}).", 
+                persona.getCurp().getValue(), isEncrypted ? "encrypted" : "JWT direct");
             
             return loginResponse;
         } catch (InvalidTokenException | UserNotFoundException e) {
@@ -254,14 +308,25 @@ public class AuthServiceImpl implements IAuthService {
         Long disabilityId = null;
         Long learningPathId = null;
         
-        // Si es estudiante, obtener información de discapacidad
+        // Si es estudiante, obtener información de discapacidad desde la BD
+        // NOTA: Siempre se obtienen las impairments actuales desde la BD, ignorando las del token QR
+        // Si el estudiante tiene múltiples impairments, solo se usa la primera para el token de respuesta
+        // (por limitaciones del TokenPayloadDto que solo soporta una impairment)
         if (studentId != null) {
             try {
                 var impairmentDetails = studentImpairmentService.getStudentPreferencesWithDetails(persona.getIdPersona().intValue());
                 if (impairmentDetails != null && !impairmentDetails.getImpairments().isEmpty()) {
+                    int totalImpairments = impairmentDetails.getImpairments().size();
+                    // Solo se usa la primera impairment para el token de respuesta
+                    // Si hay múltiples, se registra en el log para referencia
                     var firstImpairment = impairmentDetails.getImpairments().get(0);
                     disabilityName = firstImpairment.getName();
                     disabilityId = firstImpairment.getId();
+                    
+                    if (totalImpairments > 1) {
+                        logger.debug("Estudiante {} tiene {} impairment(s), usando solo la primera para el token: {}", 
+                            studentId, totalImpairments, disabilityName);
+                    }
                     
                     if (impairmentDetails.getLearningPath() != null) {
                         learningPathId = impairmentDetails.getLearningPath().getId();

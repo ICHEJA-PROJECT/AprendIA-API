@@ -76,4 +76,24 @@ public class StudentImpairmentRepositoryAdapter implements IStudentImpairmentRep
     public List<com.icheha.aprendia_api.preferences.impairments.data.entities.StudentImpairment> findByStudentIdWithImpairmentForList(Long studentId) {
         return studentImpairmentRepository.findByStudentIdWithImpairmentForList(studentId);
     }
+    
+    @Override
+    public java.util.Optional<com.icheha.aprendia_api.preferences.impairments.data.entities.StudentImpairment> findByStudentIdAndImpairmentId(Long studentId, Long impairmentId) {
+        return studentImpairmentRepository.findByStudentIdAndImpairmentId(studentId, impairmentId);
+    }
+    
+    @Override
+    public boolean existsByStudentIdAndImpairmentId(Long studentId, Long impairmentId) {
+        return studentImpairmentRepository.existsByStudentIdAndImpairmentId(studentId, impairmentId);
+    }
+    
+    @Override
+    public void deleteByStudentIdAndImpairmentId(Long studentId, Long impairmentId) {
+        studentImpairmentRepository.deleteByStudentIdAndImpairmentId(studentId, impairmentId);
+    }
+    
+    @Override
+    public void deleteByStudentId(Long studentId) {
+        studentImpairmentRepository.deleteByStudentId(studentId);
+    }
 }

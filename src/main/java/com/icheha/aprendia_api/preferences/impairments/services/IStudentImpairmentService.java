@@ -19,4 +19,10 @@ public interface IStudentImpairmentService {
     List<Long> findByStudentOnlyIds(Long studentId);
     
     List<StudentImpairmentResponseDto> findByStudent(Long studentId);
+    
+    StudentImpairmentResponseDto findById(Long studentId, Long impairmentId);
+    
+    void delete(Long studentId, Long impairmentId);
+    
+    void deleteByStudentId(Long studentId);
 }
