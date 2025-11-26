@@ -1,7 +1,12 @@
 package com.icheha.aprendia_api.users.student.services.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.icheha.aprendia_api.auth.data.dtos.response.ParienteInfoDto;
 import com.icheha.aprendia_api.auth.data.entities.UserEntity;
 import com.icheha.aprendia_api.auth.domain.entities.Persona;
+import com.icheha.aprendia_api.auth.services.mappers.TokenPayloadMapper;
 import com.icheha.aprendia_api.core.utils.JwtUtil;
 import com.icheha.aprendia_api.users.person.domain.repositories.IPersonaRepository;
 import com.icheha.aprendia_api.users.person.services.IImageUploadService;
@@ -22,6 +27,8 @@ import com.icheha.aprendia_api.users.student.services.IParienteService;
 import com.icheha.aprendia_api.users.student.services.IStudentService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +45,8 @@ import java.util.stream.Collectors;
 @Service
 public class StudentServiceImpl implements IStudentService {
     
+    private static final Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
+    
     private final IStudentRepository studentRepository;
     private final IParienteService parienteService;
     private final IRolParienteRepository rolParienteRepository;
@@ -49,6 +58,8 @@ public class StudentServiceImpl implements IStudentService {
     private final StudentImpairmentRepository studentImpairmentRepository;
     private final JwtUtil jwtUtil;
     private final com.icheha.aprendia_api.users.role.services.IRolePersonService rolePersonService;
+    private final TokenPayloadMapper tokenPayloadMapper;
+    private final ObjectMapper objectMapper;
     
     @PersistenceContext
     private EntityManager entityManager;
@@ -63,7 +74,8 @@ public class StudentServiceImpl implements IStudentService {
                              IStudentImpairmentService studentImpairmentService,
                              StudentImpairmentRepository studentImpairmentRepository,
                              JwtUtil jwtUtil,
-                             com.icheha.aprendia_api.users.role.services.IRolePersonService rolePersonService) {
+                             com.icheha.aprendia_api.users.role.services.IRolePersonService rolePersonService,
+                             TokenPayloadMapper tokenPayloadMapper) {
         this.studentRepository = studentRepository;
         this.parienteService = parienteService;
         this.rolParienteRepository = rolParienteRepository;
@@ -75,6 +87,11 @@ public class StudentServiceImpl implements IStudentService {
         this.studentImpairmentRepository = studentImpairmentRepository;
         this.jwtUtil = jwtUtil;
         this.rolePersonService = rolePersonService;
+        this.tokenPayloadMapper = tokenPayloadMapper;
+        // Inicializar ObjectMapper con la misma configuración que JwtUtil
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
+        this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
     
     @Override
@@ -185,14 +202,20 @@ public class StudentServiceImpl implements IStudentService {
                 }
             }
             
-            // Generar token con la estructura del original
+            // Obtener información de parientes (padre y madre)
+            ParienteInfoDto padreInfo = obtenerParienteInfo(savedStudent.getPersona().getIdPersona(), "Padre");
+            ParienteInfoDto madreInfo = obtenerParienteInfo(savedStudent.getPersona().getIdPersona(), "Madre");
+            
+            // Generar token con la estructura del original incluyendo parientes
             String token = generateStudentToken(
                     savedStudent.getId(),
                     savedStudent.getPersona().getIdPersona(),
                     savedStudent.getPersona().getPrimerNombre(),
                     disabilityName,
                     disabilityId,
-                    learningPathId
+                    learningPathId,
+                    padreInfo,
+                    madreInfo
             );
             
             // Encriptar token
@@ -220,12 +243,60 @@ public class StudentServiceImpl implements IStudentService {
         }
     }
     
-    private String generateStudentToken(Long studentId, Long personId, String name, 
-                                       String disabilityName, Long disabilityId, Long learningPathId) {
-        // Generar token con la misma estructura que el original
-        // El payload original incluye: studentId, personId, name, disabilityName, disabilityId, learningPathId
+    /**
+     * Obtiene la información de un pariente (padre o madre) del estudiante
+     * 
+     * @param personaId ID de la persona (estudiante)
+     * @param rolNombre Nombre del rol del pariente ("Padre" o "Madre")
+     * @return ParienteInfoDto con la información del pariente, o con existe=false si no existe
+     */
+    private ParienteInfoDto obtenerParienteInfo(Long personaId, String rolNombre) {
         try {
-            // Crear un mapa con los claims como en el original
+            var parientes = parienteService.findByPersonaIdAndRolNombre(personaId, rolNombre);
+            if (!parientes.isEmpty()) {
+                var parienteDto = parientes.get(0);
+                Optional<Persona> parientePersonaOpt = personaRepository.findById(parienteDto.getParienteId());
+                if (parientePersonaOpt.isPresent()) {
+                    return tokenPayloadMapper.toParienteInfoDto(parientePersonaOpt.get());
+                } else {
+                    logger.warn("Pariente con ID {} no encontrado en la base de datos para persona {}", 
+                            parienteDto.getParienteId(), personaId);
+                    return ParienteInfoDto.builder()
+                            .existe(false)
+                            .build();
+                }
+            } else {
+                return ParienteInfoDto.builder()
+                        .existe(false)
+                        .build();
+            }
+        } catch (Exception e) {
+            logger.warn("Error obteniendo información de pariente {} para persona {}: {}", 
+                    rolNombre, personaId, e.getMessage());
+            return ParienteInfoDto.builder()
+                    .existe(false)
+                    .build();
+        }
+    }
+    
+    /**
+     * Genera un token JWT para el estudiante con toda su información incluyendo parientes
+     * 
+     * @param studentId ID del estudiante
+     * @param personId ID de la persona
+     * @param name Nombre del estudiante
+     * @param disabilityName Nombre de la discapacidad
+     * @param disabilityId ID de la discapacidad
+     * @param learningPathId ID de la ruta de aprendizaje
+     * @param padreInfo Información del padre (puede ser null o con existe=false)
+     * @param madreInfo Información de la madre (puede ser null o con existe=false)
+     * @return Token JWT como string
+     */
+    private String generateStudentToken(Long studentId, Long personId, String name, 
+                                       String disabilityName, Long disabilityId, Long learningPathId,
+                                       ParienteInfoDto padreInfo, ParienteInfoDto madreInfo) {
+        try {
+            // Crear un mapa con los claims básicos
             Map<String, Object> claims = new HashMap<>();
             claims.put("studentId", studentId);
             claims.put("personId", personId);
@@ -234,10 +305,25 @@ public class StudentServiceImpl implements IStudentService {
             claims.put("disabilityId", disabilityId);
             claims.put("learningPathId", learningPathId);
             
-            // Generar token usando JwtUtil con los claims directamente
-            // JwtUtil debe soportar Map<String, Object> o necesitamos crear un método específico
+            // Agregar información de parientes como JSON (siguiendo el mismo patrón que JwtUtil.generateToken)
+            try {
+                if (padreInfo != null) {
+                    String padreJson = objectMapper.writeValueAsString(padreInfo);
+                    claims.put("padre", padreJson);
+                }
+                if (madreInfo != null) {
+                    String madreJson = objectMapper.writeValueAsString(madreInfo);
+                    claims.put("madre", madreJson);
+                }
+            } catch (Exception e) {
+                logger.warn("Error serializando información de parientes al token: {}", e.getMessage());
+                // Continuar sin los parientes si falla la serialización
+            }
+            
+            // Generar token usando JwtUtil con los claims
             return jwtUtil.generateTokenFromClaims(claims);
         } catch (Exception e) {
+            logger.error("Error al generar token para estudiante {}: {}", studentId, e.getMessage(), e);
             throw new RuntimeException("Error al generar token: " + e.getMessage(), e);
         }
     }
