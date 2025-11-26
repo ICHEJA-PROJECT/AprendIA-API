@@ -12,6 +12,7 @@ import com.icheha.aprendia_api.auth.domain.exceptions.InvalidCredentialsExceptio
 import com.icheha.aprendia_api.auth.domain.exceptions.InvalidTokenException;
 import com.icheha.aprendia_api.auth.domain.exceptions.UserNotFoundException;
 import com.icheha.aprendia_api.auth.domain.exceptions.UserRoleNotFoundException;
+import com.icheha.aprendia_api.auth.domain.repositories.IPersonaRepository;
 import com.icheha.aprendia_api.auth.domain.repositories.IRolRepository;
 import com.icheha.aprendia_api.auth.domain.services.IAuthDomainService;
 import com.icheha.aprendia_api.auth.domain.valueobjects.Curp;
@@ -62,6 +63,12 @@ public class AuthServiceImpl implements IAuthService {
     
     @Autowired
     private com.icheha.aprendia_api.preferences.impairments.services.IStudentImpairmentService studentImpairmentService;
+    
+    @Autowired
+    private com.icheha.aprendia_api.users.student.services.IParienteService parienteService;
+    
+    @Autowired
+    private IPersonaRepository personaRepository;
     
     @Transactional(readOnly = true)
     public LoginResponseDto loginWithCredentials(LoginCredentialsDto loginDto) {
@@ -337,12 +344,71 @@ public class AuthServiceImpl implements IAuthService {
             }
         }
         
+        // Obtener información de parientes (mamá y papá)
+        com.icheha.aprendia_api.auth.data.dtos.response.ParienteInfoDto padreInfo = null;
+        com.icheha.aprendia_api.auth.data.dtos.response.ParienteInfoDto madreInfo = null;
+        
+        try {
+            // Buscar pariente con rol "Padre"
+            var parientesPadre = parienteService.findByPersonaIdAndRolNombre(persona.getIdPersona(), "Padre");
+            if (!parientesPadre.isEmpty()) {
+                var padreDto = parientesPadre.get(0);
+                // Obtener información completa del pariente desde el repositorio
+                java.util.Optional<Persona> padrePersonaOpt = personaRepository.findById(padreDto.getParienteId());
+                if (padrePersonaOpt.isPresent()) {
+                    padreInfo = tokenPayloadMapper.toParienteInfoDto(padrePersonaOpt.get());
+                } else {
+                    // Si no se encuentra, crear DTO con existe = false
+                    padreInfo = com.icheha.aprendia_api.auth.data.dtos.response.ParienteInfoDto.builder()
+                            .existe(false)
+                            .build();
+                }
+            } else {
+                // No existe padre, crear DTO con existe = false
+                padreInfo = com.icheha.aprendia_api.auth.data.dtos.response.ParienteInfoDto.builder()
+                        .existe(false)
+                        .build();
+            }
+            
+            // Buscar pariente con rol "Madre"
+            var parientesMadre = parienteService.findByPersonaIdAndRolNombre(persona.getIdPersona(), "Madre");
+            if (!parientesMadre.isEmpty()) {
+                var madreDto = parientesMadre.get(0);
+                // Obtener información completa del pariente desde el repositorio
+                java.util.Optional<Persona> madrePersonaOpt = personaRepository.findById(madreDto.getParienteId());
+                if (madrePersonaOpt.isPresent()) {
+                    madreInfo = tokenPayloadMapper.toParienteInfoDto(madrePersonaOpt.get());
+                } else {
+                    // Si no se encuentra, crear DTO con existe = false
+                    madreInfo = com.icheha.aprendia_api.auth.data.dtos.response.ParienteInfoDto.builder()
+                            .existe(false)
+                            .build();
+                }
+            } else {
+                // No existe madre, crear DTO con existe = false
+                madreInfo = com.icheha.aprendia_api.auth.data.dtos.response.ParienteInfoDto.builder()
+                        .existe(false)
+                        .build();
+            }
+        } catch (Exception e) {
+            logger.warn("Error obteniendo información de parientes para persona {}: {}", persona.getIdPersona(), e.getMessage());
+            // En caso de error, crear DTOs con existe = false
+            padreInfo = com.icheha.aprendia_api.auth.data.dtos.response.ParienteInfoDto.builder()
+                    .existe(false)
+                    .build();
+            madreInfo = com.icheha.aprendia_api.auth.data.dtos.response.ParienteInfoDto.builder()
+                    .existe(false)
+                    .build();
+        }
+        
         TokenPayloadDto payload = tokenPayloadMapper.toDto(persona, 
                 personaRol.getRol().getNombre(), 
                 disabilityName,
                 disabilityId,
                 learningPathId,
-                studentId
+                studentId,
+                padreInfo,
+                madreInfo
         );
         String token = jwtUtil.generateToken(payload);
         
