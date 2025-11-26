@@ -11,9 +11,12 @@ public class LayoutResponseDto {
     
     private Long id;
     private String name;
+    private String description;
     private String attributes;
     private Long typeLayoutId;
     private String typeLayoutName;
+    private String urlImage;
+    private Boolean isActive;
     private Integer resourceCount;
     private Integer templateCount;
 }

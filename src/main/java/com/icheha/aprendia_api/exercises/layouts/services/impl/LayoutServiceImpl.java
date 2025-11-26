@@ -1,5 +1,7 @@
 package com.icheha.aprendia_api.exercises.layouts.services.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.icheha.aprendia_api.exercises.layouts.data.dtos.request.CreateLayoutDto;
 import com.icheha.aprendia_api.exercises.layouts.data.dtos.request.UpdateLayoutDto;
 import com.icheha.aprendia_api.exercises.layouts.data.dtos.response.LayoutResponseDto;
@@ -12,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,6 +29,8 @@ public class LayoutServiceImpl implements ILayoutService {
     @Autowired
     private TypeLayoutRepository typeLayoutRepository;
     
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    
     @Override
     @Transactional
     public LayoutResponseDto createLayout(CreateLayoutDto createLayoutDto) {
@@ -35,7 +41,24 @@ public class LayoutServiceImpl implements ILayoutService {
         // Crear nueva entidad
         LayoutEntity entity = new LayoutEntity();
         entity.setNombre(createLayoutDto.getName());
-        entity.setDescripcion(createLayoutDto.getAttributes());
+        entity.setDescripcion(createLayoutDto.getDescription() != null ? createLayoutDto.getDescription() : createLayoutDto.getAttributes());
+        
+        // Parsear atributos desde String a Map si es necesario
+        if (createLayoutDto.getAttributes() != null && !createLayoutDto.getAttributes().trim().isEmpty()) {
+            try {
+                // Intentar parsear como JSON
+                Map<String, Object> atributosMap = objectMapper.readValue(createLayoutDto.getAttributes(), new TypeReference<Map<String, Object>>() {});
+                entity.setAtributos(atributosMap);
+            } catch (Exception e) {
+                // Si falla, crear un mapa simple con el string
+                Map<String, Object> atributosMap = new HashMap<>();
+                atributosMap.put("attributes", createLayoutDto.getAttributes());
+                entity.setAtributos(atributosMap);
+            }
+        }
+        
+        entity.setUrlImage(createLayoutDto.getUrlImage());
+        entity.setIsActive(createLayoutDto.getIsActive() != null ? createLayoutDto.getIsActive() : true);
         entity.setIdTipoLayout(createLayoutDto.getTypeLayoutId());
         
         // Guardar en la base de datos
@@ -71,8 +94,29 @@ public class LayoutServiceImpl implements ILayoutService {
             entity.setNombre(updateLayoutDto.getName());
         }
         
+        if (updateLayoutDto.getDescription() != null) {
+            entity.setDescripcion(updateLayoutDto.getDescription());
+        }
+        
         if (updateLayoutDto.getAttributes() != null) {
-            entity.setDescripcion(updateLayoutDto.getAttributes());
+            try {
+                // Intentar parsear como JSON
+                Map<String, Object> atributosMap = objectMapper.readValue(updateLayoutDto.getAttributes(), new TypeReference<Map<String, Object>>() {});
+                entity.setAtributos(atributosMap);
+            } catch (Exception e) {
+                // Si falla, crear un mapa simple con el string
+                Map<String, Object> atributosMap = new HashMap<>();
+                atributosMap.put("attributes", updateLayoutDto.getAttributes());
+                entity.setAtributos(atributosMap);
+            }
+        }
+        
+        if (updateLayoutDto.getUrlImage() != null) {
+            entity.setUrlImage(updateLayoutDto.getUrlImage());
+        }
+        
+        if (updateLayoutDto.getIsActive() != null) {
+            entity.setIsActive(updateLayoutDto.getIsActive());
         }
         
         if (updateLayoutDto.getTypeLayoutId() != null) {
@@ -98,8 +142,29 @@ public class LayoutServiceImpl implements ILayoutService {
         LayoutResponseDto dto = new LayoutResponseDto();
         dto.setId(entity.getIdLayout());
         dto.setName(entity.getNombre());
-        dto.setAttributes(entity.getDescripcion()); // Usar descripcion
+        dto.setDescription(entity.getDescripcion());
+        
+        // Convertir atributos de Map a String JSON
+        if (entity.getAtributos() != null) {
+            try {
+                dto.setAttributes(objectMapper.writeValueAsString(entity.getAtributos()));
+            } catch (Exception e) {
+                dto.setAttributes(entity.getAtributos().toString());
+            }
+        } else if (entity.getDescripcion() != null) {
+            dto.setAttributes(entity.getDescripcion());
+        } else {
+            dto.setAttributes("{}");
+        }
+        
         dto.setTypeLayoutId(typeLayoutId);
+        dto.setUrlImage(entity.getUrlImage());
+        dto.setIsActive(entity.getIsActive() != null ? entity.getIsActive() : true);
+        
+        // Obtener nombre del tipo de layout si está disponible
+        if (entity.getTipoLayout() != null) {
+            dto.setTypeLayoutName(entity.getTipoLayout().getNombre());
+        }
         
         // Contar recursos y templates asociados
         dto.setResourceCount(entity.getRecursos() != null ? entity.getRecursos().size() : 0);

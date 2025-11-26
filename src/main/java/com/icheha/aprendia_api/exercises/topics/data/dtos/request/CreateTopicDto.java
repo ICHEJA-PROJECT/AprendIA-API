@@ -14,6 +14,9 @@ public class CreateTopicDto {
     @NotBlank(message = "Name es requerido")
     private String name;
     
+    private String description;
+    private String urlImagen;
+    
     @NotNull(message = "Unit ID es requerido")
     private Long unitId;
 }

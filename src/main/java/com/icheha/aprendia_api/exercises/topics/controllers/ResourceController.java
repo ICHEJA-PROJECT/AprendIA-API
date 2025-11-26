@@ -5,6 +5,7 @@ import com.icheha.aprendia_api.exercises.topics.data.dtos.request.CreateResource
 import com.icheha.aprendia_api.exercises.topics.data.dtos.request.UpdateResourceDto;
 import com.icheha.aprendia_api.exercises.topics.data.dtos.response.ResourceResponseDto;
 import com.icheha.aprendia_api.exercises.topics.services.IResourceService;
+import com.icheha.aprendia_api.users.person.services.IImageUploadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,9 +13,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -23,10 +28,12 @@ import java.util.List;
 public class ResourceController {
 
     private final IResourceService resourceService;
+    private final IImageUploadService imageUploadService;
 
     @Autowired
-    public ResourceController(IResourceService resourceService) {
+    public ResourceController(IResourceService resourceService, IImageUploadService imageUploadService) {
         this.resourceService = resourceService;
+        this.imageUploadService = imageUploadService;
     }
 
     @PostMapping
@@ -146,6 +153,37 @@ public class ResourceController {
         BaseResponse<List<ResourceResponseDto>> response = new BaseResponse<>(
                 true, resources, "Recursos del tema y ruta de aprendizaje obtenidos exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
+    }
+    
+    @PostMapping(value = "/{id}/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Subir imagen de recurso", description = "Sube una imagen para un recurso usando Cloudinary")
+    @ApiResponse(responseCode = "200", description = "Imagen subida exitosamente")
+    @ApiResponse(responseCode = "404", description = "Recurso no encontrado")
+    public ResponseEntity<BaseResponse<String>> uploadImage(
+            @Parameter(description = "ID del recurso") @PathVariable Long id,
+            @Parameter(description = "Archivo de imagen") @RequestPart("file") MultipartFile file) {
+        try {
+            String originalFilename = file.getOriginalFilename();
+            String extension = (originalFilename != null && originalFilename.contains(".")) 
+                    ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
+                    : ".jpg";
+            String fileName = "resource-" + id + "-" + 
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss")) + extension;
+            String imageUrl = imageUploadService.uploadImage(file.getBytes(), fileName, "resources-images");
+            
+            // Actualizar el recurso con la URL de la imagen
+            UpdateResourceDto updateDto = new UpdateResourceDto();
+            updateDto.setUrlImagen(imageUrl);
+            resourceService.update(id, updateDto);
+            
+            BaseResponse<String> response = new BaseResponse<>(
+                    true, imageUrl, "Imagen subida exitosamente", HttpStatus.OK);
+            return response.buildResponseEntity();
+        } catch (Exception e) {
+            BaseResponse<String> response = new BaseResponse<>(
+                    false, null, "Error al subir imagen: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return response.buildResponseEntity();
+        }
     }
 }
 

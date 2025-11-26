@@ -40,7 +40,8 @@ public class ResourceServiceImpl implements IResourceService {
         entity.setNombre(createResourceDto.getTitle());
         entity.setContenido(createResourceDto.getContent());
         entity.setIdLayout(createResourceDto.getLayoutId());
-        // Nota: idTema se debe establecer por separado o a través de TopicResource
+        entity.setIdTema(createResourceDto.getTopicId());
+        entity.setUrlImagen(createResourceDto.getUrlImagen());
         
         // Guardar en la base de datos
         ResourceEntity savedEntity = resourceRepository.save(entity);
@@ -143,6 +144,8 @@ public class ResourceServiceImpl implements IResourceService {
         dto.setTitle(entity.getNombre());
         dto.setContent(entity.getContenido());
         dto.setLayoutId(entity.getIdLayout());
+        dto.setTopicId(entity.getIdTema());
+        dto.setUrlImagen(entity.getUrlImagen());
         
         // Obtener nombre del layout si está disponible
         if (entity.getLayout() != null) {

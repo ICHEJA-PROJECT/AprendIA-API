@@ -16,6 +16,7 @@ public class HabilidadPuntajeResponseDto {
     private Long idEjercicio;
     private Long idHabilidad;
     private Long idPersona;
+    private Long idEducando;
     private BigDecimal puntaje;
     private LocalDateTime fechaCompletado;
     private LocalDateTime createdAt;

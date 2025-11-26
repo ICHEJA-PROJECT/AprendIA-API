@@ -11,6 +11,8 @@ public class TopicResponseDto {
     
     private Long id;
     private String name;
+    private String description;
     private Long unitId;
     private String unitName;
+    private String urlImagen;
 }

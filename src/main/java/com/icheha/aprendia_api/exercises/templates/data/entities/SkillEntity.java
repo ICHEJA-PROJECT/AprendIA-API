@@ -30,8 +30,14 @@ public class SkillEntity {
     @Column(name = "tipo", length = 50)
     private TipoHabilidadEnum tipo;
     
+    @Column(name = "id_agente")
+    private Long idAgente;
+    
     @Column(name = "id_categoria")
     private Long idCategoria;
+    
+    @Column(name = "descripcion", columnDefinition = "TEXT")
+    private String descripcion;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_categoria", insertable = false, updatable = false)

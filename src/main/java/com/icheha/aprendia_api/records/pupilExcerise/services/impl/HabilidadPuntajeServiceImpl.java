@@ -53,6 +53,7 @@ public class HabilidadPuntajeServiceImpl implements IHabilidadPuntajeService {
         entity.setIdEjercicio(createDto.getIdEjercicio());
         entity.setIdHabilidad(createDto.getIdHabilidad());
         entity.setIdPersona(createDto.getIdPersona());
+        entity.setIdEducando(createDto.getIdEducando() != null ? createDto.getIdEducando() : createDto.getIdPersona());
         entity.setPuntaje(createDto.getPuntaje());
         entity.setFechaCompletado(createDto.getFechaCompletado());
         
@@ -104,6 +105,11 @@ public class HabilidadPuntajeServiceImpl implements IHabilidadPuntajeService {
             personaRepository.findById(updateDto.getIdPersona())
                     .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con ID: " + updateDto.getIdPersona()));
             entity.setIdPersona(updateDto.getIdPersona());
+        }
+        
+        // Actualizar id_educando si se proporciona
+        if (updateDto.getIdEducando() != null) {
+            entity.setIdEducando(updateDto.getIdEducando());
         }
         
         // Actualizar puntaje si se proporciona
@@ -163,6 +169,7 @@ public class HabilidadPuntajeServiceImpl implements IHabilidadPuntajeService {
         dto.setIdEjercicio(entity.getIdEjercicio());
         dto.setIdHabilidad(entity.getIdHabilidad());
         dto.setIdPersona(entity.getIdPersona());
+        dto.setIdEducando(entity.getIdEducando() != null ? entity.getIdEducando() : entity.getIdPersona());
         dto.setPuntaje(entity.getPuntaje());
         dto.setFechaCompletado(entity.getFechaCompletado());
         dto.setCreatedAt(entity.getCreatedAt());

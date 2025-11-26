@@ -17,6 +17,8 @@ public class CreateUnitDto {
     @NotBlank(message = "Description es requerido")
     private String description;
     
+    private String urlImagen;
+    
     @NotNull(message = "Cuadernillo ID es requerido")
     private Long cuadernilloId;
 }

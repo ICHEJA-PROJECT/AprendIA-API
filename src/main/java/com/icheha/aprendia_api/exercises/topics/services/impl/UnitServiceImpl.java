@@ -36,6 +36,7 @@ public class UnitServiceImpl implements IUnitService {
         UnitEntity entity = new UnitEntity();
         entity.setNombre(createUnitDto.getName());
         entity.setDescripcion(createUnitDto.getDescription());
+        entity.setUrlImagen(createUnitDto.getUrlImagen());
         entity.setIdCuadernillo(createUnitDto.getCuadernilloId());
         
         // Guardar en la base de datos
@@ -75,6 +76,10 @@ public class UnitServiceImpl implements IUnitService {
             entity.setDescripcion(updateUnitDto.getDescription());
         }
         
+        if (updateUnitDto.getUrlImagen() != null) {
+            entity.setUrlImagen(updateUnitDto.getUrlImagen());
+        }
+        
         if (updateUnitDto.getCuadernilloId() != null) {
             cuadernilloRepository.findById(updateUnitDto.getCuadernilloId())
                     .orElseThrow(() -> new EntityNotFoundException("Cuadernillo no encontrado con ID: " + updateUnitDto.getCuadernilloId()));
@@ -109,6 +114,7 @@ public class UnitServiceImpl implements IUnitService {
         dto.setName(entity.getNombre());
         dto.setDescription(entity.getDescripcion());
         dto.setCuadernilloId(entity.getIdCuadernillo());
+        dto.setUrlImagen(entity.getUrlImagen());
         
         // Obtener el nombre del cuadernillo si está disponible
         if (entity.getCuadernillo() != null) {

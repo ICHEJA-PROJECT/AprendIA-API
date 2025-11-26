@@ -14,4 +14,5 @@ public class UnitResponseDto {
     private String description;
     private Long cuadernilloId;
     private String cuadernilloNombre;
+    private String urlImagen;
 }

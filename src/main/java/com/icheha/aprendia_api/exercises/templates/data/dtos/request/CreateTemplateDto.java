@@ -33,4 +33,6 @@ public class CreateTemplateDto {
     @NotNull(message = "Topic ID es requerido")
     @Min(value = 1, message = "Topic ID debe ser mayor que 0")
     private Long topic;
+    
+    private String urlImagen;
 }
