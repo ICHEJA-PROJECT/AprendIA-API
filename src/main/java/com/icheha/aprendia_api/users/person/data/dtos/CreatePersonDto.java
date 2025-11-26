@@ -17,8 +17,7 @@ public class CreatePersonDto {
     @Schema(description = "Primer nombre de la persona", example = "Fernando")
     private String firstName;
     
-    @NotBlank(message = "El segundo nombre es obligatorio")
-    @Schema(description = "Segundo nombre de la persona", example = "Emiliano")
+    @Schema(description = "Segundo nombre de la persona (opcional)", example = "Emiliano")
     private String middleName;
     
     @NotBlank(message = "El apellido paterno es obligatorio")
