@@ -20,4 +20,7 @@ public class TokenPayloadDto {
     private Long studentId;
     private Long iat;
     private Long exp;
+    // Información de parientes
+    private ParienteInfoDto padre;
+    private ParienteInfoDto madre;
 }
