@@ -35,6 +35,8 @@ public class TopicServiceImpl implements ITopicService {
         
         TopicEntity entity = new TopicEntity();
         entity.setNombre(createTopicDto.getName());
+        entity.setDescripcion(createTopicDto.getDescription());
+        entity.setUrlImagen(createTopicDto.getUrlImagen());
         entity.setIdUnidad(createTopicDto.getUnitId());
         
         TopicEntity savedEntity = topicRepository.save(entity);
@@ -138,6 +140,8 @@ public class TopicServiceImpl implements ITopicService {
         TopicResponseDto dto = new TopicResponseDto();
         dto.setId(entity.getIdTema());
         dto.setName(entity.getNombre());
+        dto.setDescription(entity.getDescripcion());
+        dto.setUrlImagen(entity.getUrlImagen());
         dto.setUnitId(unitId != null ? unitId : entity.getIdUnidad());
         
         // Obtener el nombre de la unidad si está disponible

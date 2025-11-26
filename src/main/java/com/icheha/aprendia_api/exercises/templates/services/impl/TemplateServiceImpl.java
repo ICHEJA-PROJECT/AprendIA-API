@@ -58,6 +58,7 @@ public class TemplateServiceImpl implements ITemplateService {
         }
         entity.setTopicId(createTemplateDto.getTopic());
         entity.setLayoutId(createTemplateDto.getLayout());
+        entity.setUrlImagen(createTemplateDto.getUrlImagen());
         
         // Guardar en la base de datos
         TemplateEntity savedEntity = templateRepository.save(entity);
@@ -139,6 +140,10 @@ public class TemplateServiceImpl implements ITemplateService {
             entity.setIdRecurso(updateTemplateDto.getResourceId());
         }
         
+        if (updateTemplateDto.getUrlImagen() != null) {
+            entity.setUrlImagen(updateTemplateDto.getUrlImagen());
+        }
+        
         TemplateEntity updatedEntity = templateRepository.save(entity);
         return toResponseDto(updatedEntity);
     }
@@ -160,6 +165,7 @@ public class TemplateServiceImpl implements ITemplateService {
         dto.setSuggestTime(entity.getTiempoSugerido() != null ? entity.getTiempoSugerido().toString() : null);
         dto.setLayoutId(entity.getLayoutId());
         dto.setTopicId(entity.getTopicId());
+        dto.setUrlImagen(entity.getUrlImagen());
         
         // Obtener nombres de layout y topic si están disponibles
         if (entity.getLayout() != null) {

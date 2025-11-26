@@ -44,6 +44,9 @@ public class HabilidadPuntajeEntity {
     @JoinColumn(name = "id_persona", insertable = false, updatable = false)
     private PersonaEntity persona;
     
+    @Column(name = "id_educando")
+    private Long idEducando;
+    
     @Column(name = "puntaje", precision = 5, scale = 2)
     private BigDecimal puntaje;
     

@@ -6,8 +6,11 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "layout")
@@ -26,6 +29,16 @@ public class LayoutEntity {
 
     @Column(name = "descripcion", columnDefinition = "TEXT")
     private String descripcion;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "atributos", columnDefinition = "JSONB")
+    private Map<String, Object> atributos;
+    
+    @Column(name = "url_image", length = 500)
+    private String urlImage;
+    
+    @Column(name = "is_active")
+    private Boolean isActive;
     
     @Column(name = "update_at")
     private LocalDateTime updateAt;

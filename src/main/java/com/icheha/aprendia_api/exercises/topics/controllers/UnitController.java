@@ -5,6 +5,7 @@ import com.icheha.aprendia_api.exercises.topics.data.dtos.request.CreateUnitDto;
 import com.icheha.aprendia_api.exercises.topics.data.dtos.request.UpdateUnitDto;
 import com.icheha.aprendia_api.exercises.topics.data.dtos.response.UnitResponseDto;
 import com.icheha.aprendia_api.exercises.topics.services.IUnitService;
+import com.icheha.aprendia_api.users.person.services.IImageUploadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,9 +13,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -23,10 +28,12 @@ import java.util.List;
 public class UnitController {
 
     private final IUnitService unitService;
+    private final IImageUploadService imageUploadService;
 
     @Autowired
-    public UnitController(IUnitService unitService) {
+    public UnitController(IUnitService unitService, IImageUploadService imageUploadService) {
         this.unitService = unitService;
+        this.imageUploadService = imageUploadService;
     }
 
     @PostMapping
@@ -121,5 +128,36 @@ public class UnitController {
         BaseResponse<List<UnitResponseDto>> response = new BaseResponse<>(
                 true, units, "Unidades obtenidas exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
+    }
+    
+    @PostMapping(value = "/{id}/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Subir imagen de unidad", description = "Sube una imagen para una unidad usando Cloudinary")
+    @ApiResponse(responseCode = "200", description = "Imagen subida exitosamente")
+    @ApiResponse(responseCode = "404", description = "Unidad no encontrada")
+    public ResponseEntity<BaseResponse<String>> uploadImage(
+            @Parameter(description = "ID de la unidad") @PathVariable Long id,
+            @Parameter(description = "Archivo de imagen") @RequestPart("file") MultipartFile file) {
+        try {
+            String originalFilename = file.getOriginalFilename();
+            String extension = (originalFilename != null && originalFilename.contains(".")) 
+                    ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
+                    : ".jpg";
+            String fileName = "unit-" + id + "-" + 
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss")) + extension;
+            String imageUrl = imageUploadService.uploadImage(file.getBytes(), fileName, "units-images");
+            
+            // Actualizar la unidad con la URL de la imagen
+            UpdateUnitDto updateDto = new UpdateUnitDto();
+            updateDto.setUrlImagen(imageUrl);
+            unitService.update(id, updateDto);
+            
+            BaseResponse<String> response = new BaseResponse<>(
+                    true, imageUrl, "Imagen subida exitosamente", HttpStatus.OK);
+            return response.buildResponseEntity();
+        } catch (Exception e) {
+            BaseResponse<String> response = new BaseResponse<>(
+                    false, null, "Error al subir imagen: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return response.buildResponseEntity();
+        }
     }
 }

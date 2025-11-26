@@ -23,6 +23,8 @@ public class CreateHabilidadPuntajeDto {
     @NotNull(message = "El ID de la persona es obligatorio")
     private Long idPersona;
     
+    private Long idEducando;
+    
     @DecimalMin(value = "0.0", message = "El puntaje debe ser mayor o igual a 0")
     private BigDecimal puntaje;
     

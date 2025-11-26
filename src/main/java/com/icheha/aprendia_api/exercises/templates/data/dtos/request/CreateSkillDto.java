@@ -12,4 +12,8 @@ public class CreateSkillDto {
     
     @NotBlank(message = "Name es requerido")
     private String name;
+    
+    private Long idAgente;
+    private Long idCategoria;
+    private String description;
 }

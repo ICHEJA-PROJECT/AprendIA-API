@@ -28,6 +28,9 @@ public class SkillServiceImpl implements ISkillService {
         // Crear nueva entidad
         SkillEntity entity = new SkillEntity();
         entity.setNombre(createSkillDto.getName());
+        entity.setIdAgente(createSkillDto.getIdAgente());
+        entity.setIdCategoria(createSkillDto.getIdCategoria());
+        entity.setDescripcion(createSkillDto.getDescription());
         
         // Guardar en la base de datos
         SkillEntity savedEntity = skillRepository.save(entity);
@@ -74,8 +77,16 @@ public class SkillServiceImpl implements ISkillService {
             }
         }
         
+        if (updateSkillDto.getIdAgente() != null) {
+            entity.setIdAgente(updateSkillDto.getIdAgente());
+        }
+        
         if (updateSkillDto.getIdCategoria() != null) {
             entity.setIdCategoria(updateSkillDto.getIdCategoria());
+        }
+        
+        if (updateSkillDto.getDescription() != null) {
+            entity.setDescripcion(updateSkillDto.getDescription());
         }
         
         SkillEntity updatedEntity = skillRepository.save(entity);
@@ -107,6 +118,15 @@ public class SkillServiceImpl implements ISkillService {
         SkillResponseDto dto = new SkillResponseDto();
         dto.setId(entity.getIdHabilidad());
         dto.setName(entity.getNombre());
+        dto.setIdAgente(entity.getIdAgente());
+        dto.setIdCategoria(entity.getIdCategoria());
+        dto.setDescription(entity.getDescripcion());
+        
+        // Si no hay descripción directa pero hay categoría relacionada, usar su descripción
+        if (dto.getDescription() == null && entity.getCategoria() != null && entity.getCategoria().getDescripcion() != null) {
+            dto.setDescription(entity.getCategoria().getDescripcion());
+        }
+        
         return dto;
     }
 }

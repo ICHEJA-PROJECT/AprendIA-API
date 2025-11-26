@@ -17,6 +17,10 @@ public class CreateLayoutDto {
     @NotBlank(message = "Attributes es requerido")
     private String attributes;
     
+    private String description;
+    private String urlImage;
+    private Boolean isActive;
+    
     @NotNull(message = "Type Layout ID es requerido")
     private Long typeLayoutId;
 }

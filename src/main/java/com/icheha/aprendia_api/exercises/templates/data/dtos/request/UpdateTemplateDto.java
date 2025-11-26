@@ -28,5 +28,8 @@ public class UpdateTemplateDto {
 
     @Schema(description = "ID del recurso (opcional)", example = "1")
     private Long resourceId;
+
+    @Schema(description = "URL de la imagen del template (opcional)", example = "https://example.com/template.png")
+    private String urlImagen;
 }
 

@@ -20,7 +20,13 @@ public class UpdateSkillDto {
     @Schema(description = "Tipo de habilidad (opcional)", example = "COGNITIVA")
     private String tipo;
 
+    @Schema(description = "ID del agente (opcional)", example = "1")
+    private Long idAgente;
+
     @Schema(description = "ID de la categoría (opcional)", example = "1")
     private Long idCategoria;
+
+    @Schema(description = "Descripción de la habilidad (opcional)", example = "Descripción de la habilidad")
+    private String description;
 }
 

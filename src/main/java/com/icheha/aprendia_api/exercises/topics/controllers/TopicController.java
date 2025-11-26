@@ -6,6 +6,7 @@ import com.icheha.aprendia_api.exercises.topics.data.dtos.request.UpdateTopicDto
 import com.icheha.aprendia_api.exercises.topics.data.dtos.response.TopicResponseDto;
 import com.icheha.aprendia_api.exercises.topics.data.dtos.response.LearningPathResponseDto;
 import com.icheha.aprendia_api.exercises.topics.services.ITopicService;
+import com.icheha.aprendia_api.users.person.services.IImageUploadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,9 +14,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -24,10 +29,12 @@ import java.util.List;
 public class TopicController {
 
     private final ITopicService topicService;
+    private final IImageUploadService imageUploadService;
 
     @Autowired
-    public TopicController(ITopicService topicService) {
+    public TopicController(ITopicService topicService, IImageUploadService imageUploadService) {
         this.topicService = topicService;
+        this.imageUploadService = imageUploadService;
     }
 
     @PostMapping
@@ -150,6 +157,37 @@ public class TopicController {
         BaseResponse<List<LearningPathResponseDto>> response = new BaseResponse<>(
                 true, learningPath, "Ruta de aprendizaje obtenida exitosamente", HttpStatus.OK);
         return response.buildResponseEntity();
+    }
+    
+    @PostMapping(value = "/{id}/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Subir imagen de tema", description = "Sube una imagen para un tema usando Cloudinary")
+    @ApiResponse(responseCode = "200", description = "Imagen subida exitosamente")
+    @ApiResponse(responseCode = "404", description = "Tema no encontrado")
+    public ResponseEntity<BaseResponse<String>> uploadImage(
+            @Parameter(description = "ID del tema") @PathVariable Long id,
+            @Parameter(description = "Archivo de imagen") @RequestPart("file") MultipartFile file) {
+        try {
+            String originalFilename = file.getOriginalFilename();
+            String extension = (originalFilename != null && originalFilename.contains(".")) 
+                    ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
+                    : ".jpg";
+            String fileName = "topic-" + id + "-" + 
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss")) + extension;
+            String imageUrl = imageUploadService.uploadImage(file.getBytes(), fileName, "topics-images");
+            
+            // Actualizar el tema con la URL de la imagen
+            UpdateTopicDto updateDto = new UpdateTopicDto();
+            updateDto.setUrlImagen(imageUrl);
+            topicService.update(id, updateDto);
+            
+            BaseResponse<String> response = new BaseResponse<>(
+                    true, imageUrl, "Imagen subida exitosamente", HttpStatus.OK);
+            return response.buildResponseEntity();
+        } catch (Exception e) {
+            BaseResponse<String> response = new BaseResponse<>(
+                    false, null, "Error al subir imagen: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return response.buildResponseEntity();
+        }
     }
 }
 

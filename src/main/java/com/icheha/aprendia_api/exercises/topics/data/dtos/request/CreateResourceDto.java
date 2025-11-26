@@ -19,4 +19,7 @@ public class CreateResourceDto {
     
     @NotNull(message = "Layout ID es requerido")
     private Long layoutId;
+    
+    private Long topicId;
+    private String urlImagen;
 }

@@ -20,4 +20,5 @@ public class TemplateResponseDto {
     private String layoutName;
     private Long topicId;
     private String topicName;
+    private String urlImagen;
 }

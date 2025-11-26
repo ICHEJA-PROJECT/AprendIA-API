@@ -30,6 +30,9 @@ public class UnitEntity {
     @Column(name = "descripcion", columnDefinition = "TEXT", nullable = false)
     private String descripcion;
 
+    @Column(name = "url_imagen", length = 500)
+    private String urlImagen;
+
     @Column(name = "id_cuadernillo", nullable = false)
     private Long idCuadernillo;
 

@@ -17,4 +17,6 @@ public class ResourceResponseDto {
     private Long layoutId;
     private String layoutName;
     private List<Long> topicIds;
+    private Long topicId;
+    private String urlImagen;
 }

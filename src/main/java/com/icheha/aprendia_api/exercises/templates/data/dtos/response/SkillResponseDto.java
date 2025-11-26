@@ -11,4 +11,7 @@ public class SkillResponseDto {
     
     private Long id;
     private String name;
+    private Long idAgente;
+    private Long idCategoria;
+    private String description;
 }
